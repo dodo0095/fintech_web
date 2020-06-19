@@ -15,7 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import include, path
+from rest_framework import routers
+from apiserver import views
+from django.conf.urls import url
+
+
+router = routers.DefaultRouter()
+router.register(r'chose_robot', views.chose_robot, basename='chose_robot')
+router.register(r'history_stock', views.history_stock, basename='history_stock')
+router.register(r'now_chose_stock', views.now_chose_stock, basename='now_chose_stock')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    #path('chose_robot/', views.chose_robot),
+    path('', include(router.urls)),
 ]
