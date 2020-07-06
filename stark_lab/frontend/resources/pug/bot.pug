@@ -1,0 +1,13 @@
+include ./modules/base
+- var topperWords = self.htmlWebpackPlugin.options.data.topper;
+- var footerWords = self.htmlWebpackPlugin.options.data.topper;
+- var pageWords = self.htmlWebpackPlugin.options.data.base;
+
++headMeta(pageWords, 'null')
+  +topper(topperWords)
+  //- Main Container
+  main.container
+
+  //- Footer
+  +footer(footerWords)
+

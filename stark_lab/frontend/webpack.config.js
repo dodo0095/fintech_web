@@ -16,6 +16,8 @@ let cleanFolderInit = {
   }
 }
 
+const PUBLIC_PATH = '/';
+
 module.exports = {
   // 當前webpack 模式
   mode: 'development',
@@ -25,7 +27,7 @@ module.exports = {
   // entry: ['./resources/file1.js', './resources/file2.js'] 一個入口，產生兩個檔案
   // entry: { './resources/file1.js', './resources/file2.js' } 多入口，產生兩個檔案
   entry: {
-    main: './resources/entrance.js'
+    bot: './resources/bot.js'
   },
 
   // 輸出位置
@@ -86,7 +88,20 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
-          'sass-loader'
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+              data: () => `$BaseUrl: '${PUBLIC_PATH}';`,
+              // Sass變數取代 類似String-replace-loader
+              // sassOptions: {
+              //   data: () => `$BaseUrl: '${PUBLIC_PATH}';`,
+              //   // includePaths: [
+              //   //   './resources/sass/mixin',
+              //   // ],
+              // },
+            },
+          },
         ]
       }
     ],
@@ -96,16 +111,6 @@ module.exports = {
       /jquery/
     ]
   },
-
-  // 設定尋找模組（Modules的規則）
-  // alias中取代 字串為新的路徑名稱
-  // resolve: {
-  //   alias: {
-  //     test: 'test/test'
-  //   },
-  // 是否強制寫明匯入檔案的副檔名
-  // enforceExtension: false
-  // },
 
   // 套件設定
   plugins: [
@@ -132,33 +137,17 @@ module.exports = {
 
     // 產生html的編譯器
     new HtmlWebpackPlugin({
-      chunks: ['main'],
-      filename: 'test.html',
-      // template: path.resolve(__dirname, './resources/test.html'),
-      template: path.resolve(__dirname, './resources/test.pug'),
-      // data: require('./resources/test.json'),
+      chunks: ['bot'],
+      filename: 'bot.html',
+      template: path.resolve(__dirname, './resources/pug/bot.pug'),
+      data: {
+        topper: require('./resources/words/common/topper.json'),
+        base: require('./resources/words/bot.json'),
+        footer: require('./resources/words/common/footer.json'),
+      },
       inject: true
     })
   ],
-
-  // 效能檢查
-  // performance: {
-  //   // 有效能問題時輸出警告
-  //   hints: 'warning',
-  //   // 最大檔案的大小（bytes)
-  //   maxAssetSize: 200000,
-  //   // 最大入口檔案的大小（bytes)
-  //   maxEntrypointSize: 400000,
-  //   // 針對要檢查的檔案類型
-  //   assetFilter: function(assetFilename) {
-  //     return assetFilename.endsWith('.css') || assetFilename.endsWith('.js');
-  //   }
-  // },
-
-  // 使用預先載入的(cdn方式) 全域變數
-  // externals: {
-  //   jquery: 'jQuery'
-  // },
 
   // 開發模式是否產生source-map
   devtool: 'source-map',
@@ -174,7 +163,7 @@ module.exports = {
     // 是否產生實體檔案到disk目錄
     writeToDisk: true,
     open: true,
-    openPage: 'test.html',
+    openPage: 'bot.html',
     compress: true,
     watchContentBase: true,
     contentBase: path.join(__dirname, './resources/'),

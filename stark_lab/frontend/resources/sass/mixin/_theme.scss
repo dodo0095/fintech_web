@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+TC:300,400,500,700&display=swap&subset=chinese-traditional');
+
+:root {
+  --theme-color: #0D6FB8;
+  --input-text-color: #d0d0d0;
+  --input-text-color-focus: #262626;
+  --border-color: #CBCBCB;
+  --border-focus-color: #b1b1b1;
+  --border-radius: 5px;
+  --link-color: #b1b1b1;
+  --button-hover: #eee;
+
+
+  --text-tiny: 14px;
+  --text-small: 15px;
+  --text-normal: 17px;
+  --text-big: 19px;
+  --text-super-big: 22px;
+}
+
+div, span, a, input, textarea {
+  font-family: 'Noto Sans TC', 'Segoe UI', '微軟正黑體', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: auto;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.font-light,
+.font-light * {
+  font-weight: 300;
+}
+
+.font-regular,
+.font-regular * {
+  font-weight: 400;
+}
+
+.font-medium,
+.font-medium * {
+  font-weight: 500;
+}
+
+.font-bold,
+.font-bold * {
+  font-weight: 700;
+}
+
+
+$iconType: 'brain', 'feedback', 'light', 'peaks', 'robot';
+
+.icons {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+
+  @for $i from 1 through length($iconType) {
+    &.icons-#{nth($iconType, $i)} {
+      background-image: url('#{$BaseUrl}images/icons/#{nth($iconType, $i)}.svg');
+    }
+  }
+}

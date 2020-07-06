@@ -1,0 +1,10 @@
+mixin topper(words)
+  .topper
+    .topper-content
+      a.topper-logo(href="#")!= 'StartLab'
+      ul.topper-navbar
+        each item in words.topper
+          li(class= item.isActive ? `js-selected` : ``)
+            div
+              i.icons(class=`icons-${item.iconType}`)
+            span.font-regular!= `${item.text}`
