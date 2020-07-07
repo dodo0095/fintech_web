@@ -1,12 +1,80 @@
 include ./modules/base
 - var topperWords = self.htmlWebpackPlugin.options.data.topper;
-- var footerWords = self.htmlWebpackPlugin.options.data.topper;
+- var footerWords = self.htmlWebpackPlugin.options.data.footer;
 - var pageWords = self.htmlWebpackPlugin.options.data.base;
 
 +headMeta(pageWords, 'null')
   +topper(topperWords)
   //- Main Container
   main.container
+    .bot-content
+      section.s1
+        .s1-block
+          figure
+          //- input(type='text' placeholder='輸入關鍵字')
+      section.s2
+        .s2-block
+          //- 月績效
+          .score.month-score.box-shadow
+            .score-title.font-bold!='月績效'
+            .score-value
+              span.font-bold.score-value-title!='策略績效'
+              span.font-bold.score-value-data.increse!='999%'
+            .score-value
+              span.font-bold.score-value-title!='0050績效'
+              span.font-bold.score-value-data.reduce!='999%'
+
+          //- 季績效
+          .score.season-score.box-shadow
+            .score-title.font-bold!='季績效'
+            .score-value
+              span.font-bold.score-value-title!='策略績效'
+              span.font-bold.score-value-data.increse!='999%'
+            .score-value
+              span.font-bold.score-value-title!='0050績效'
+              span.font-bold.score-value-data.reduce!='999%'
+
+          //- 年績效
+          .score.year-score.box-shadow
+            .score-title.font-bold!='年績效'
+            .score-value
+              span.font-bold.score-value-title!='策略績效'
+              span.font-bold.score-value-data.increse!='999%'
+            .score-value
+              span.font-bold.score-value-title!='0050績效'
+              span.font-bold.score-value-data.reduce!='999%'
+            
+      section.s3
+        .s3-block
+          .s3-content.history-content
+            .s3-content-title.font-bold!='基本面'
+              span!='指標策略'
+            .s3-content-score.box-shadow
+              .s3-content-score-title.font-medium!= '年報酬率'
+              .s3-content-score-value.font-bold!= '999%'
+              .s3-content-control
+                a(href="")
+                  i.icons-direct
+                  span.font-regular!='查看歷史觀察清單'
+                a(href="")
+                  i.icons-direct
+                  span.font-regular!='查看當前觀察清單'
+
+
+          .s3-content.current-content
+            .s3-content-title.font-bold!='技術面'
+              span!='指標策略'
+            .s3-content-score.box-shadow
+              .s3-content-score-title.font-medium!= '年報酬率'
+              .s3-content-score-value.font-bold!= '999%'
+              .s3-content-control
+                a(href="")
+                  i.icons-direct
+                  span.font-regular!='查看歷史觀察清單'
+                a(href="")
+                  i.icons-direct
+                  span.font-regular!='查看當前觀察清單'
+
 
   //- Footer
   +footer(footerWords)

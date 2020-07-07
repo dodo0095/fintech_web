@@ -1,3 +1,10 @@
 mixin footer(words)
   footer.footer
-    span!= words
+    .footer-content
+      a.footer-logo(href='#')
+      .footer-main
+        ul.footer-sitemap
+          each items in words.sitemap 
+            li
+              a(href='#')!= items
+        span.footer-copyright!= words.copyright

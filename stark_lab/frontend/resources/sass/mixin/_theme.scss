@@ -45,6 +45,10 @@ div, span, a, input, textarea {
   font-weight: 700;
 }
 
+.box-shadow {
+  box-shadow: 0 5px 5px rgba(0, 0, 0, .1275);
+}
+
 
 $iconType: 'brain', 'feedback', 'light', 'peaks', 'robot';
 
