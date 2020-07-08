@@ -61,7 +61,11 @@ $iconType: 'brain', 'feedback', 'light', 'peaks', 'robot';
 
   @for $i from 1 through length($iconType) {
     &.icons-#{nth($iconType, $i)} {
-      background-image: url('#{$BaseUrl}images/icons/#{nth($iconType, $i)}.svg');
+      background-image: url('#{$BaseUrl}images/icons/nav/#{nth($iconType, $i)}.png');
+    }
+
+    &.icons-hover-#{nth($iconType, $i)} {
+      background-image: url('#{$BaseUrl}images/icons/navhover/#{nth($iconType, $i)}.png');
     }
   }
 }

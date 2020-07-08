@@ -49,3 +49,17 @@
     }
   }
 }
+
+@media all and (min-width: 0px) and (max-width: 730px) {
+  .footer .footer-content {
+    .footer-main {
+      width: calc(100% - 86px);
+      margin-left: 10px;
+    }
+    
+    .footer-logo {
+      width: 70px;
+      height: 44px;
+    }
+  }
+}

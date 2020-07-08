@@ -11,6 +11,17 @@
 
   main.container {
     width: 100%;
+    padding-top: 87px;
     min-height: calc(100vh - 195px);
+  }
+}
+
+@media all and (min-width: 0px) and (max-width: 730px) {
+  .wrapper {
+    main.container {
+      width: 100%;
+      padding-top: 64px;
+      min-height: calc(100vh - 195px);
+    }
   }
 }

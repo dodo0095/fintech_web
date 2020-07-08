@@ -180,3 +180,90 @@
     }
   }
 }
+
+@media all and (min-width: 731px) and (max-width: 1199px) {
+  .bot-content {
+    padding: 5px 15px 60px;
+
+    .s1 {
+      .s1-block figure {
+        width: 300px;
+        height: 190px;
+      }
+    }
+
+    .s2 {
+      margin-bottom: 30px;
+
+      .s2-block .score {
+        width: 270px;
+        padding: 30px 25px;
+        margin: 0 12px 35px;
+      }
+    }
+
+    .s3 {
+      .s3-block .s3-content {
+        margin: 0 10px 35px;
+      }
+    }
+  }
+}
+
+@media all and (min-width: 0px) and (max-width: 730px) {
+  .bot-content {
+    padding: 5px 15px 30px;
+
+    .s1 {
+      margin-top: 25px;
+      margin-bottom: 25px;
+
+      .s1-block {
+        margin-top: 25px;
+        margin-bottom: 25px;
+        figure {
+          width: 220px;
+          height: 140px;
+        }
+      }
+    }
+
+    .s2 {
+      margin-bottom: 30px;
+
+      .s2-block .score {
+        width: 250px;
+        padding: 25px;
+        margin: 0 12px 25px;
+
+        .score-title {
+          font-size: 56px;
+          margin-bottom: 21px;
+        }
+
+        .score-value {
+          .score-value-title {
+            font-size: 18px;
+          }
+          .score-value-data {
+            font-size: 20px;
+          }
+        }
+      }
+    }
+
+    .s3 {
+      .s3-block .s3-content {
+        width: 250px;
+        margin: 0 10px 25px;
+        .s3-content-score .s3-content-control {
+          margin-top: 10px;
+          a {
+            margin: 6px 10px;
+          }
+        }
+      }
+    }
+  }
+}
+
