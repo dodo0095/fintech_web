@@ -1,11 +1,12 @@
-mixin topper(words)
+mixin topper(words, activeIndex)
   .topper
     .topper-content
       .topper-mobile-opener
       a.topper-logo(href="#")!= 'StartLab'
       .topper-navbar
-        each item in words.topper
-          a(href='#' class= item.isActive ? `js-selected` : ``)
+        each item, index in words.topper
+
+          a(href=`${item.url}` class= `${index + 1 === activeIndex ? 'js-selected' : ''}`)
             div
               i.icons(class=`icons-${item.iconType}`)
             span.font-regular!= `${item.text}`

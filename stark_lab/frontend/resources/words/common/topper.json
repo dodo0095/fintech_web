@@ -3,41 +3,27 @@
     {
       "text": "理念",
       "iconType": "brain",
-      "url": "index.html"
+      "url": "about.html"
     },
     {
       "text": "指標紅綠燈",
       "iconType": "light",
-      "url": "index.html"
+      "url": "traffic.html"
     },
     {
       "text": "選股機器人",
       "iconType": "robot",
-      "isActive": true,
-      "subMenu": [
-        {
-          "text": "近期績效",
-          "url": "index.html"
-        },
-        {
-          "text": "歷史觀察清單",
-          "url": "index.html"
-        },
-        {
-          "text": "當前觀察清單",
-          "url": "index.html"
-        }
-      ]
+      "url": "bot.html"
     },
     {
       "text": "風險評估機器",
       "iconType": "peaks",
-      "url": "index.html"
+      "url": "peaks.html"
     },
     {
       "text": "意見回饋",
       "iconType": "feedback",
-      "url": "index.html"
+      "url": "contact.html"
     }
   ]
 }

@@ -96,10 +96,10 @@
             font-size: 24px;
   
             &.increse {
-              background: #DF262C;
+              background: var(--theme-increase);
             }
             &.reduce {
-              background: #3BD48C;
+              background: var(--theme-reduce);
             }
           }
         }

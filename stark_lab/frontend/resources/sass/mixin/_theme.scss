@@ -2,6 +2,8 @@
 
 :root {
   --theme-color: #0D6FB8;
+  --theme-increase: #cc354a;
+  --theme-reduce: #3bd48c;
   --input-text-color: #d0d0d0;
   --input-text-color-focus: #262626;
   --border-color: #CBCBCB;
@@ -47,6 +49,14 @@ div, span, a, input, textarea {
 
 .box-shadow {
   box-shadow: 0 5px 5px rgba(0, 0, 0, .1275);
+}
+
+.theme-color {
+  color: var(--theme-color);
+}
+
+.theme-bg {
+  background: var(--theme-color);
 }
 
 

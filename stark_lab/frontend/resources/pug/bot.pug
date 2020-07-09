@@ -4,7 +4,7 @@ include ./modules/base
 - var pageWords = self.htmlWebpackPlugin.options.data.base;
 
 +headMeta(pageWords, 'null')
-  +topper(topperWords)
+  +topper(topperWords, 3)
   //- Main Container
   main.container
     .bot-content
@@ -53,10 +53,10 @@ include ./modules/base
               .s3-content-score-title.font-medium!= '年報酬率'
               .s3-content-score-value.font-bold!= '999%'
               .s3-content-control
-                a(href="")
+                a(href="botBasicHistory.html")
                   i.icons-direct
                   span.font-regular!='查看歷史觀察清單'
-                a(href="")
+                a(href="botBasicCurrent.html")
                   i.icons-direct
                   span.font-regular!='查看當前觀察清單'
 
@@ -68,10 +68,10 @@ include ./modules/base
               .s3-content-score-title.font-medium!= '年報酬率'
               .s3-content-score-value.font-bold!= '999%'
               .s3-content-control
-                a(href="")
+                a(href="botTechnicHistory.html")
                   i.icons-direct
                   span.font-regular!='查看歷史觀察清單'
-                a(href="")
+                a(href="botTechnicCurrent")
                   i.icons-direct
                   span.font-regular!='查看當前觀察清單'
 
