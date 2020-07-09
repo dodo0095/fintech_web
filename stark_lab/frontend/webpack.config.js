@@ -17,7 +17,7 @@ let cleanFolderInit = {
 };
 
 module.exports = (env, argv) => {
-  // const PUBLIC_PATH = argv.mode === 'production' ? `/` : `/`;
+  const PUBLIC_PATH = argv.mode === 'production' ? `../` : `/`;
 
   return {
     // 當前webpack 模式
@@ -89,12 +89,17 @@ module.exports = (env, argv) => {
           test: /\.(sa|sc|c)ss$/,
           use: [
             MiniCssExtractPlugin.loader,
-            'css-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                url: false,
+              },
+            },
             {
               loader: 'sass-loader',
               options: {
                 sourceMap: true,
-                data: () => `$BaseUrl: '${argv.mode === 'production' ? `../` : `/`}';`,
+                data: () => `$BaseUrl: '${PUBLIC_PATH}';`,
                 // Sass變數取代 類似String-replace-loader
                 // sassOptions: {
                 //   data: () => `$BaseUrl: '${PUBLIC_PATH}';`,
@@ -106,17 +111,18 @@ module.exports = (env, argv) => {
             },
           ]
         },
-        // {
-        //   test: /\.(svg|woff2?|ttf|eot|jpe?g|png|gif)$/i,
-        //   use :
-        //     {
-        //       loader: 'url-loader',
-        //       // query: {
-        //       //   limit: 2048,
-        //       //   name: '[name]_[md5:hash:base64:6].[ext]'
-        //       // }
-        //     }
-        // }
+        {
+          test: /\.(png|jpg|gif|jpe?g|svg)$/,
+          use: [
+            {
+              // 圖片做壓縮
+              loader: 'image-webpack-loader',
+              options: {
+                bypassOnDebug: true,
+              }
+            }
+          ]
+        }
       ],
       
       // 不用丟到webpack解析與處理的模組，節省處理時間
