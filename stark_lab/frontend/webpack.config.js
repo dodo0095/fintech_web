@@ -28,7 +28,7 @@ let baseConfig = {
   // 輸出位置
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'js/bundle.js',
+    filename: 'js/[name].js',
     sourceMapFilename: '[file].map',
     // publicPath: PUBLIC_PATH,
   },
