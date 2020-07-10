@@ -7,7 +7,7 @@ let PUBLIC_PATH;
 
 let initProject = {
   openPage: 'bot',
-  pages: ['bot', 'botBasicHistory']
+  pages: ['bot', 'botBasicHistory', 'botBasicCurrent', 'botTechnicHistory', 'botTechnicCurrent']
   // pages: ['bot', 'botBasicHistory', 'botBasicCurrent']
 };
 
@@ -28,7 +28,7 @@ let baseConfig = {
   // 輸出位置
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'js/bundle.js',
+    filename: 'js/[name].js',
     sourceMapFilename: '[file].map',
     // publicPath: PUBLIC_PATH,
   },
@@ -87,7 +87,7 @@ let baseConfig = {
           {
             loader: 'sass-loader',
             options: {
-              sourceMap: true,
+              sourceMap: false,
               data: () => `$BaseUrl: '${PUBLIC_PATH}';`,
               // Sass變數取代 類似String-replace-loader
               // sassOptions: {
@@ -157,7 +157,7 @@ let baseConfig = {
   ],
 
   // 開發模式是否產生source-map
-  devtool: 'source-map',
+  // devtool: 'source-map',
 
   // dev模式設定
   devServer: {
