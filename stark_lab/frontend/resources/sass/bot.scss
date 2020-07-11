@@ -4,6 +4,7 @@
 
 @import './modules/topper';
 @import './modules/footer';
+@import './modules/preloader';
 
 // Bot Page Scss
 .bot-content {
@@ -55,6 +56,8 @@
 
   //section2
   .s2 {
+    display: none;
+
     text-align: center;
     margin-bottom: 50px;
 
@@ -95,7 +98,7 @@
             color: #fff;
             font-size: 24px;
   
-            &.increse {
+            &.increase {
               background: var(--theme-increase);
             }
             &.reduce {
@@ -109,6 +112,8 @@
 
   //section3
   .s3 {
+    display: none;
+
     .s3-block {
       position: relative;
       margin-top: 30px;
@@ -136,42 +141,51 @@
           border: 1px solid var(--border-color);
           padding: 25px 20px;
           border-radius: var(--border-radius);
-          .s3-content-score-value {
-            font-size: 50px;
-            color: var(--theme-color);
+          text-align: center;
+
+          > .score-content {
+            padding: 10px 20px;
+            box-sizing: border-box;
+            display: inline-block;
+            vertical-align: top;
+            .s3-content-score-value {
+              font-size: 50px;
+              color: var(--theme-color);
+            }
           }
-          .s3-content-control {
-            a {
+        }
+        
+        .s3-content-control {
+          a {
+            display: inline-block;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background: #333;
+            color: #fff;
+            text-decoration: none;
+            margin: 13px 10px;
+            transition: background 250ms ease;
+
+            .icons-direct {
+              vertical-align: baseline;
               display: inline-block;
-              padding: 15px;
-              border-radius: var(--border-radius);
-              background: #333;
+              width: 15px;
+              height: 15px;
+              margin-right: 5px;
+              @include resolution2xImg((
+                img1xPath: '#{$BaseUrl}images/icons/direct.png',
+                img2xPath: '#{$BaseUrl}images/icons/direct.png'
+              )...);
+            }
+            
+            span {
+              display: inline-block;
+              vertical-align: baseline;
               color: #fff;
-              text-decoration: none;
-              margin: 13px 10px;
-              transition: background 250ms ease;
+            }
 
-              .icons-direct {
-                vertical-align: baseline;
-                display: inline-block;
-                width: 15px;
-                height: 15px;
-                margin-right: 5px;
-                @include resolution2xImg((
-                  img1xPath: '#{$BaseUrl}images/icons/direct.png',
-                  img2xPath: '#{$BaseUrl}images/icons/direct.png'
-                )...);
-              }
-              
-              span {
-                display: inline-block;
-                vertical-align: baseline;
-                color: #fff;
-              }
-
-              &:hover {
-                background: var(--theme-color);
-              }
+            &:hover {
+              background: var(--theme-color);
             }
           }
         }

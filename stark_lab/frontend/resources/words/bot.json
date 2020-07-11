@@ -1,5 +1,81 @@
 {
   "meta": {
-    "title": "StarkLab | 選股機器人"
-  }
+    "title": "StarkLab | 選股機器人",
+    "keyword": "StarkLab",
+    "describe": "StarkLab"
+  },
+  "performance": [
+    {
+      "class": "month",
+      "title": "月績效",
+      "subTop": "策略績效",
+      "subBottom": "策略績效"
+    },
+    {
+      "class": "season",
+      "title": "季績效",
+      "subTop": "策略績效",
+      "subBottom": "策略績效"
+    },
+    {
+      "class": "year",
+      "title": "年績效",
+      "subTop": "策略績效",
+      "subBottom": "策略績效"
+    }
+  ],
+  "target": [
+    {
+      "class": "basic",
+      "titleHL": "基本面",
+      "title": "指標策略",
+      "data": [
+        {
+          "class": "year",
+          "title": "年報酬率"
+        },
+        {
+          "class": "max",
+          "title": "最大振福"
+        }
+      ],
+      "button": [
+        {
+          "text": "查看歷史觀察清單",
+          "link": "botBasicHistory.html",
+          "blank": false
+        },
+        {
+          "text": "查看當前觀察清單",
+          "link": "botBasicCurrent.html",
+          "blank": false
+        }
+      ]
+    },
+    {
+      "class": "technic",
+      "titleHL": "技術面",
+      "title": "指標策略",
+      "data": [
+        {
+          "class": "year",
+          "title": "年報酬率"
+        },
+        {
+          "class": "max",
+          "title": "最大振福"
+        }
+      ],
+      "button": [
+        {
+          "text": "查看歷史觀察清單",
+          "link": "botTechnicHistory.html"
+        },
+        {
+          "text": "查看當前觀察清單",
+          "link": "botTechnicCurrent.html"
+        }
+      ]
+    }
+  ]
 }

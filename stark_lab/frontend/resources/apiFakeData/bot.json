@@ -1,0 +1,21 @@
+{
+  "performance": {
+
+    "monthly_return": "-111",
+    "monthly_0050_return": "222",
+
+    "season_return": "333",
+    "season_0050_return": "-444",
+
+    "year_return": "-555",
+    "year_0050_return": "-666"
+  },
+
+  "target": {
+    "fundamental_return": "111",
+    "fundamental_amplitude": "222",
+
+    "technology_return": "333",
+    "technology_amplitude": "444"
+  }
+}
