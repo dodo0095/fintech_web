@@ -1,7 +1,22 @@
 {
   "meta": {
-    "title": "StarkLab | 基本面歷史觀察清單",
+    "title": "StarkLab | 技術面歷史觀察清單",
     "keyword": "StarkLab",
     "describe": "StarkLab"
-  }
+  },
+  "banner": {
+    "titleHL": "技術面",
+    "title": "歷史觀察清單"
+  },
+  "navMenu": [
+    {
+      "text": "歷史觀察清單",
+      "link": "botTechnicHistory.html",
+      "isActive": true
+    },
+    {
+      "text": "當前觀察清單",
+      "link": "botTechnicCurrent.html"
+    }
+  ]
 }

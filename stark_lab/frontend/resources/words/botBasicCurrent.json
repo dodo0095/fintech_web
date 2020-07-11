@@ -3,5 +3,31 @@
     "title": "StarkLab | 基本面當前觀察清單",
     "keyword": "StarkLab",
     "describe": "StarkLab"
-  }
+  },
+  "banner": {
+    "titleHL": "基本面",
+    "title": "當前觀察清單"
+  },
+  "navMenu": [
+    {
+      "text": "歷史觀察清單",
+      "link": "botBasicHistory.html"
+    },
+    {
+      "text": "當前觀察清單",
+      "link": "botBasicCurrent.html",
+      "isActive": true
+    }
+  ],
+  "board": [
+    {
+      "class": "today",
+      "text": "今日漲跌幅"
+    },
+    {
+      "class": "total",
+      "text": "累計漲跌幅"
+    }
+  ],
+  "tableDate": "目前觀察清單日期"
 }

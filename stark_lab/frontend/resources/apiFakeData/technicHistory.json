@@ -1,0 +1,54 @@
+{
+  "technicHistory": [
+    {
+      "index": 1,
+      "type": "+",
+      "stock_name": "9926新海",
+      "start_date": "2020-01-01",
+      "buy_price": "40.8",
+      "over_date": "2020-01-01",
+      "sell_price": "99.9",
+      "return": "-3.5"
+    },
+    {
+      "index": 2,
+      "type": "-",
+      "stock_name": "9926新海",
+      "start_date": "2020-01-01",
+      "buy_price": "40.8",
+      "over_date": "2020-01-01",
+      "sell_price": "99.9",
+      "return": "-3.5"
+    },
+    {
+      "index": 3,
+      "type": "-",
+      "stock_name": "9926新海",
+      "start_date": "2020-01-01",
+      "buy_price": "40.8",
+      "over_date": "2020-01-01",
+      "sell_price": "99.9",
+      "return": "-3.5"
+    },
+    {
+      "index": 4,
+      "type": "+",
+      "stock_name": "9926新海",
+      "start_date": "2020-01-01",
+      "buy_price": "40.8",
+      "over_date": "2020-01-01",
+      "sell_price": "99.9",
+      "return": "-3.5"
+    },
+    {
+      "index": 5,
+      "type": "-",
+      "stock_name": "9926新海",
+      "start_date": "2020-01-01",
+      "buy_price": "40.8",
+      "over_date": "2020-01-01",
+      "sell_price": "99.9",
+      "return": "-3.5"
+    }
+  ]
+}

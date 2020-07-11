@@ -4,6 +4,7 @@
 
 @import './modules/topper';
 @import './modules/footer';
+@import './modules/preloader';
 
 // Bot Page Scss
 .bot-content {
@@ -99,6 +100,7 @@
 
   //section3
   .s3 {
+    display: none;
     .s3-block {
 
       .s3-board {
