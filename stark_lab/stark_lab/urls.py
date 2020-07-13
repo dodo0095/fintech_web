@@ -19,6 +19,7 @@ from django.urls import include, path
 from rest_framework import routers
 from apiserver import views
 from django.conf.urls import url
+from django.views.generic import TemplateView
 
 
 router = routers.DefaultRouter()
@@ -29,6 +30,11 @@ router.register(r'now_chose_stock', views.now_chose_stock, basename='now_chose_s
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('bot.html', TemplateView.as_view(template_name="bot.html")),
+    path('botBasicHistory.html', TemplateView.as_view(template_name="botBasicHistory.html")),
+    path('botBasicCurrent.html', TemplateView.as_view(template_name="botBasicCurrent.html")),
+    path('botTechnicHistory.html', TemplateView.as_view(template_name="botTechnicHistory.html")),
+    path('botTechnicCurrent.html', TemplateView.as_view(template_name="botTechnicCurrent.html")),
     #path('chose_robot/', views.chose_robot),
     path('', include(router.urls)),
 ]

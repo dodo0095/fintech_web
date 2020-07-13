@@ -72,9 +72,9 @@ const handleAxiosGetData = () => {
 
 
   // Call Api
-  axios.get('../apiFakeData/technicHistory.json')
+  axios.get('/history_stock/?format=json')
     .then((res) => {
-      const RES_DATA = res.data.technicHistory;
+      const RES_DATA = res.data;
       // Import Value
       _initTableData(RES_DATA);
 

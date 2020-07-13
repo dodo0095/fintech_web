@@ -74,13 +74,14 @@ const handleAxiosGetData = () => {
   }
 
   // Call Api
-  axios.get('../apiFakeData/bot.json')
+  axios.get('/chose_robot/?format=json')
     .then((res) => {
-      const PERFORMANCE_DATA = res.data.performance;
-      const TARGET_DATA = res.data.target;
+      const RES_DATA = res.data[0];
+      console.log('RES_DATA', RES_DATA)
+      // const TARGET_DATA = res.data.target;
       // Import Value
-      _initSection2Data(PERFORMANCE_DATA);
-      _initSection3Data(TARGET_DATA);
+      _initSection2Data(RES_DATA);
+      _initSection3Data(RES_DATA);
 
       setTimeout(() => {
         $s2.fadeIn(300);

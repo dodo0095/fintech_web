@@ -1,6 +1,13 @@
+# Django #
+*.pyc
+__pycache__
+!**/__pycache__/
+!**/migrations/
+# db.sqlite3
+
+# FrontEnd #
 dist
 merge
-build
 node_modules
 npm-debug.log
 package-lock.json
