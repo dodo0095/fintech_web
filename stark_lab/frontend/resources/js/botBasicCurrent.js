@@ -75,8 +75,8 @@ const handleAxiosGetData = () => {
   }
 
   function _initBoardValue(apiData) {
-    $s3BoardToday.find('.board-nav-value-count').text(apiData.today);
-    $s3BoardTotal.find('.board-nav-value-count').text(apiData.total);
+    $s3BoardToday.find('.board-nav-value-count').text((apiData.today).toFixed(2));
+    $s3BoardTotal.find('.board-nav-value-count').text((apiData.total).toFixed(2));
 
     if (apiData.today[0].includes('-')) {
       $s3BoardToday.addClass('reduce');
