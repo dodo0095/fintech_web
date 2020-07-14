@@ -36,7 +36,7 @@ const handleAxiosGetData = () => {
         <td>${item.buy_price}</td>
         <td>${item.over_date}</td>
         <td>${item.sell_price}</td>
-        <td>${item.return_value}</td>
+        <td>${item.return_value}%</td>
       </tr>`)
 
       $s3TableMobile.append(`<div class='table-list-nav list-nav-${index + 1}'>
@@ -63,7 +63,7 @@ const handleAxiosGetData = () => {
           </tr>
           <tr class='data-row'>
             <td class='data-row-title'>報酬(%)</td>
-            <td>${item.return_value}</td>
+            <td>${item.return_value}%</td>
           </tr>
         </table>
       </div>`)
