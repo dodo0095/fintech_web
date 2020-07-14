@@ -1,22 +1,36 @@
 from rest_framework import serializers
-from apiserver.models import strategy_robot,history,now_chose
+from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent
 
-class strategy_robot_apiSerializer(serializers.ModelSerializer):
+class bot_apiSerializer(serializers.ModelSerializer):
     class Meta:
-        model = strategy_robot
+        model = bot
         fields = '__all__'
         #fields = ("tag")
 
 
-class history_apiSerializer(serializers.ModelSerializer):
+class technicHistory_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = history
+        model = technicHistory
         fields = '__all__'
         #fields = ("tag")
 
 
-class now_chose_apiSerializer(serializers.ModelSerializer):
+class technicCurrent_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = now_chose
+        model = technicCurrent
+        fields = '__all__'
+        #fields = ("tag")
+
+
+class basicHistory_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = basicHistory
+        fields = '__all__'
+        #fields = ("tag")
+
+
+class basicCurrent_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = basicCurrent
         fields = '__all__'
         #fields = ("tag")

@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 
-class strategy_robot(models.Model):
+class bot(models.Model):
 
 	monthly_return= models.TextField(default="")
 	monthly_0050_return= models.TextField(default="")
@@ -17,11 +17,11 @@ class strategy_robot(models.Model):
 	technology_amplitude= models.TextField(default="")
 
 	class Meta:
-		db_table = "strategy_robot"
+		db_table = "bot"
 
 
 
-class history(models.Model):
+class basicHistory(models.Model):
 
 	stock_name= models.TextField(default="")
 	start_date= models.TextField(default="")
@@ -29,12 +29,27 @@ class history(models.Model):
 	over_date= models.TextField(default="")
 	sell_price= models.TextField(default="")
 	return_value= models.TextField(default="")
+	type= models.TextField(default="")
 	class Meta:
-		db_table = "history"
+		db_table = "basicHistory"
+
+
+class technicHistory(models.Model):
+
+	stock_name= models.TextField(default="")
+	start_date= models.TextField(default="")
+	buy_price= models.TextField(default="")
+	over_date= models.TextField(default="")
+	sell_price= models.TextField(default="")
+	return_value= models.TextField(default="")
+	type= models.TextField(default="")
+	class Meta:
+		db_table = "technicHistory"
 
 
 
-class now_chose(models.Model):
+
+class basicCurrent(models.Model):
 
 	final_update= models.TextField(default="")
 	stock_name= models.TextField(default="")
@@ -43,6 +58,20 @@ class now_chose(models.Model):
 	over_date= models.TextField(default="")
 	current_price= models.TextField(default="")
 	now_return= models.TextField(default="")
-
+	type= models.TextField(default="")
 	class Meta:
-		db_table = "now_chose"
+		db_table = "basicCurrent"
+
+
+class technicCurrent(models.Model):
+
+	final_update= models.TextField(default="")
+	stock_name= models.TextField(default="")
+	start_date= models.TextField(default="")
+	start_price= models.TextField(default="")
+	over_date= models.TextField(default="")
+	current_price= models.TextField(default="")
+	now_return= models.TextField(default="")
+	type= models.TextField(default="")
+	class Meta:
+		db_table = "technicCurrent"

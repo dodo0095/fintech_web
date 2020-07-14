@@ -24,8 +24,10 @@ from django.views.generic import TemplateView
 
 router = routers.DefaultRouter()
 router.register(r'chose_robot', views.chose_robot, basename='chose_robot')
-router.register(r'history_stock', views.history_stock, basename='history_stock')
-router.register(r'now_chose_stock', views.now_chose_stock, basename='now_chose_stock')
+router.register(r'technicHistory', views.technicHistoryapi, basename='technicHistory')
+router.register(r'technicCurrent', views.technicCurrentapi, basename='technicCurrent')
+router.register(r'basicHistory', views.basicHistoryapi, basename='basicHistory')
+router.register(r'basicCurrent', views.basicCurrentapi, basename='basicCurrent')
 
 
 urlpatterns = [

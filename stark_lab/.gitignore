@@ -13,3 +13,7 @@ npm-debug.log
 package-lock.json
 .*DS_Store
 vic.code-workspace
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
