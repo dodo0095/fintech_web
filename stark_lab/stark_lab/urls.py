@@ -25,9 +25,9 @@ from django.views.generic import TemplateView
 router = routers.DefaultRouter()
 router.register(r'chose_robot', views.chose_robot, basename='chose_robot')
 router.register(r'technicHistory', views.technicHistoryapi, basename='technicHistory')
-router.register(r'technicCurrent', views.technicCurrentapi, basename='technicCurrent')
+#router.register(r'technicCurrent', views.technicCurrentapi, basename='technicCurrent')
 router.register(r'basicHistory', views.basicHistoryapi, basename='basicHistory')
-router.register(r'basicCurrent', views.basicCurrentapi, basename='basicCurrent')
+#router.register(r'basicCurrent', views.basicCurrentapi, basename='basicCurrent')
 
 
 urlpatterns = [
@@ -39,4 +39,8 @@ urlpatterns = [
     path('botTechnicCurrent.html', TemplateView.as_view(template_name="botTechnicCurrent.html")),
     #path('chose_robot/', views.chose_robot),
     path('', include(router.urls)),
+
+
+    url(r'^basicCurrent/',views.searchuser_data),
+    url(r'^technicCurrent/',views.searchuser_data),
 ]

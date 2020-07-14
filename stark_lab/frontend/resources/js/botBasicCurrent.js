@@ -114,7 +114,7 @@ const handleAxiosGetData = () => {
       console.log('Axios Success');
     })
     .catch((error) => {
-      console.log('Axios Error');
+      console.log('Axios Error', error.message);
     })
 }
 
