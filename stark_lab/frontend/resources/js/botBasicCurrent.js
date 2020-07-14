@@ -98,9 +98,9 @@ const handleAxiosGetData = () => {
 
 
   // Call Api
-  axios.get('../apiFakeData/basicCurrent.json')
+  axios.get('/basicCurrent/?format=json')
     .then((res) => {
-      const RES_DATA = res.data.basicCurrent;
+      const RES_DATA = res.data;
       // Import Value
       _initTableData(RES_DATA.final_update);
       _initTableTime(RES_DATA.tableTime);

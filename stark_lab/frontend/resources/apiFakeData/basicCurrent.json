@@ -8,7 +8,8 @@
     "tableData": [
       {
         "index": 1,
-        "type": "+",
+        "today": "99.99",
+        "total": "-99.99",
         "stock_name": "9926新海",
         "start_date": "2020-01-01",
         "start_price": "40.8",
