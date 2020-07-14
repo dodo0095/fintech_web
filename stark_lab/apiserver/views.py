@@ -147,7 +147,6 @@ class basicCurrentapi(viewsets.ModelViewSet):
 from rest_framework.decorators import api_view, permission_classes
 
 @api_view(['GET'])
-
 def searchuser_data(request):
 
 
@@ -163,12 +162,14 @@ def searchuser_data(request):
                         ,'start_price':data[i].start_price\
                         ,'over_date':data[i].over_date\
                         ,'current_price':data[i].current_price\
-                        ,'now_return':data[i].now_return\
+                        ,'now_return':str(round(float(data[i].now_return),2))\
                         ,'type':data[i].type\
                             }
             tableData.append(dict)
-            total_return=total_return+round(float(data[i].now_return),2)
+            total_return=total_return+float(data[i].now_return)
+            total_return=round(total_return,2)
 
-        board= {"today": 2,"total":total_return   }
+
+        board= {"today": '2',"total":str(total_return )}
         dict_finalt={'board':board, 'final_update':data[0].final_update,'tableData':tableData}
         return Response(dict_finalt)
