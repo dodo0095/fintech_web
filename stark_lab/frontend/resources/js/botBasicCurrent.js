@@ -102,8 +102,8 @@ const handleAxiosGetData = () => {
     .then((res) => {
       const RES_DATA = res.data;
       // Import Value
-      _initTableData(RES_DATA.final_update);
-      _initTableTime(RES_DATA.tableTime);
+      _initTableData(RES_DATA.tableData);
+      _initTableTime(RES_DATA.final_update);
       _initBoardValue(RES_DATA.board)
 
       setTimeout(() => {
