@@ -40,7 +40,7 @@ const handleAxiosGetData = () => {
         <td>${item.start_price}</td>
         <td>${item.current_price}</td>
         <td>${item.over_date}</td>
-        <td>${item.now_return}</td>
+        <td>${item.now_return}%</td>
       </tr>`)
 
       $s3TableMobile.append(`<div class='table-list-nav list-nav-${index + 1}'>
@@ -67,7 +67,7 @@ const handleAxiosGetData = () => {
           </tr>
           <tr class='data-row'>
             <td class='data-row-title'>至今漲幅</td>
-            <td>${item.now_return}</td>
+            <td>${item.now_return}%</td>
           </tr>
         </table>
       </div>`)
@@ -75,8 +75,8 @@ const handleAxiosGetData = () => {
   }
 
   function _initBoardValue(apiData) {
-    $s3BoardToday.find('.board-nav-value-count').text((apiData.today).toFixed(2));
-    $s3BoardTotal.find('.board-nav-value-count').text((apiData.total).toFixed(2));
+    $s3BoardToday.find('.board-nav-value-count').text(apiData.today);
+    $s3BoardTotal.find('.board-nav-value-count').text(apiData.total);
 
     if (apiData.today[0].includes('-')) {
       $s3BoardToday.addClass('reduce');
