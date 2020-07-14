@@ -3,7 +3,7 @@ const axios = require('axios');
 
 console.log('Current Page: bot.html');
 
-const PRELOAD_DURATION = 1000;
+const PRELOAD_DURATION = 1;
 
 const handleAxiosGetData = () => {
   const $s2 = $('.s2');

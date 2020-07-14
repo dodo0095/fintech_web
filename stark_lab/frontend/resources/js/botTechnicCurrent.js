@@ -3,7 +3,7 @@ const axios = require('axios');
 
 console.log('Current Page: botTechnicCurrent.html');
 
-const PRELOAD_DURATION = 1000;
+const PRELOAD_DURATION = 1;
 
 const handleAxiosGetData = () => {
   const $s3 = $('.s3');
@@ -40,7 +40,7 @@ const handleAxiosGetData = () => {
         <td>${item.start_price}</td>
         <td>${item.current_price}</td>
         <td>${item.over_date}</td>
-        <td>${item.now_return}</td>
+        <td>${item.now_return}%</td>
       </tr>`)
 
       $s3TableMobile.append(`<div class='table-list-nav list-nav-${index + 1}'>
@@ -67,7 +67,7 @@ const handleAxiosGetData = () => {
           </tr>
           <tr class='data-row'>
             <td class='data-row-title'>至今漲幅</td>
-            <td>${item.now_return}</td>
+            <td>${item.now_return}%</td>
           </tr>
         </table>
       </div>`)
