@@ -21,7 +21,7 @@ const handleAxiosGetData = () => {
       ${apiData[0].buy_price ? `<td>買入價格</td>` : ``}
       ${apiData[0].over_date ? `<td>結束日</td>` : ``}
       ${apiData[0].sell_price ? `<td>賣出價格</td>` : ``}
-      ${apiData[0].return ? `<td>報酬%</td>` : ``}
+      ${apiData[0].return_value ? `<td>報酬%</td>` : ``}
     </tr>`)
 
 
@@ -36,7 +36,7 @@ const handleAxiosGetData = () => {
         <td>${item.buy_price}</td>
         <td>${item.over_date}</td>
         <td>${item.sell_price}</td>
-        <td>${item.return}</td>
+        <td>${item.return_value}</td>
       </tr>`)
 
       $s3TableMobile.append(`<div class='table-list-nav list-nav-${index + 1}'>
@@ -63,7 +63,7 @@ const handleAxiosGetData = () => {
           </tr>
           <tr class='data-row'>
             <td class='data-row-title'>報酬(%)</td>
-            <td>${item.return}</td>
+            <td>${item.return_value}</td>
           </tr>
         </table>
       </div>`)
