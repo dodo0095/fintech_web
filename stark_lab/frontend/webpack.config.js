@@ -8,7 +8,7 @@ let SERVER_PORT;
 
 let initProject = {
   openPage: 'bot',
-  pages: ['bot', 'botBasicHistory', 'botBasicCurrent', 'botTechnicHistory', 'botTechnicCurrent']
+  pages: ['bot','botBlog','botBasicHistory', 'botBasicCurrent', 'botTechnicHistory','botTechnicCurrent']
   // pages: ['bot', 'botBasicHistory', 'botBasicCurrent']
 };
 
@@ -25,6 +25,8 @@ let cleanFolderInit = {
 };
 
 module.exports = (env, argv) => {
+  // PUBLIC_PATH = argv.mode === 'production' ? `./` : `/`;
+  // 正式打包用
   PUBLIC_PATH = argv.mode === 'production' ? `/static/` : `/`;
   SERVER_PORT = argv.mode === 'production' ? 8000 : 3000;
 

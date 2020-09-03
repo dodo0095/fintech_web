@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "StarkLab | 基本面歷史觀察清單",
+    "keyword": "StarkLab",
+    "describe": "StarkLab"
+  },
+
+
+  "writings": [
+    {
+      "index": 1,
+      "title": "手把程式實作分享系列:AWSEC2連線",
+      "title_picture": "https://i2.wp.com/softnshare.com/wp-content/uploads/2019/04/2000596_0ee9_3.jpg?w=480&ssl=1",
+      "abstract": "有了Amazon EC2，您可以設定和配置從作業系統到應用程式的所有執行個體。 ... 目前有五個以vCPU 為基礎的執行個體限制，它們各自定義相關執行個體系列可供您 ... 因為AWS 快速入門經過模組化且可自訂，所以您可以針對自己的實作新增其他功能 ... 現場部署伺服器可透過到VPC 的 AWS Direct Connect 連線掛載檔案系統。",
+      "link": "StarkLab",
+      "author_picture": "https://miro.medium.com/fit/c/192/192/2*dewQQf0DXIFI-I5HrlhXVQ.jpeg",
+      "author_name": "Walter Chiu",
+      "date": "2020/09/01"
+    },
+    {
+      "index": 2,
+      "title": "手把程式實作分享系列:Djsngo Simplejwt 客製化你的Token",
+      "title_picture": "https://miro.medium.com/max/1200/1*JbYLDYXkxoYAMpsgHhstXg.jpeg",
+      "abstract": "會有這一篇的原因，是因為simple jwt裡面，預設的參數缺少了一個重要的指標IAT(Issued At) 也就是得到Token當下的時間，這個參數的用意是為了讓前端去監控使用者，用了這個Token多久，沒有他的話，會無法監控時間，去更新。另外大家也可以在裡面加入各式各樣有趣的參數，讓你的Token更強大。",
+      "link": "StarkLab",
+      "author_picture": "https://miro.medium.com/fit/c/192/192/2*dewQQf0DXIFI-I5HrlhXVQ.jpeg",
+      "author_name": "Walter Chiu",
+      "date": "2020/09/02"
+    },
+    {
+      "index": 3,
+      "title": "手把手程式實作分享系列：建構 Django REST framework (DRF) API -Put",
+      "title_picture": "https://miro.medium.com/max/720/1*weZOxTb0UMmx9oUKY-XSAQ.jpeg",
+      "abstract": "雖然我是在寫手把手系列，但今天這篇文章不會有全部的程式碼，而是我記錄下put自己發生到的問題。",
+      "link": "StarkLab",
+      "author_picture": "https://miro.medium.com/fit/c/192/192/2*dewQQf0DXIFI-I5HrlhXVQ.jpeg",
+      "author_name": "Walter Chiu",
+      "date": "2020/09/02"
+    },
+    {
+      "index": 4,
+      "title": "手把手程式實作分享系列:如何用 Python 寄信？smtplib & email",
+      "title_picture": "https://miro.medium.com/max/827/1*wv9MI-oszcivOzGpaMUUbA.png",
+      "abstract": "自動寄信可用這個 Library（內建在 Anaconda）：smtplib 與 email。這個套件除了能夠發出一般的文字內容，也有夾帶檔案的功能，程式碼可參考：",
+      "link": "StarkLab",
+      "author_picture": "https://miro.medium.com/fit/c/192/192/2*dewQQf0DXIFI-I5HrlhXVQ.jpeg",
+      "author_name": "Walter Chiu",
+      "date": "2020/09/01"
+    },
+    {
+      "index": 5,
+      "title": "手把手程式實作分享系列：Django範例 上傳個人圖片",
+      "title_picture": "https://miro.medium.com/max/1050/1*FlP5HLwWzgTx704Corrv8Q.jpeg",
+      "abstract": "玩了django一陣子，寫平台到一半突然發現自己不會上傳圖片….蝦爆了 果然技能是隨著突發狀況而來，打這篇文章的時候雖然已經練好了，不過…照慣例 就記錄一下",
+      "link": "StarkLab",
+      "author_picture": "https://miro.medium.com/fit/c/192/192/2*dewQQf0DXIFI-I5HrlhXVQ.jpeg",
+      "author_name": "Walter Chiu",
+      "date": "2020/09/02"
+    },
+    {
+      "index": 6,
+      "title": "手把手程式實作分享系列：Django SQLite資料庫設定集簡單操作",
+      "title_picture": "https://miro.medium.com/max/720/1*weZOxTb0UMmx9oUKY-XSAQ.jpeg",
+      "abstract": "雖然我是在寫手把手系列，但今天這篇文章不會有全部的程式碼，而是我記錄下put自己發生到的問題。",
+      "link": "StarkLab",
+      "author_picture": "https://miro.medium.com/fit/c/192/192/2*dewQQf0DXIFI-I5HrlhXVQ.jpeg",
+      "author_name": "Walter Chiu",
+      "date": "2020/09/02"
+    }
+  ]
+
+}

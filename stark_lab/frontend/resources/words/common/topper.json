@@ -1,9 +1,9 @@
 {
   "topper": [
     {
-      "text": "理念",
-      "iconType": "brain",
-      "url": "about.html"
+      "text": "Blog",
+      "iconType": "blog",
+      "url": "blog.html"
     },
     {
       "text": "指標紅綠燈",
@@ -24,6 +24,16 @@
       "text": "意見回饋",
       "iconType": "feedback",
       "url": "contact.html"
+    },
+    {
+      "text": "FACEBOOK",
+      "iconType": "fb",
+      "url": "facebook.html"
+    },
+    {
+      "text": "關於我",
+      "iconType": "brain",
+      "url": "about.html"
     }
   ]
 }
