@@ -27,6 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+CORS_ORIGIN_ALLOW_ALL = True # product : 註解
+CORS_ALLOW_CREDENTIALS = True # product : 註解
+CORS_ORIGIN_WHITELIST = ( # product : 註解
+    # TODO - set this properly for production
+    'https://127.0.0.1:8080',
+    'https://127.0.0.1:8000',
+    'https://127.0.0.1:3000',
+    'https://localhost:3000'
+)
+
 
 # Application definition
 
