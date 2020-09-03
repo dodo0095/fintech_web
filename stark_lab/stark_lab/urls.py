@@ -28,7 +28,7 @@ router.register(r'technicHistory', views.technicHistoryapi, basename='technicHis
 #router.register(r'technicCurrent', views.technicCurrentapi, basename='technicCurrent')
 router.register(r'basicHistory', views.basicHistoryapi, basename='basicHistory')
 #router.register(r'basicCurrent', views.basicCurrentapi, basename='basicCurrent')
-
+router.register(r'articleapi', views.articleapi, basename='articleapi')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -43,4 +43,5 @@ urlpatterns = [
 
     url(r'^basicCurrent/',views.searchuser_data),
     url(r'^technicCurrent/',views.searchuser_data),
+
 ]

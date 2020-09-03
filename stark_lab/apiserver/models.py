@@ -75,3 +75,18 @@ class technicCurrent(models.Model):
 	type= models.TextField(default="")
 	class Meta:
 		db_table = "technicCurrent"
+
+
+
+class article_1(models.Model):
+
+	title= models.TextField(default="")
+	title_picture= models.TextField(default="")
+	abstract= models.TextField(default="")
+	author_picture= models.TextField(default="")
+	author_name= models.TextField(default="")
+	date= models.TextField(default="")
+	link= models.TextField(default="")
+
+	class Meta:
+		db_table = "article_1"

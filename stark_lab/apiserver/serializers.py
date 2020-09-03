@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent
+from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent,article_1
 
 class bot_apiSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,5 +32,12 @@ class basicHistory_Serializer(serializers.ModelSerializer):
 class basicCurrent_Serializer(serializers.ModelSerializer):
     class Meta:
         model = basicCurrent
+        fields = '__all__'
+        #fields = ("tag")
+
+
+class article_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = article_1
         fields = '__all__'
         #fields = ("tag")
