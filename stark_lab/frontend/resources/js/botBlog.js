@@ -57,11 +57,11 @@ const handleAxiosGetData = () => {
   }
 
   // Call Api
-  // axios.get('//dodo0095.pythonanywhere.com/articleapi/?format=json')
-  axios.get('http://127.0.0.1:8000/articleapi/?format=json')
+  axios.get('//dodo0095.pythonanywhere.com/articleapi/?format=json')
+  // axios.get('http://127.0.0.1:8000/articleapi/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
-      console.log('Show RES_DATA', RES_DATA);
+      // console.log('Show RES_DATA', RES_DATA);
       // Import Value
       _initTableData(RES_DATA);
 
