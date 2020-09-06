@@ -57,7 +57,7 @@ const handleAxiosGetData = () => {
   }
 
   // Call Api
-  axios.get('https://cors-anywhere.herokuapp.com/http://dodo0095.pythonanywhere.com/articleapi/?format=json')
+  axios.get('api/articleapi/?format=json')
   // axios.get('http://127.0.0.1:8000/articleapi/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
