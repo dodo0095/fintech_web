@@ -102,7 +102,7 @@ const handleAxiosGetData = () => {
 
 
   // Call Api
-  axios.get('./words/botBlog.json')
+  axios.get('//dodo0095.pythonanywhere.com/articleapi/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
       // Import Value
