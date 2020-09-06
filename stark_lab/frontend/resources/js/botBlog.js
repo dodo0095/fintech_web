@@ -43,8 +43,9 @@ const handleAxiosGetData = () => {
       // }
       // 桌機平板表格 Append 資料內容
       $s1Table.append(`
-      <div class='writings-frame'>
-        <div class='writings writings-${index + 1}'>
+        <div class='writings writings-${index + 1} style="cursor:pointer;" onclick="location.href=
+        '${item.link}';"'>
+
           <div class='title_picture title_picture${index + 1}'>
             <figure>
               <img src="${item.title_picture}">
