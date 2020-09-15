@@ -72,7 +72,7 @@ const handleAxiosGetData = () => {
 
 
   // Call Api
-  axios.get('/technicHistory/?format=json')
+  axios.get('api/technicHistory/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
       // Import Value

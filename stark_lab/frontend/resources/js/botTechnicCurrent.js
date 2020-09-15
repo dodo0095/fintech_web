@@ -98,7 +98,7 @@ const handleAxiosGetData = () => {
 
 
   // Call Api
-  axios.get('/technicCurrent/?format=json')
+  axios.get('api/technicCurrent/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
       // Import Value

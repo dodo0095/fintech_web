@@ -57,8 +57,13 @@ const handleAxiosGetData = () => {
   }
 
   // Call Api
+<<<<<<< HEAD
   // axios.get('//dodo0095.pythonanywhere.com/articleapi/?format=json')
   axios.get('http://127.0.0.1:8000/articleapi/?format=json')
+=======
+  axios.get('api/articleapi/?format=json')
+  // axios.get('http://127.0.0.1:8000/articleapi/?format=json')
+>>>>>>> e8625706586903702f3ad113eb43bc2e72693f8c
     .then((res) => {
       const RES_DATA = res.data;
       // console.log('Show RES_DATA', RES_DATA);

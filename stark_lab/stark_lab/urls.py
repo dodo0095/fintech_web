@@ -32,16 +32,17 @@ router.register(r'articleapi', views.articleapi, basename='articleapi')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', TemplateView.as_view(template_name="bot.html")),
     path('bot.html', TemplateView.as_view(template_name="bot.html")),
     path('botBasicHistory.html', TemplateView.as_view(template_name="botBasicHistory.html")),
     path('botBasicCurrent.html', TemplateView.as_view(template_name="botBasicCurrent.html")),
     path('botTechnicHistory.html', TemplateView.as_view(template_name="botTechnicHistory.html")),
     path('botTechnicCurrent.html', TemplateView.as_view(template_name="botTechnicCurrent.html")),
     #path('chose_robot/', views.chose_robot),
-    path('', include(router.urls)),
+    path('api/', include(router.urls)),
 
 
-    url(r'^basicCurrent/',views.searchuser_data),
-    url(r'^technicCurrent/',views.searchuser_data),
+    url(r'^api/basicCurrent/',views.searchuser_data),
+    url(r'^api/technicCurrent/',views.searchuser_data),
 
 ]
