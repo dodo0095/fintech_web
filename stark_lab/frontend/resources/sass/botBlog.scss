@@ -56,6 +56,37 @@
           padding-right: 10px;
           padding-bottom: 10px;
         }
+
+        .author-frame {
+          display: flex;
+          margin-top: 10px;
+          .author_picture {
+            padding-right: 10px;
+            img {
+              display: inline-block;
+              width: 50px;
+              height: 50px;
+              border-radius: 50%;
+            }
+          }
+          .author-data {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: start;
+            .author_name {
+              flex-direction: column;
+              font-size: 12px;
+            }
+            .date {
+              flex-direction: column;
+              font-size: 12px;
+              color: #555;
+              // display: inline-block;
+            }
+          }
+        }
+
         .title {
           display: -webkit-box;
           -webkit-line-clamp: 3!important;
@@ -64,7 +95,7 @@
           white-space: normal;
           color: #0d6fb8;
           font-size: 20px;
-          height: 82px;
+          height: 63px;
           margin-bottom: 10px;
           line-height: 1.2;
         }
@@ -78,9 +109,10 @@
         }
 
         .abstract {
+          margin-bottom: 13px;
           span {
             display: -webkit-box;
-            -webkit-line-clamp: 8!important;
+            -webkit-line-clamp: 2!important;
             -webkit-box-orient: vertical!important;
             overflow: hidden!important;
             white-space: normal;
@@ -88,41 +120,12 @@
             font-size: 16px;
             font-weight: 300; 
             color: #333;
-            height: 175px;
+            height: 55px;
             line-height: 1.4;
           }
         }
 
-        .author-frame {
-          position: relative;
-          margin-top: 10px;
-          .author_picture {
-            
-            img {
-              display: inline-block;
-              width: 50px;
-              height: 50px;
-              border-radius: 50%;
-            }
-          }
-          .author-data {
-            position: relative;
-            top: -58px;
-            left: 60px;
-            .author_name {
-              position: relative;
-              display: inline-block;
-              margin-bottom: 5px;
-              font-size: 12px;
-            }
-            .date {
-              font-size: 12px;
-              color: #555;
-              // display: inline-block;
-            }
 
-          }
-        }
         
       }//.writings-frame
       
@@ -195,11 +198,37 @@
         .writings-frame {
           display: grid;
           grid-template-columns: 1fr;
+          margin-left: auto;
+          margin-right: auto;
           .writings {
             // padding-left: 10px;
             // padding-right: 10px;
             // padding-bottom: 10px;
           }
+
+          .author-frame {
+            .author_picture {
+              
+              img {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+              }
+            }
+            .author-data {
+
+              .author_name {
+
+                font-size: 12px;
+              }
+              .date {
+                font-size: 12px;
+                color: #555;
+                // display: inline-block;
+              }
+            }
+          }
+
           .title {
             display: -webkit-box;
             -webkit-line-clamp: 2!important;
@@ -221,6 +250,7 @@
           }
   
           .abstract {
+            
             span {
               display: -webkit-box;
               -webkit-line-clamp: 3!important;
@@ -236,36 +266,7 @@
             }
           }
   
-          .author-frame {
-            position: relative;
-            margin-top: 10px;
-            .author_picture {
-              
-              img {
-                display: inline-block;
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-              }
-            }
-            .author-data {
-              position: relative;
-              top: -58px;
-              left: 60px;
-              .author_name {
-                position: relative;
-                display: inline-block;
-                margin-bottom: 5px;
-                font-size: 12px;
-              }
-              .date {
-                font-size: 12px;
-                color: #555;
-                // display: inline-block;
-              }
-  
-            }
-          }
+
           
         }//.writings-frame
         

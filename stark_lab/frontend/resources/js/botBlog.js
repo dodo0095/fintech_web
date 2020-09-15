@@ -30,7 +30,15 @@ const handleAxiosGetData = () => {
       $s1Table.append(`
         <div class='writings writings-${index + 1} style="cursor:pointer;" onclick="location.href=
         '${item.link}';"'>
-
+          <div class="author-frame author${index + 1}">
+            <div class="author_picture">
+              <img src="${item.author_picture}">
+            </div>
+            <div class="author-data">
+              <div class="author_name">${item.author_name}</div>
+              <div class="date">${item.date}</div>
+            </div>
+          </div>
           <div class='title_picture title_picture${index + 1}'>
             <figure>
               <img src="${item.title_picture}">
@@ -42,14 +50,7 @@ const handleAxiosGetData = () => {
             <div class="abstract abstract${index + 1}">
               <span>${item.abstract}</span>
             </div>
-            <div class="author-frame author${index + 1}">
-              <div class="author_picture">
-                <img src="${item.author_picture}">
-              </div>
-            <div class="author-data">
-              <div class="author_name">${item.author_name}</div>
-              <div class="date">${item.date}</div>
-            </div>
+            
           </div>
         </div>
       </div>`)
@@ -57,13 +58,8 @@ const handleAxiosGetData = () => {
   }
 
   // Call Api
-<<<<<<< HEAD
   // axios.get('//dodo0095.pythonanywhere.com/articleapi/?format=json')
-  axios.get('http://127.0.0.1:8000/articleapi/?format=json')
-=======
-  axios.get('api/articleapi/?format=json')
-  // axios.get('http://127.0.0.1:8000/articleapi/?format=json')
->>>>>>> e8625706586903702f3ad113eb43bc2e72693f8c
+  axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
       // console.log('Show RES_DATA', RES_DATA);
