@@ -16,6 +16,22 @@
 
   //section1
   .s1 {
+    margin: 30px auto;
+    max-width: 1056px;
+    .sub_title {
+      display: inline-block;
+      padding: 10px 0;
+      margin: 20px 0 20px;
+      box-sizing: border-box;
+      border-bottom: 4px solid #0d6fb8;
+
+      span {
+        display: inline-block;
+        font-size: 28px;
+        color: #333;
+        font-weight: 600px;
+      }
+    }
     .sub-nav {
       margin-top: 60px;
       display: flex;
