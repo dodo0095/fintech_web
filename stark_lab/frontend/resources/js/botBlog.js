@@ -3,17 +3,23 @@ const axios = require('axios');
 // import $botBlog  from './words/botBlog.json';
 console.log('Current Page: botBlog.html');
 const PRELOAD_DURATION = 1;
+const $navBtn1 = $('.bot-content .s1 .sub-nav .navBtn1');
+const $navBtn2 = $('.bot-content .s1 .sub-nav .navBtn2');
+const $navBtn3 = $('.bot-content .s1 .sub-nav .navBtn3');
+const $navBtn4 = $('.bot-content .s1 .sub-nav .navBtn4');
 
 const handleAxiosGetData = () => {
   // const length = 50;
   // const $s1TableMobile = $('.s1');
+  const $s1 = $('.s1');
   const $s1Table = $('.s1 .s1-block .writings-frame');
   // const $s1TableMobile = $('.s1 .s1-block -mobile');
   const $preloader = $('.preloader');
 
   function _initTableData(apiData) {
     // console.log('apiData', apiData[0]);
-
+    //先清空writings-frame的html，在重新載入API
+    document.getElementById('writings-frame').innerHTML = "";
     apiData.forEach(function(item, index) {
       // let growType = item.type === `+` ? `increase` : `reduce`;
       // console.log('foreach', item);
@@ -56,6 +62,10 @@ const handleAxiosGetData = () => {
       </div>`)
     })
   }
+  
+
+
+
 
   // Call Api
   // axios.get('//dodo0095.pythonanywhere.com/articleapi/?format=json')
@@ -71,13 +81,101 @@ const handleAxiosGetData = () => {
         $preloader.addClass('js-hide');
       }, PRELOAD_DURATION);
 
-      console.log('Axios Success');
+      console.log('Axios Success1');
     })
     .catch((error) => {
       console.log('Axios Error', error.message);
     })
 
+    // navBtn1
+    $navBtn1.click(function() {
+      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
+      .then((res) => {
+        const RES_DATA = res.data;
+        // console.log('Show RES_DATA', RES_DATA);
+        // Import Value
+        _initTableData(RES_DATA);
+  
+        setTimeout(() => {
+          $s1.fadeIn(300);
+          $preloader.addClass('js-hide');
+        }, PRELOAD_DURATION);
+  
+        console.log('Axios Success1');
+      })
+      .catch((error) => {
+        console.log('Axios Error', error.message);
+      })
+    });
+
+    // navBtn2
+    $navBtn2.click(function() {
+      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
+      .then((res) => {
+        const RES_DATA = res.data;
+        // console.log('Show RES_DATA', RES_DATA);
+        // Import Value
+        _initTableData(RES_DATA);
+  
+        setTimeout(() => {
+          $s1.fadeIn(300);
+          $preloader.addClass('js-hide');
+        }, PRELOAD_DURATION);
+  
+        console.log('Axios Success2');
+      })
+      .catch((error) => {
+        console.log('Axios Error', error.message);
+      })
+    });
+
+    // navBtn3
+    $navBtn3.click(function() {
+      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
+      .then((res) => {
+        const RES_DATA = res.data;
+        // console.log('Show RES_DATA', RES_DATA);
+        // Import Value
+        _initTableData(RES_DATA);
+  
+        setTimeout(() => {
+          $s1.fadeIn(300);
+          $preloader.addClass('js-hide');
+        }, PRELOAD_DURATION);
+  
+        console.log('Axios Success3');
+      })
+      .catch((error) => {
+        console.log('Axios Error', error.message);
+      })
+    });
+
+    // navBtn4
+    $navBtn4.click(function() {
+      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
+      .then((res) => {
+        const RES_DATA = res.data;
+        // console.log('Show RES_DATA', RES_DATA);
+        // Import Value
+        _initTableData(RES_DATA);
+  
+        setTimeout(() => {
+          $s1.fadeIn(300);
+          $preloader.addClass('js-hide');
+        }, PRELOAD_DURATION);
+  
+        console.log('Axios Success4');
+      })
+      .catch((error) => {
+        console.log('Axios Error', error.message);
+      })
+    });
+
 }
+
+
+
+
 
 handleAxiosGetData();
 

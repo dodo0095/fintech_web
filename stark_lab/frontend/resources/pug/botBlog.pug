@@ -11,13 +11,13 @@ include ./modules/base
       section.s1
         .sub_title
           span!= '機器學習'
-        //- .sub-nav
-        //-   .navBtn.navBtn1 精選文章
-        //-   .navBtn.navBtn2 大師對談
-        //-   .navBtn.navBtn3 大師分享
-        //-   .navBtn.navBtn4 資源寶庫
+        .sub-nav
+          .navBtn.navBtn1 精選文章
+          .navBtn.navBtn2 大師對談
+          .navBtn.navBtn3 大師分享
+          .navBtn.navBtn4 資源寶庫
         .s1-block
-          .writings-frame
+          .writings-frame#writings-frame
             //- if pageWords.writings
               each items, index in pageWords.writings
                 .writings(class=`writings-${index + 1}`)
