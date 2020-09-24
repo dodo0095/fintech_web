@@ -34,6 +34,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name="bot.html")),
     path('bot.html', TemplateView.as_view(template_name="bot.html")),
+    path('botBlog.html', TemplateView.as_view(template_name="botBlog.html")),
     path('botBasicHistory.html', TemplateView.as_view(template_name="botBasicHistory.html")),
     path('botBasicCurrent.html', TemplateView.as_view(template_name="botBasicCurrent.html")),
     path('botTechnicHistory.html', TemplateView.as_view(template_name="botTechnicHistory.html")),
