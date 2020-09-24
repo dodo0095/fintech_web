@@ -8,7 +8,7 @@ let SERVER_PORT;
 
 let initProject = {
   openPage: 'bot',
-  pages: ['bot','botBlog','botBasicHistory', 'botBasicCurrent', 'botTechnicHistory','botTechnicCurrent']
+  pages: ['bot','botBlog','botBasicHistory', 'botBasicCurrent', 'botTechnicHistory','botTechnicCurrent','botAbout']
   // pages: ['bot', 'botBasicHistory', 'botBasicCurrent']
 };
 
