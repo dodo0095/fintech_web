@@ -29,18 +29,25 @@ router.register(r'technicHistory', views.technicHistoryapi, basename='technicHis
 router.register(r'basicHistory', views.basicHistoryapi, basename='basicHistory')
 #router.register(r'basicCurrent', views.basicCurrentapi, basename='basicCurrent')
 router.register(r'articleapi', views.articleapi, basename='articleapi')
+router.register(r'articleapi2', views.articleapi2, basename='articleapi2')
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name="bot.html")),
     path('bot.html', TemplateView.as_view(template_name="bot.html")),
     path('botBlog.html', TemplateView.as_view(template_name="botBlog.html")),
+  #  path('about.html', TemplateView.as_view(template_name="about.html")),
     path('botBasicHistory.html', TemplateView.as_view(template_name="botBasicHistory.html")),
     path('botBasicCurrent.html', TemplateView.as_view(template_name="botBasicCurrent.html")),
     path('botTechnicHistory.html', TemplateView.as_view(template_name="botTechnicHistory.html")),
     path('botTechnicCurrent.html', TemplateView.as_view(template_name="botTechnicCurrent.html")),
     #path('chose_robot/', views.chose_robot),
     path('api/', include(router.urls)),
+
+
+
 
 
     url(r'^api/basicCurrent/',views.searchuser_data),

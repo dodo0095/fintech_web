@@ -2,8 +2,8 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework import viewsets
 from apiserver.serializers import  bot_apiSerializer,technicHistory_Serializer,technicCurrent_Serializer
-from apiserver.serializers import basicHistory_Serializer,basicCurrent_Serializer,article_Serializer
-from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent,article_1
+from apiserver.serializers import basicHistory_Serializer,basicCurrent_Serializer,article_Serializer,article2_Serializer
+from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent,article_1,article_2
 from rest_framework import generics
 import django_filters.rest_framework
 from rest_framework.decorators import api_view
@@ -192,6 +192,31 @@ class articleapi(viewsets.ModelViewSet):
         by filtering against a `username` query parameter in the URL.
         """
         queryset = article_1.objects.all()
+        username = self.request.query_params.get('title', None)
+
+        #username=urllib.parse.quote(username)
+
+
+        if username is not None:
+            queryset = queryset.filter(title=str(title))
+        return queryset
+
+
+
+class articleapi2(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    lookup_url_kwarg = "email"
+   # queryset = pttdata.objects.filter(id = 412)
+    serializer_class = article2_Serializer
+
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = article_2.objects.all()
         username = self.request.query_params.get('title', None)
 
         #username=urllib.parse.quote(username)
