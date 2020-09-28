@@ -34,8 +34,8 @@ const handleAxiosGetData = () => {
       // }
       // 桌機平板表格 Append 資料內容
       $s1Table.append(`
-        <div class='writings writings-${index + 1} style="cursor:pointer;" onclick="location.href=
-        '${item.link}';"'>
+        <div class="writings writings-${index + 1}" style="cursor:pointer;" onclick="location.href=
+        '${item.link}'">
           <div class="author-frame author${index + 1}">
             <div class="author_picture">
               <img src="${item.author_picture}">
@@ -69,7 +69,7 @@ const handleAxiosGetData = () => {
 
   // Call Api
   // axios.get('//dodo0095.pythonanywhere.com/articleapi/?format=json')
-  axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
+  axios.get('/api/articleapi/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
       // console.log('Show RES_DATA', RES_DATA);
@@ -87,95 +87,90 @@ const handleAxiosGetData = () => {
       console.log('Axios Error', error.message);
     })
 
-    // navBtn1
-    $navBtn1.click(function() {
-      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
-      .then((res) => {
-        const RES_DATA = res.data;
-        // console.log('Show RES_DATA', RES_DATA);
-        // Import Value
-        _initTableData(RES_DATA);
-  
-        setTimeout(() => {
-          $s1.fadeIn(300);
-          $preloader.addClass('js-hide');
-        }, PRELOAD_DURATION);
-  
-        console.log('Axios Success1');
-      })
-      .catch((error) => {
-        console.log('Axios Error', error.message);
-      })
-    });
+  // navBtn1
+  $navBtn1.on('click', function() {
+    axios.get('/api/articleapi/?format=json')
+    .then((res) => {
+      const RES_DATA = res.data;
+      // console.log('Show RES_DATA', RES_DATA);
+      // Import Value
+      _initTableData(RES_DATA);
 
-    // navBtn2
-    $navBtn2.click(function() {
-      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
-      .then((res) => {
-        const RES_DATA = res.data;
-        // console.log('Show RES_DATA', RES_DATA);
-        // Import Value
-        _initTableData(RES_DATA);
-  
-        setTimeout(() => {
-          $s1.fadeIn(300);
-          $preloader.addClass('js-hide');
-        }, PRELOAD_DURATION);
-  
-        console.log('Axios Success2');
-      })
-      .catch((error) => {
-        console.log('Axios Error', error.message);
-      })
-    });
+      setTimeout(() => {
+        $s1.fadeIn(300);
+        $preloader.addClass('js-hide');
+      }, PRELOAD_DURATION);
 
-    // navBtn3
-    $navBtn3.click(function() {
-      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
-      .then((res) => {
-        const RES_DATA = res.data;
-        // console.log('Show RES_DATA', RES_DATA);
-        // Import Value
-        _initTableData(RES_DATA);
-  
-        setTimeout(() => {
-          $s1.fadeIn(300);
-          $preloader.addClass('js-hide');
-        }, PRELOAD_DURATION);
-  
-        console.log('Axios Success3');
-      })
-      .catch((error) => {
-        console.log('Axios Error', error.message);
-      })
-    });
+      console.log('Axios Success1');
+    })
+    .catch((error) => {
+      console.log('Axios Error', error.message);
+    })
+  });
 
-    // navBtn4
-    $navBtn4.click(function() {
-      axios.get('http://127.0.0.1:8000/api/articleapi/?format=json')
-      .then((res) => {
-        const RES_DATA = res.data;
-        // console.log('Show RES_DATA', RES_DATA);
-        // Import Value
-        _initTableData(RES_DATA);
-  
-        setTimeout(() => {
-          $s1.fadeIn(300);
-          $preloader.addClass('js-hide');
-        }, PRELOAD_DURATION);
-  
-        console.log('Axios Success4');
-      })
-      .catch((error) => {
-        console.log('Axios Error', error.message);
-      })
-    });
+  // navBtn2
+  $navBtn2.on('click', function() {
+    axios.get('/api/articleapi/?format=json')
+    .then((res) => {
+      const RES_DATA = res.data;
+      // console.log('Show RES_DATA', RES_DATA);
+      // Import Value
+      _initTableData(RES_DATA);
 
+      setTimeout(() => {
+        $s1.fadeIn(300);
+        $preloader.addClass('js-hide');
+      }, PRELOAD_DURATION);
+
+      console.log('Axios Success2');
+    })
+    .catch((error) => {
+      console.log('Axios Error', error.message);
+    })
+  });
+
+  // navBtn3
+  $navBtn3.on('click', function() {
+    axios.get('/api/articleapi/?format=json')
+    .then((res) => {
+      const RES_DATA = res.data;
+      // console.log('Show RES_DATA', RES_DATA);
+      // Import Value
+      _initTableData(RES_DATA);
+
+      setTimeout(() => {
+        $s1.fadeIn(300);
+        $preloader.addClass('js-hide');
+      }, PRELOAD_DURATION);
+
+      console.log('Axios Success3');
+    })
+    .catch((error) => {
+      console.log('Axios Error', error.message);
+    })
+  });
+
+  // navBtn4
+  $navBtn4.on('click', function() {
+    axios.get('/api/articleapi/?format=json')
+    .then((res) => {
+      const RES_DATA = res.data;
+      // console.log('Show RES_DATA', RES_DATA);
+      // Import Value
+      _initTableData(RES_DATA);
+
+      setTimeout(() => {
+        $s1.fadeIn(300);
+        $preloader.addClass('js-hide');
+      }, PRELOAD_DURATION);
+
+      console.log('Axios Success4');
+    })
+    .catch((error) => {
+      console.log('Axios Error', error.message);
+    })
+  });
 }
-
-
-
-
 
 handleAxiosGetData();
 

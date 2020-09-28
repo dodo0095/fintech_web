@@ -48,7 +48,7 @@
       .navBtn {
         display: flex;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 22px;
         padding-bottom: 20px;
       }
       .navBtn:hover {
@@ -218,6 +218,10 @@
   
     //section1
     .s1 { 
+      .sub-nav .navBtn {
+        font-size: 15px;
+      }
+      
       .s1-block {
         // position: relative;
         // margin: 30px auto;
