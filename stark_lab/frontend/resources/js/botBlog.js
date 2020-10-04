@@ -110,7 +110,7 @@ const handleAxiosGetData = () => {
 
   // navBtn2
   $navBtn2.on('click', function() {
-    axios.get('/api/articleapi/?format=json')
+    axios.get('/api/articleapi2/?format=json')
     .then((res) => {
       const RES_DATA = res.data;
       // console.log('Show RES_DATA', RES_DATA);
