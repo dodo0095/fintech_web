@@ -8,20 +8,20 @@
     {
       "class": "month",
       "title": "月績效",
-      "subTop": "策略績效",
-      "subBottom": "策略績效"
+      "subTop": "Starklab策略績效",
+      "subBottom": "0050策略績效"
     },
     {
       "class": "season",
       "title": "季績效",
-      "subTop": "策略績效",
-      "subBottom": "策略績效"
+      "subTop": "Starklab策略績效",
+      "subBottom": "0050策略績效"
     },
     {
       "class": "year",
       "title": "年績效",
-      "subTop": "策略績效",
-      "subBottom": "策略績效"
+      "subTop": "Starklab策略績效",
+      "subBottom": "0050策略績效"
     }
   ],
   "target": [
@@ -32,11 +32,11 @@
       "data": [
         {
           "class": "year",
-          "title": "年報酬率"
+          "title": "近期月績效"
         },
         {
           "class": "max",
-          "title": "最大振福"
+          "title": "最大個股振幅"
         }
       ],
       "button": [
@@ -59,11 +59,11 @@
       "data": [
         {
           "class": "year",
-          "title": "年報酬率"
+          "title": "近期月績效"
         },
         {
           "class": "max",
-          "title": "最大振福"
+          "title": "最大個股振幅"
         }
       ],
       "button": [
