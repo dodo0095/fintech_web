@@ -34,11 +34,11 @@ router.register(r'articleapi2', views.articleapi2, basename='articleapi2')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name="bot.html")),
+    #path('', TemplateView.as_view(template_name="bot.html")),
     path('bot.html', TemplateView.as_view(template_name="bot.html")),
     path('botBlog.html', TemplateView.as_view(template_name="botBlog.html")),
     path('botAbout.html', TemplateView.as_view(template_name="botAbout.html")),
-    
+    path('', TemplateView.as_view(template_name="botAbout.html")),
 
     path('botBasicHistory.html', TemplateView.as_view(template_name="botBasicHistory.html")),
     path('botBasicCurrent.html', TemplateView.as_view(template_name="botBasicCurrent.html")),
