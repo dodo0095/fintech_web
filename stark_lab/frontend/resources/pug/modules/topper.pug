@@ -10,7 +10,7 @@ mixin topper(words, activeIndex)
             a(
               href=`${item.url}`
               class= `${index + 1 === activeIndex ? 'js-selected' : ''}`
-              target=`${item.text === 'FACEBOOK' ? '_blank' : '_self'}`)
+              target=`${item.blank ? '_blank' : '_self'}`)
               div
                 i.icons(class=`icons-${item.iconType}`)
               span.font-regular!= `${item.text}`
