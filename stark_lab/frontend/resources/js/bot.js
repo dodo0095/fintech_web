@@ -18,7 +18,7 @@ const handleAxiosGetData = () => {
   const $preloader = $('.preloader');
 
   function _initSection2Data(apiData) {
-    $s2MonthScore.find('.score-value-1 .score-value-data').html(`${apiData.monthly_return}%`);
+      $s2MonthScore.find('.score-value-1 .score-value-data').html(`${apiData.monthly_return}%`);
       $s2MonthScore.find('.score-value-2 .score-value-data').html(`${apiData.monthly_0050_return}%`);
 
       $s2SeasonScore.find('.score-value-1 .score-value-data').html(`${apiData.season_return}%`);
@@ -27,41 +27,47 @@ const handleAxiosGetData = () => {
       $s2YearScore.find('.score-value-1 .score-value-data').html(`${apiData.year_return}%`);
       $s2YearScore.find('.score-value-2 .score-value-data').html(`${apiData.year_0050_return}%`);
 
+      let monthBigger = Math.max(apiData.monthly_return, apiData.monthly_0050_return);
+      let seasonBigger = Math.max(apiData.season_return, apiData.season_0050_return);
+      let yearBigger = Math.max(apiData.year_return, apiData.year_0050_return);
+      // console.log('whoIsBigger', monthBigger, seasonBigger, yearBigger);
+
+
       // Init Increase & Reduce
-      if (apiData.monthly_return[0].includes('-')) {
-        $s2MonthScore.find('.score-value-1 .score-value-data').addClass('reduce')
-      } else {
+      if (Number(apiData.monthly_return) === monthBigger) {
         $s2MonthScore.find('.score-value-1 .score-value-data').addClass('increase')
+      } else {
+        $s2MonthScore.find('.score-value-1 .score-value-data').addClass('reduce')
       }
 
-      if (apiData.monthly_0050_return[0].includes('-')) {
-        $s2MonthScore.find('.score-value-2 .score-value-data').addClass('reduce')
-      } else {
+      if (Number(apiData.monthly_0050_return) === monthBigger) {
         $s2MonthScore.find('.score-value-2 .score-value-data').addClass('increase')
+      } else {
+        $s2MonthScore.find('.score-value-2 .score-value-data').addClass('reduce')
       }
 
-      if (apiData.season_return[0].includes('-')) {
-        $s2SeasonScore.find('.score-value-1 .score-value-data').addClass('reduce')
-      } else {
+      if (Number(apiData.season_return) === seasonBigger) {
         $s2SeasonScore.find('.score-value-1 .score-value-data').addClass('increase')
+      } else {
+        $s2SeasonScore.find('.score-value-1 .score-value-data').addClass('reduce')
       }
 
-      if (apiData.season_0050_return[0].includes('-')) {
-        $s2SeasonScore.find('.score-value-2 .score-value-data').addClass('reduce')
-      } else {
+      if (Number(apiData.season_0050_return) === seasonBigger) {
         $s2SeasonScore.find('.score-value-2 .score-value-data').addClass('increase')
+      } else {
+        $s2SeasonScore.find('.score-value-2 .score-value-data').addClass('reduce')
       }
 
-      if (apiData.year_return[0].includes('-')) {
-        $s2YearScore.find('.score-value-1 .score-value-data').addClass('reduce')
-      } else {
+      if (Number(apiData.year_return) === yearBigger) {
         $s2YearScore.find('.score-value-1 .score-value-data').addClass('increase')
+      } else {
+        $s2YearScore.find('.score-value-1 .score-value-data').addClass('reduce')
       }
 
-      if (apiData.year_0050_return[0].includes('-')) {
-        $s2YearScore.find('.score-value-2 .score-value-data').addClass('reduce')
-      } else {
+      if (Number(apiData.year_0050_return) === yearBigger) {
         $s2YearScore.find('.score-value-2 .score-value-data').addClass('increase')
+      } else {
+        $s2YearScore.find('.score-value-2 .score-value-data').addClass('reduce')
       }
   }
 
@@ -74,7 +80,8 @@ const handleAxiosGetData = () => {
   }
 
   // Call Api
-  axios.get('api/chose_robot/?format=json')
+  axios.get(' http://localhost:8000/api/chose_robot/?format=json')
+  // axios.get('api/chose_robot/?format=json')
     .then((res) => {
       const RES_DATA = res.data[0];
       console.log('RES_DATA', RES_DATA)

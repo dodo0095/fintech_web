@@ -115,6 +115,7 @@
           vertical-align: top;
 
           &:first-child {
+            display: none;
             border-right: 1px solid var(--border-color);
           }
 
