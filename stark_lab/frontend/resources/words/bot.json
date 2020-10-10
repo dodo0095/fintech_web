@@ -27,8 +27,8 @@
   "target": [
     {
       "class": "basic",
-      "titleHL": "基本面",
-      "title": "指標策略",
+      "titleHL": "Stark月營收選股策略",
+      "title": "",
       "data": [
         {
           "class": "year",
@@ -54,8 +54,8 @@
     },
     {
       "class": "technic",
-      "titleHL": "技術面",
-      "title": "指標策略",
+      "titleHL": "Stark月營收選股策略II",
+      "title": "",
       "data": [
         {
           "class": "year",

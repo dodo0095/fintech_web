@@ -80,8 +80,8 @@ const handleAxiosGetData = () => {
   }
 
   // Call Api
-  axios.get(' http://localhost:8000/api/chose_robot/?format=json')
-  // axios.get('api/chose_robot/?format=json')
+  //axios.get(' http://localhost:8000/api/chose_robot/?format=json')
+   axios.get('api/chose_robot/?format=json')
     .then((res) => {
       const RES_DATA = res.data[0];
       console.log('RES_DATA', RES_DATA)

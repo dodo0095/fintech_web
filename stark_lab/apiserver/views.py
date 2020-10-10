@@ -8,7 +8,7 @@ from rest_framework import generics
 import django_filters.rest_framework
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+import datetime
 import math
 class chose_robot(viewsets.ModelViewSet):
     """
@@ -50,17 +50,37 @@ class technicHistoryapi(viewsets.ModelViewSet):
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
         """
-        queryset = technicHistory.objects.all()
+        data = technicHistory.objects.all()
         username = self.request.query_params.get('email', None)
-
+        tableData=[]
         #username=urllib.parse.quote(username)
 
 
-        if username is not None:
-            queryset = queryset.filter(email=str(username))
-        return queryset
+        temp=0
+        today = datetime.date.today()
+#        print(today.month,type(today.month)) 
+        for i in range(len(data)):
+            #print((data[i].start_date)[0:4],(data[i].start_date)[5:7])
+            if (data[i].start_date)[0:4]==str((today.year)-1) and (data[i].start_date)[5:7]==str((today.month)) :
+                temp=i
+                break
 
 
+        print(temp,i)
+
+        for i in range(temp,len(data),1):
+            dict = {'id':data[i].id\
+                        #,'final_update':data[i].final_update\
+                        ,'stock_name':data[i].stock_name,'start_date':data[i].start_date\
+                        ,'buy_price':data[i].buy_price\
+                        ,'over_date':data[i].over_date\
+                        ,'sell_price':data[i].sell_price\
+                        ,'return_value':str(round(float(data[i].return_value),2))\
+                        ,'type':data[i].type\
+                            }
+            tableData.append(dict)
+
+        return (tableData)
 
 
 class technicCurrentapi(viewsets.ModelViewSet):
@@ -106,16 +126,37 @@ class basicHistoryapi(viewsets.ModelViewSet):
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
         """
-        queryset = basicHistory.objects.all()
+        data = basicHistory.objects.all()
         username = self.request.query_params.get('email', None)
-
+        tableData=[]
         #username=urllib.parse.quote(username)
 
 
-        if username is not None:
-            queryset = queryset.filter(email=str(username))
-        return queryset
+        temp=0
+        today = datetime.date.today()
+#        print(today.month,type(today.month)) 
+        for i in range(len(data)):
+            #print((data[i].start_date)[0:4],(data[i].start_date)[5:7])
+            if (data[i].start_date)[0:4]==str((today.year)-1) and (data[i].start_date)[5:7]==str((today.month)) :
+                temp=i
+                break
 
+
+        print(temp,i)
+
+        for i in range(temp,len(data),1):
+            dict = {'id':data[i].id\
+                        #,'final_update':data[i].final_update\
+                        ,'stock_name':data[i].stock_name,'start_date':data[i].start_date\
+                        ,'buy_price':data[i].buy_price\
+                        ,'over_date':data[i].over_date\
+                        ,'sell_price':data[i].sell_price\
+                        ,'return_value':str(round(float(data[i].return_value),2))\
+                        ,'type':data[i].type\
+                            }
+            tableData.append(dict)
+
+        return (tableData)
 
 
 
