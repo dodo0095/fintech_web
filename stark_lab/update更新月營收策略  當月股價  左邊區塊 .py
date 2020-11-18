@@ -57,7 +57,7 @@ def change_parameter(save_list):
     name=search_name(now_list[i][0]).replace("\u3000", " ")
     start_date=predict_day[:4]+"-"+predict_day[4:6]+"-"+predict_day[6:8]
     start_price=now_list[i][2]
-    over_date="2020-10-10"
+    #over_date="2020-10-10"
     current_price=now_list[i][3]
 
     now_return=(float(current_price)-float(start_price))/float(start_price)
@@ -67,7 +67,7 @@ def change_parameter(save_list):
         types="+"
     else:
         types="-"
-    return final_update,name,start_date,start_price,over_date,current_price,now_return,types
+    return final_update,name,start_date,start_price,current_price,now_return,types
 
 #查詢list in str
 #any('1101' in item for item in a)
@@ -123,8 +123,33 @@ predict_day=nowyear+predictmonth+"11"
 now_day=nowyear+nowmonth+nowday
 
 
-df_last_month=stock_value(predict_day)
-df_now=stock_value(now_day)
+#取出上市個股數值
+for i in range(100):
+    try:
+        df_last_month=stock_value(predict_day)
+        break
+    except:
+        from datetime import datetime
+        edit_time=datetime.strptime(predict_day, "%Y%m%d")
+        import datetime
+        predict_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
+        
+        
+for i in range(100):
+    try:
+        df_now=stock_value(now_day)
+        break
+    except:
+        from datetime import datetime
+        edit_time=datetime.strptime(now_day, "%Y%m%d")
+        import datetime
+        now_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
+        
+        
+
+
+
+
 
 
 nowyear2=str(int(nowyear)-1911)
@@ -133,8 +158,41 @@ predict_day2=predictyear2+"/"+predictmonth+"/"+"11"
 now_day2=nowyear2+"/"+nowmonth+"/"+nowday
 
 
-df2_last_month=stock_value2(predict_day2)
-df2_now=stock_value2(now_day2)
+
+
+#取出上櫃個股數值
+for i in range(100):
+    try:
+        print(predict_day2)
+        df2_last_month=stock_value2(predict_day2)
+        break
+    except:
+        from datetime import datetime
+        predict_day_temp=str(int(predict_day2[0:3])+1911)+predict_day2[3:]
+        edit_time=datetime.strptime(predict_day_temp, "%Y/%m/%d")
+        import datetime
+        predict_day_temp= (edit_time+datetime.timedelta(days=-1)).strftime("%Y/%m/%d")
+        predict_day_temp_year=str(int(predict_day_temp[0:4])-1911)
+        predict_day2=  predict_day_temp_year+predict_day_temp[4:]                                 
+        print(predict_day2)                               
+                                          
+for i in range(100):
+    try:
+        print(now_day2)
+        df2_now=stock_value2(now_day2)
+        break
+    except:
+        from datetime import datetime
+        now_day_temp=str(int(now_day2[0:3])+1911)+now_day2[3:]
+        
+        edit_time=datetime.strptime(now_day_temp, "%Y/%m/%d")
+        import datetime
+        now_day_temp= (edit_time+datetime.timedelta(days=-1)).strftime("%Y/%m/%d")
+        now_day_temp_year=str(int(now_day_temp[0:4])-1911)
+        now_day2=  now_day_temp_year+now_day_temp[4:]                                 
+       
+        print(now_day2)      
+
 
 
 
@@ -185,12 +243,15 @@ for i in range(len(month_predict)):
 
 
 
+over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
 
 # 更新月營收策略  當月股價
-for i in range(len(now_list)):
-    final_update,name,start_date,start_price,over_date,current_price,now_return,types=change_parameter(now_list[i]) 
-    print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
+# for i in range(len(now_list)):
+#     final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
+#     print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
 
+
+    
 
 
 
@@ -201,9 +262,17 @@ db.execute("delete from basicCurrent")
 db.commit()
 pk=1
 for i in range(len(now_list)):
-    final_update,name,start_date,start_price,over_date,current_price,now_return,types=change_parameter(now_list[i]) 
+    final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
+    over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
+    print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
     db =  sqlite3.connect('db.sqlite3')
     db.execute("INSERT INTO basicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
     db.commit()
     db.close()
     pk=pk+1
+    
+    
+    
+    
+    
+    

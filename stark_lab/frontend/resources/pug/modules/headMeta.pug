@@ -12,3 +12,9 @@ mixin headMeta(words)
       .wrapper
         if block
           block
+    script(async src="https://www.googletagmanager.com/gtag/js?id=UA-180599162-1")
+    script.
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-180599162-1');

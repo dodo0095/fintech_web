@@ -1,7 +1,7 @@
 {
   "topper": [
     {
-      "text": "文章列表",
+      "text": "精彩文章",
       "iconType": "blog",
       "url": "botBlog.html",
       "blank": false
