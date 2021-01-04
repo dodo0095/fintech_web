@@ -241,8 +241,8 @@ for i in range(len(month_predict)):
 # db.commit()
 
 
-
 over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
+
 
 # 更新月營收策略  當月股價
 # for i in range(len(now_list)):
@@ -263,6 +263,9 @@ pk=1
 for i in range(len(now_list)):
     final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
     over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
+    if (int(int(predictmonth)+1)+1)>12:
+        predictmonth="01"
+    over_date=predictyear+"-"+predictmonth+"-"+"11"
     print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
     db =  sqlite3.connect('db.sqlite3')
     db.execute("INSERT INTO technicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
