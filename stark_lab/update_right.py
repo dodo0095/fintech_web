@@ -9,6 +9,16 @@ import requests
 from io import StringIO
 
 
+
+
+#抓取現在的時間
+def take_time():
+    from time import gmtime, strftime
+    a=strftime("%Y%m%d", gmtime())
+    return a[0:4],a[4:6],a[6:8]
+    
+    
+
 # 抓上市公司股價
 def stock_value(datestr):
     #把當月11號的台股資訊 更新
@@ -57,7 +67,7 @@ def change_parameter(save_list):
     name=search_name(now_list[i][0]).replace("\u3000", " ")
     start_date=predict_day[:4]+"-"+predict_day[4:6]+"-"+predict_day[6:8]
     start_price=now_list[i][2]
-    #over_date="2020-10-10"
+    
     current_price=now_list[i][3]
 
     now_return=(float(current_price)-float(start_price))/float(start_price)
@@ -95,7 +105,12 @@ def search_name(name):
     return company
 
 
-txt = input('請輸入你文件的名稱：')
+
+with open('data.txt', 'r') as f:
+    myNames = [line.strip() for line in f]
+    
+txt=myNames[0]+"-2"
+#txt = input('請輸入你文件的名稱：')
 
 ## Open file   把當月份的代號txt  拿出來
 doc_name=txt+".txt"
@@ -111,15 +126,21 @@ while line:
 fp.close()
 
 
-nowyear = input('請輸入今天的年份：')
-nowmonth = input('請輸入今天的月份：')
-nowday = input('請輸入今天的日期：')
+
+nowyear,nowmonth,nowday=take_time()
 
 
-predictyear = input('請輸入預測的年份：')
-predictmonth = input('請輸入預測的月份')
+# nowyear = input('請輸入今天的年份：')
+# nowmonth = input('請輸入今天的月份：')
+# nowday = input('請輸入今天的日期：')
 
-predict_day=nowyear+predictmonth+"11"
+predictyear=myNames[0][0:4]
+predictmonth=myNames[0][4:6]
+
+#predictyear = input('請輸入預測的年份：')
+#predictmonth = input('請輸入預測的月份：')
+
+predict_day=predictyear+predictmonth+"11"
 now_day=nowyear+nowmonth+nowday
 
 
@@ -129,11 +150,12 @@ for i in range(100):
         df_last_month=stock_value(predict_day)
         break
     except:
+        
         from datetime import datetime
         edit_time=datetime.strptime(predict_day, "%Y%m%d")
         import datetime
         predict_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
-        
+        print(predict_day)
         
 for i in range(100):
     try:
@@ -144,7 +166,7 @@ for i in range(100):
         edit_time=datetime.strptime(now_day, "%Y%m%d")
         import datetime
         now_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
-        
+        print(now_day)
         
 
 
@@ -241,9 +263,8 @@ for i in range(len(month_predict)):
 # db.commit()
 
 
-
-
 over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
+
 
 # 更新月營收策略  當月股價
 # for i in range(len(now_list)):
@@ -258,21 +279,20 @@ over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
 # 更新月營收策略  當月股價
 db =  sqlite3.connect('db.sqlite3')
 #db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
-db.execute("delete from basicCurrent")
+db.execute("delete from technicCurrent")
 db.commit()
 pk=1
 for i in range(len(now_list)):
     final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
-    over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
+    #print(predictmonth)
+    if predictmonth=="12":
+        predictmonth="01"  
+        over_date=predictyear+"-"+str(int(predictmonth))+"-"+"11" 
+    else:
+        over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11" 
     print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
     db =  sqlite3.connect('db.sqlite3')
-    db.execute("INSERT INTO basicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
+    db.execute("INSERT INTO technicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
     db.commit()
     db.close()
     pk=pk+1
-    
-    
-    
-    
-    
-    

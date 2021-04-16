@@ -53,4 +53,7 @@ urlpatterns = [
     url(r'^api/basicCurrent/',views.basicCurrentapi2),
     url(r'^api/technicCurrent/',views.technicCurrentapi2),
 
+
+    url(r'^api/news_get/(?P<search>)$',views.news_get),
+    url(r'^api/sentiment_score/(?P<search>)$',views.sentiment_score),
 ]

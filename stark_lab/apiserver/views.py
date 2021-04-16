@@ -10,6 +10,47 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import datetime
 import math
+import sqlite3
+import re
+
+
+
+def sent_dict():
+    #輸入情感字典
+    with open('NTUSD/negatives整理.txt', mode='r', encoding='utf-8') as f:
+        negs = f.readlines()
+    with open('NTUSD/positives整理.txt', mode='r', encoding='utf-8') as f:
+        poss = f.readlines()
+    pos = []
+    for i in poss:
+        a=re.findall(r'\w+',i) 
+        pos.extend(a)
+    neg = []
+    for i in negs:
+        a=re.findall(r'\w+',i) 
+        neg.extend(a)
+    return pos,neg
+
+def fin_dict():
+    #輸入情感字典
+    with open('NTUSD/negatives金融.txt', mode='r', encoding='utf-8') as f:
+        negs = f.readlines()
+    with open('NTUSD/positives金融.txt', mode='r', encoding='utf-8') as f:
+        poss = f.readlines()
+    pos_fin = []
+    for i in poss:
+        a=re.findall(r'\w+',i) 
+        pos_fin.extend(a)
+    neg_fin = []
+    for i in negs:
+        a=re.findall(r'\w+',i) 
+        neg_fin.extend(a)
+    return pos_fin,neg_fin
+
+
+
+
+
 class chose_robot(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -308,3 +349,163 @@ class articleapi2(viewsets.ModelViewSet):
         if username is not None:
             queryset = queryset.filter(title=str(title))
         return queryset
+
+@api_view(['GET'])
+def news_get(request,search):
+    search = request.query_params.get('search', None)
+    #拿ptt資料
+    db =  sqlite3.connect('stock.db')
+    cursor = db.execute("SELECT * from PTT_NEWS where title like ? ", ('%{}%'.format(search),))
+    data=cursor.fetchall()
+    db.close()
+    #print(data[0][0])
+    ptt=[]
+    for i in range(10):
+        temp = {'value':data[i][2]\
+                    #,'final_update':data[i].final_update\
+                    ,'link':data[i][3]
+                           }
+        ptt.append(temp)
+
+    #拿 google 資料
+    db =  sqlite3.connect('stock.db')
+    cursor = db.execute("SELECT * from Google_NEWS where Title like ? ", ('%{}%'.format(search),))
+    data=cursor.fetchall()
+    db.close()
+    #print(data[0][0])
+    google=[]
+    for i in range(10):
+        temp = {'value':data[i][3]\
+                    #,'final_update':data[i].final_update\
+                    ,'link':"https://"+data[i][4]
+                           }
+        google.append(temp)
+
+
+    #拿 yahoo 資料
+    db =  sqlite3.connect('stock.db')
+    cursor = db.execute("SELECT * from Yahoo_NEWS where Title like ? ", ('%{}%'.format(search),))
+    data=cursor.fetchall()
+    db.close()
+    #print(data[0][0])
+    yahoo=[]
+    for i in range(10):
+        temp = {'value':data[i][3]\
+                    #,'final_update':data[i].final_update\
+                    ,'link':data[i][5]
+                           }
+        yahoo.append(temp)
+
+
+    news={"google":google,"yahoo":yahoo,"ptt":ptt}
+    dict_final={"news":news,"emotionValue": 1}
+    return Response(dict_final)
+
+
+@api_view(['GET'])
+def sentiment_score(request,search):
+    search = request.query_params.get('search', None)
+
+    #pos,neg=sent_dict()
+    pos,neg=fin_dict()
+
+    #日期範圍
+    time_range=datetime.datetime.now()+datetime.timedelta(days=-14)
+    time_range=time_range.strftime("%Y-%m-%d")
+    db =  sqlite3.connect('stock.db')
+    cursor = db.execute("SELECT * from PTT_NEWS where title like ? ", ('%{}%'.format(search),))
+    data=cursor.fetchall()
+    db.close()
+    #print(data[0][0])
+    data_all=[]
+    content_all=[]
+    href_all=[]
+    title_all=[]
+    for i in range(len(data)-1,1,-1):
+        if data[i][0][0:10]>time_range:
+            #data_all.append(data[i])  
+            content_all.append(data[i][5])
+            href_all.append(data[i][3])
+            title_all.append(data[i][2])
+
+        if data[i][0][0:10]<time_range:
+            break
+
+
+    #日期範圍
+    time_range=datetime.datetime.now()+datetime.timedelta(days=-14)
+    time_range=time_range.strftime("%Y%m%d")
+
+    #拿 google 資料
+    db =  sqlite3.connect('stock.db')
+    cursor = db.execute("SELECT * from Google_NEWS where Title like ? ", ('%{}%'.format(search),))
+    data=cursor.fetchall()
+    db.close()
+    #print(data[0][0])
+    google=[]
+    for i in range(len(data)-1,1,-1):
+        if str(data[i][0])>time_range:
+            #data_all.append(data[i])  
+            content_all.append(data[i][5])
+            href_all.append(data[i][4])
+            title_all.append(data[i][3])
+        if str(data[i][0])<time_range:
+            break
+
+
+
+    #拿取正向  負向自詞
+    positiveValue=[]
+    positiveNews=[]
+    negativeValue=[]
+    negativeNews=[]
+    count=0
+    allpos=[]
+    allneg=[]
+    for i in range(len(content_all)):
+        for j in range(len(pos)):
+            if pos[j] in str(content_all[i]):
+                temp = {'value':title_all[i],'link':href_all[i]}
+                count=1
+                allpos.append(pos[j])
+        if count ==1: 
+            positiveNews.append(temp)
+            count=0
+
+
+
+    for i in range(len(content_all)):
+        for j in range(len(neg)):
+            if neg[j] in str(content_all[i]):
+                temp = {'value':title_all[i],'link':href_all[i]}
+                count=1
+                allneg.append(neg[j])
+        if count ==1: 
+            negativeNews.append(temp)
+            count=0
+
+    #把文字數量算出來
+    #正面
+    l1 = allpos
+    set01 = set(l1)
+    dict01 = {item: l1.count(item) for item in set01}
+    sorted_x = sorted(dict01.items(), key=lambda x: x[1], reverse=True)
+    #排序
+    for i in range(len(sorted_x)):
+        temp={"text":sorted_x[i][0],"value":sorted_x[i][1]}
+        positiveValue.append(temp)
+
+    #負面
+    l1 = allneg
+    set01 = set(l1)
+    dict01 = {item: l1.count(item) for item in set01}
+    sorted_x = sorted(dict01.items(), key=lambda x: x[1], reverse=True)
+    #排序
+    for i in range(len(sorted_x)):
+        temp={"text":sorted_x[i][0],"value":sorted_x[i][1]}
+        negativeValue.append(temp)
+
+    chartBar={"positiveValue":positiveValue,"positiveNews":positiveNews,"negativeValue":negativeValue,"negativeNews":negativeNews}
+    final={"chartBar":chartBar}
+
+    return Response(final)

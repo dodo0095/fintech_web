@@ -10,7 +10,6 @@ from io import StringIO
 
 
 
-
 #抓取現在的時間
 def take_time():
     from time import gmtime, strftime
@@ -18,7 +17,7 @@ def take_time():
     return a[0:4],a[4:6],a[6:8]
     
     
-
+    
 # 抓上市公司股價
 def stock_value(datestr):
     #把當月11號的台股資訊 更新
@@ -105,11 +104,10 @@ def search_name(name):
     return company
 
 
-
 with open('data.txt', 'r') as f:
     myNames = [line.strip() for line in f]
     
-txt=myNames[0]+"-2"
+txt=myNames[0]
 #txt = input('請輸入你文件的名稱：')
 
 ## Open file   把當月份的代號txt  拿出來
@@ -279,7 +277,7 @@ over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
 # 更新月營收策略  當月股價
 db =  sqlite3.connect('db.sqlite3')
 #db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
-db.execute("delete from technicCurrent")
+db.execute("delete from basicCurrent")
 db.commit()
 pk=1
 for i in range(len(now_list)):
@@ -292,7 +290,7 @@ for i in range(len(now_list)):
         over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11" 
     print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
     db =  sqlite3.connect('db.sqlite3')
-    db.execute("INSERT INTO technicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
+    db.execute("INSERT INTO basicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
     db.commit()
     db.close()
     pk=pk+1
