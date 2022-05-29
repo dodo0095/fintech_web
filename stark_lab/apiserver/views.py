@@ -315,7 +315,7 @@ class articleapi(viewsets.ModelViewSet):
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
         """
-        queryset = article_1.objects.all()
+        queryset = article_1.objects.all().order_by('-id')
         username = self.request.query_params.get('title', None)
 
         #username=urllib.parse.quote(username)
@@ -340,7 +340,7 @@ class articleapi2(viewsets.ModelViewSet):
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
         """
-        queryset = article_2.objects.all()
+        queryset = article_2.objects.all().order_by('-id')
         username = self.request.query_params.get('title', None)
 
         #username=urllib.parse.quote(username)
@@ -353,6 +353,19 @@ class articleapi2(viewsets.ModelViewSet):
 @api_view(['GET'])
 def news_get(request,search):
     search = request.query_params.get('search', None)
+    #情緒字典
+    
+    #pos,neg=fin_dict()
+    pos,neg=sent_dict()
+
+    #日期範圍
+    time_range=datetime.datetime.now()+datetime.timedelta(days=-5)
+    time_range=time_range.strftime("%Y-%m-%d")
+
+
+    content_all=[]
+    content_all_date=[]
+
     #拿ptt資料
     db =  sqlite3.connect('stock.db')
     cursor = db.execute("SELECT * from PTT_NEWS where title like ? ", ('%{}%'.format(search),))
@@ -360,45 +373,118 @@ def news_get(request,search):
     db.close()
     #print(data[0][0])
     ptt=[]
-    for i in range(10):
-        temp = {'value':data[i][2]\
-                    #,'final_update':data[i].final_update\
-                    ,'link':data[i][3]
-                           }
+
+    for i in range(len(data)-1,1,-1):
+        if data[i][0][0:10]>time_range:
+            temp = {'value':data[i][2]\
+                        #,'final_update':data[i].final_update\
+                        ,'link':data[i][3]\
+                        ,"date":data[i][0][0:10]}
+            content_all.append(data[i][5])
+        if data[i][0][0:10]<time_range:
+            break
+
         ptt.append(temp)
+
+
+    #日期範圍
+    time_range=datetime.datetime.now()+datetime.timedelta(days=-5)
+    time_range=time_range.strftime("%Y%m%d")
 
     #拿 google 資料
     db =  sqlite3.connect('stock.db')
     cursor = db.execute("SELECT * from Google_NEWS where Title like ? ", ('%{}%'.format(search),))
     data=cursor.fetchall()
     db.close()
-    #print(data[0][0])
+
+
     google=[]
-    for i in range(10):
-        temp = {'value':data[i][3]\
-                    #,'final_update':data[i].final_update\
-                    ,'link':"https://"+data[i][4]
-                           }
+    for i in range(len(data)-1,1,-1):
+        if str(data[i][0])>time_range:
+            temp = {'value':data[i][3]\
+                        #,'final_update':data[i].final_update\
+                        ,'link':data[i][4]\
+                        ,"date":data[i][0]}
+
+            content_all.append(data[i][5])
+            #content_all_date.append(data[i][0])
+        if str(data[i][0])<time_range:
+
+            break
+
         google.append(temp)
 
+
+
+
+    # #日期範圍
+    # time_range=datetime.datetime.now()+datetime.timedelta(days=-14)
+    # time_range=time_range.strftime("%Y-%m-%d")
 
     #拿 yahoo 資料
     db =  sqlite3.connect('stock.db')
     cursor = db.execute("SELECT * from Yahoo_NEWS where Title like ? ", ('%{}%'.format(search),))
     data=cursor.fetchall()
     db.close()
-    #print(data[0][0])
+
     yahoo=[]
-    for i in range(10):
-        temp = {'value':data[i][3]\
-                    #,'final_update':data[i].final_update\
-                    ,'link':data[i][5]
-                           }
+    for i in range(len(data)-1,1,-1):
+        if str(data[i][0])>time_range:
+            temp = {'value':data[i][3]\
+                        #,'final_update':data[i].final_update\
+                        ,'link':data[i][5]\
+                        ,"date":data[i][0]}
+            # content_all.append(data[i][4])
+        if str(data[i][0])<time_range:
+            break
+
         yahoo.append(temp)
+
+    #print(yahoo)
+    if len(google)<1:
+        google="false"
+    if len(yahoo)<1:
+        yahoo="false"
+    if len(ptt)<1:
+        ptt="false"
+
+
+    pos_count=0
+    neg_count=0
+    this_paper_pos=0
+    this_paper_neg=0
+
+    for i in range(len(content_all)):
+        for j in range(len(pos)):
+            if pos[j] in str(content_all[i]):
+                #print(time_range,content_all_date[i],(int(content_all_date[i])-int(time_range)))
+                this_paper_pos=this_paper_pos+1
+        for j in range(len(neg)):
+            if neg[j] in str(content_all[i]):
+                this_paper_neg=this_paper_neg+1
+
+        if this_paper_pos >this_paper_neg: 
+            pos_count=pos_count+1
+        else:
+            neg_count=neg_count+1
+        this_paper_pos=0
+        this_paper_neg=0
+
+
+    
+    neg_score= ((neg_count)/(pos_count+neg_count))*100
+    pos_score= ((pos_count)/(pos_count+neg_count))*100
+
+    if neg_score>pos_score:
+        score=pos_score
+    else:
+        score=neg_score
+
+    print("score",neg_score,pos_score)
 
 
     news={"google":google,"yahoo":yahoo,"ptt":ptt}
-    dict_final={"news":news,"emotionValue": 1}
+    dict_final={"news":news,"emotionValue": round(score)}
     return Response(dict_final)
 
 
@@ -406,9 +492,9 @@ def news_get(request,search):
 def sentiment_score(request,search):
     search = request.query_params.get('search', None)
 
+    pos,neg=sent_dict()
+    #pos,neg=fin_dict()
     #pos,neg=sent_dict()
-    pos,neg=fin_dict()
-
     #日期範圍
     time_range=datetime.datetime.now()+datetime.timedelta(days=-14)
     time_range=time_range.strftime("%Y-%m-%d")
@@ -421,13 +507,14 @@ def sentiment_score(request,search):
     content_all=[]
     href_all=[]
     title_all=[]
+    date_all=[]
     for i in range(len(data)-1,1,-1):
         if data[i][0][0:10]>time_range:
             #data_all.append(data[i])  
             content_all.append(data[i][5])
             href_all.append(data[i][3])
             title_all.append(data[i][2])
-
+            date_all.append(data[i][0][0:10])
         if data[i][0][0:10]<time_range:
             break
 
@@ -449,40 +536,45 @@ def sentiment_score(request,search):
             content_all.append(data[i][5])
             href_all.append(data[i][4])
             title_all.append(data[i][3])
+            date_all.append(data[i][0])
         if str(data[i][0])<time_range:
             break
-
-
 
     #拿取正向  負向自詞
     positiveValue=[]
     positiveNews=[]
     negativeValue=[]
     negativeNews=[]
-    count=0
+    pos_count=0
+    neg_count=0
     allpos=[]
     allneg=[]
+
+
     for i in range(len(content_all)):
         for j in range(len(pos)):
             if pos[j] in str(content_all[i]):
-                temp = {'value':title_all[i],'link':href_all[i]}
-                count=1
+                temp = {'value':title_all[i],'link':href_all[i],"date":date_all[i]}
+                pos_count=pos_count+1
                 allpos.append(pos[j])
-        if count ==1: 
-            positiveNews.append(temp)
-            count=0
 
-
-
-    for i in range(len(content_all)):
         for j in range(len(neg)):
             if neg[j] in str(content_all[i]):
-                temp = {'value':title_all[i],'link':href_all[i]}
-                count=1
+                temp = {'value':title_all[i],'link':href_all[i],"date":date_all[i]}
+                neg_count=neg_count+1
                 allneg.append(neg[j])
-        if count ==1: 
+
+        if pos_count >neg_count: 
+            positiveNews.append(temp)
+            pos_count=0
+            neg_count=0
+        elif neg_count >pos_count:
             negativeNews.append(temp)
-            count=0
+            pos_count=0
+            neg_count=0
+
+
+
 
     #把文字數量算出來
     #正面
@@ -504,6 +596,16 @@ def sentiment_score(request,search):
     for i in range(len(sorted_x)):
         temp={"text":sorted_x[i][0],"value":sorted_x[i][1]}
         negativeValue.append(temp)
+
+    if len(positiveValue)<1:
+        positiveValue="false"
+    if len(positiveNews)<1:
+        positiveNews="false"
+    if len(negativeNews)<1:
+        negativeNews="false"
+    if len(negativeValue)<1:
+        negativeValue="false"
+
 
     chartBar={"positiveValue":positiveValue,"positiveNews":positiveNews,"negativeValue":negativeValue,"negativeNews":negativeNews}
     final={"chartBar":chartBar}
