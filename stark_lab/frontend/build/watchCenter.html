@@ -1,0 +1,169 @@
+<!DOCTYPE html><!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,股票分析">
+    <meta name="description" content="2020 年夏天，StarkLab開張了！由幾個志同道合的朋友湊在一起，共同研究股票市場並用機器學習來做量化投資，希望透過分享自己長時間的研究成果，創造對程式交易有興趣的投資朋友一起討論成長的園地。股票的英文是stock，音近「史塔克」，因此我們就取名為「史塔克研究室StarkLab」我們深信在這個資訊爆炸的時代，大數據或機器學習這些名詞不該只是個名詞，而是能真正運用在生活中。因此，在這個平台我們不僅推廣機器學習的科普知識，同時也運用Python創造屬於StarkLab自己的投資策略，並且不定時撰寫金融投資相關文章、分析使用AI人工智慧跑出來的個股優劣勢。 如同華爾街最資深也最成功的經驗老手之一威廉‧歐尼爾（William J.O’Neil）說過：「不要懵懵懂懂的隨意買股票，要在投資前紮實的做一些功課。」投資市場博大精深，若能透過科學方法驗證、不盲目操作，一定會有不同的收穫。 不管您是投資新手或投資老手，都歡迎追蹤我們、與我們一起討論或給我們建議回饋喲：） 非常歡迎大家來看我們的資訊 也歡迎大家收聽我們Podcast">
+    <link href="images/favicon.ico" rel="shortcut icon">
+    <title>StarkLab | 選股機器人</title>
+  <link href="/static/css/watchCenter.css" rel="stylesheet"></head>
+  <body>
+    <div class="wrapper">
+      <div class="topper">
+        <div class="topper-content">
+          <div class="topper-mobile-opener"></div><a class="topper-logo" href="#">StartLab</a>
+          <div class="topper-navbar"><a href="botBlog.html" target="_self">
+              <div><i class="icons icons-blog"></i></div><span class="font-regular">精彩文章</span></a><a href="bot.html" target="_self">
+              <div><i class="icons icons-robot"></i></div><span class="font-regular">選股機器人</span></a><a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">
+              <div><i class="icons icons-feedback"></i></div><span class="font-regular">Podcast</span></a><a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">
+              <div><i class="icons icons-fb"></i></div><span class="font-regular">FACEBOOK</span></a><a href="botAbout.html" target="_self">
+              <div><i class="icons icons-brain"></i></div><span class="font-regular">關於我</span></a><a class="js-selected" href="watchCenter.html" target="_self">
+              <div><i class="icons icons-brain"></i></div><span class="font-regular">風向觀測站</span></a>
+          </div>
+        </div>
+      </div>
+      <main class="container">
+        <!-- 區塊01-->
+        <section class="sec1">
+          <div class="s1_block"><a class="s1_block_logo" href=""></a>
+            <input class="s1_inputer" type="text" placeholder="輸入股票名稱或代號">
+            <div class="s1_rwd_search searchBtn">搜尋</div>
+          </div>
+          <div class="s1_search searchBtn">搜尋</div>
+        </section>
+        <!-- 5/4新增介紹及功能說明-->
+        <section class="description">
+          <div class="description_introduce">
+            <h1>史塔克實驗室新功能<br>風向觀測站</h1><span><br>網路上時常有眾多的新聞及輿論<br>這些新聞輿論資訊都會反映現在股價的短暫趨勢<br>而我們使用文字探勘的技術<br>把一些新聞資源整理到網頁上<br>並讓大家可以簡單的看出現在市場上情緒的風向往哪邊吹<br>在上面搜尋欄位輸入你想查詢的關鍵字(公司名稱)<br>來試用看看我們的新功能吧！</span>
+          </div>
+          <div class="description_introduce_s3">
+            <h1>新聞情緒溫度計</h1><a class="description_introduce_s3_img"></a>
+            <div class="description_introduce_s3_text"><span><br>從PTT、Google、Yahoo的資料觀察<br>二週內新聞來源對'關鍵字'的情緒風向是什麼？</span></div>
+          </div>
+          <div class="description_introduce_s4">
+            <h1> 看多、看空資料分析</h1><a class="description_introduce_s4_img"></a>
+            <div class="description_introduce_s4_text"><span><br>使用文字雲 分析 抓出來的資料<br>視覺化正面,負面的用詞給大家觀察</span></div>
+          </div>
+        </section>
+        <!-- 區塊02-->
+        <section class="sec sec2 js_hide">
+          <div class="s2_block">
+            <nav class="s2_block_nav s2_nav1 js_active" data-mode="ptt" data-index="0">PTT</nav>
+            <nav class="s2_block_nav s2_nav2" data-mode="google" data-index="1">Google</nav>
+            <nav class="s2_block_nav s2_nav3" data-mode="yahoo" data-index="2">Yahoo</nav>
+          </div>
+        </section>
+        <!-- 區塊03-->
+        <section class="sec sec3 js_hide">
+          <div class="s3_block">
+            <div class="s3_block_left">
+              <h1>各家新聞 News</h1>
+              <ul class="s3_block_left_ul"></ul>
+              <div class="apiNoData eachNews"><span>暫無資料</span></div>
+              <h1 class="rwd_s3_block_left_h1">情緒溫度計(看空0-100看多)</h1>
+            </div>
+            <div class="s3_block_right">
+              <h1 class="rwd_s3_block_right_h1">情緒溫度計(看空0-100看多)</h1>
+              <div class="circle"></div>
+              <div class="outSideCircle">
+                <div class="bar bar0"><span>0</span></div>
+                <div class="bar bar10"><span>10</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar20"><span>20</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar30"><span>30</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar40"><span>40</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar50"><span>50</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar60"><span>60</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar70"><span>70</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar80"><span>80</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar90"><span>90</span>
+                  <div class="line"></div>
+                </div>
+                <div class="bar bar100"><span>100</span></div>
+              </div>
+              <div class="circleBg">
+                <div class="pointer"></div>
+                <div class="pointerHead"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!--區塊04-->
+        <section class="sec sec4 js_hide">
+          <div class="s4_block">
+            <div class="s4_block_left">
+              <div class="s4_block_left_innerBox">
+                <h1>看多情緒用詞 文字雲及長條圖</h1>
+                <div class="s4_block_left_box1">
+                  <div class="textCloud1" id="s4_block_left_box1_cloud1"></div>
+                </div>
+                <div class="s4_block_left_box2">
+                  <canvas id="s4_block_left_box2_barChart1"></canvas>
+                </div>
+                <div class="apiNoData positiveNews"><span>查無資料</span></div>
+              </div>
+              <div class="s4_block_left_box3">
+                <h1>看多文章列表</h1>
+                <ul class="s4_block_left_box3_ul s4_block_positive"></ul>
+                <div class="apiNoData positiveNews"><span>查無資料</span></div>
+              </div>
+            </div>
+            <div class="s4_block_right">
+              <div class="s4_block_right_innerBox">
+                <h1>看空情緒用詞 文字雲及長條圖</h1>
+                <div class="s4_block_right_box1">
+                  <div class="textCloud2" id="s4_block_right_box1_cloud2"></div>
+                </div>
+                <div class="s4_block_right_box2">
+                  <canvas id="s4_block_right_box2_barChart2"></canvas>
+                </div>
+                <div class="apiNoData negativeNews"><span>查無資料</span></div>
+              </div>
+              <div class="s4_block_right_box3">
+                <h1>看空文章列表</h1>
+                <ul class="s4_block_right_box3_ul s4_block_negative"></ul>
+                <div class="apiNoData negativeNews"><span>查無資料</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="footer">
+        <div class="footer-content"><a class="footer-logo" href="#"></a>
+          <div class="footer-main">
+            <ul class="footer-sitemap">
+              <li><a href="#">理念</a></li>
+              <li><a href="#">指標紅綠燈</a></li>
+              <li><a href="#">選股機器人</a></li>
+              <li><a href="#">風險評估機器</a></li>
+              <li><a href="#">意見回饋</a></li>
+            </ul><span class="footer-copyright">Copyright © 2020 史塔克實驗室 版權所有.</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  <script type="text/javascript" src="/static/js/watchCenter.js"></script></body>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-180599162-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-180599162-1');
+  </script>
+</html>
