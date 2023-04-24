@@ -46,8 +46,10 @@ urlpatterns = [
 
     path('botTechnicHistory.html', TemplateView.as_view(template_name="botTechnicHistory.html")),
     path('botTechnicCurrent.html', TemplateView.as_view(template_name="botTechnicCurrent.html")),
+    path('watchCenter.html', TemplateView.as_view(template_name="watchCenter.html")),
     #path('chose_robot/', views.chose_robot),
     path('api/', include(router.urls)),
+
 
 
     url(r'^api/basicCurrent/',views.basicCurrentapi2),
@@ -56,4 +58,8 @@ urlpatterns = [
 
     url(r'^api/news_get/(?P<search>)$',views.news_get),
     url(r'^api/sentiment_score/(?P<search>)$',views.sentiment_score),
+
+    url(r'^find_house_data/',views.find_house_data),
+
+
 ]
