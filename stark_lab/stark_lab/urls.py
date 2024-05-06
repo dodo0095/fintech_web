@@ -51,9 +51,13 @@ urlpatterns = [
     path('api/', include(router.urls)),
 
 
-
+    #現在的選股
     url(r'^api/basicCurrent/',views.basicCurrentapi2),
     url(r'^api/technicCurrent/',views.technicCurrentapi2),
+
+    #過去的選股
+    url(r'^api/technihistory/',views.technihistory2),
+
 
 
     url(r'^api/news_get/(?P<search>)$',views.news_get),

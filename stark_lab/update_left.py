@@ -7,80 +7,157 @@ import time
 import datetime
 import requests
 from io import StringIO
-
-
+import yfinance as yf
+from datetime import datetime, timedelta
 
 #抓取現在的時間
 def take_time():
     from time import gmtime, strftime
     a=strftime("%Y%m%d", gmtime())
     return a[0:4],a[4:6],a[6:8]
-    
-    
-    
-# 抓上市公司股價
-def stock_value(datestr):
-    #把當月11號的台股資訊 更新
-    #datestr = '20200911'
-    # 下載股價
-    r = requests.post('https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date=' + datestr + '&type=ALL')
-    # 整理資料，變成表格
-    df = pd.read_csv(StringIO(r.text.replace("=", "")), 
-                header=["證券代號" in l for l in r.text.split("\n")].index(True)-1)
-    # 整理一些字串：
-    df = df.apply(lambda s: pd.to_numeric(s.astype(str).str.replace(",", "").replace("+", "1").replace("-", "-1"), errors='coerce'))
-    # 顯示出來
-    #df.head()
-    return df
 
-
-
-
-#抓上櫃公司股價
-def stock_value2(datestr):
-    link = 'http://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_download.php?l=zh-tw&d='+datestr+'&s=0,asc,0'
-    r = requests.get(link)
-    r.ok
-    lines = r.text.replace('\r', '').split('\n')
-    df = pd.read_csv(StringIO("\n".join(lines[3:])), header=None)
-    #df.head()
-    df.columns = list(map(lambda l: l.replace(' ',''), lines[2].split(',')))
-    #df.index = df['代號']
-    #df = df.drop(['代號'], axis=1)
-    #df.head()
-    return df
-
-#拿上市收盤價資料
-def take_value(df,id):
-    take_info=df[pd.to_numeric(df['證券代號'], errors='coerce') == id]
-    value=float(take_info["收盤價"].values)
-    return value
-#拿上櫃收盤價資料
-def take_value2(df,id):
-    take_info=df[pd.to_numeric(df['代號'], errors='coerce') == id]
-    value=float(take_info["收盤"].values)
-    return value
-
-def change_parameter(save_list):
-    final_update=now_day[:4]+"-"+now_day[4:6]+"-"+now_day[6:8]
-    name=search_name(now_list[i][0]).replace("\u3000", " ")
-    start_date=predict_day[:4]+"-"+predict_day[4:6]+"-"+predict_day[6:8]
-    start_price=now_list[i][2]
-    
-    current_price=now_list[i][3]
-
-    now_return=(float(current_price)-float(start_price))/float(start_price)
-    now_return= round(now_return*100,2)
-
-    if float(now_return)>0:
-        types="+"
+## Open file   把當月份的代號txt  拿出來
+def take_month_predict():
+    nowyear,nowmonth,nowday=take_time()
+    if int(nowday) > 11:
+        pass
     else:
-        types="-"
-    return final_update,name,start_date,start_price,current_price,now_return,types
+        if int(nowmonth)==1:
+            nowmonth=12
+            nowyear=int(nowyear)-1
+        else:
+            nowmonth=int(nowmonth)-1
+    nowmonth=str(nowmonth)
+    if len((nowmonth))==1:
+        nowmonth="0"+nowmonth
+    nowyear=str(nowyear)
+    
+    doc_name=nowyear+nowmonth+".txt"
+    fp = open(doc_name, "r")
+    line = fp.readline()
+    month_predict=[]
+    ## 用 while 逐行讀取檔案內容，直至檔案結尾
+    while line:
+    #    print (line)
+        line=line.replace(" ","")
+        month_predict.append(line.replace("\n",""))
+        line = fp.readline()
+    fp.close()
+    return month_predict
+    
+## Open file   指定 月份的代號txt  拿出來
+def take_month_predict2(filename):
+    filename=str(filename)
+    doc_name= filename +".txt"   #修改這邊就好了
+    
+    fp = open(doc_name, "r")
+    line = fp.readline()
+    month_predict=[]
+    ## 用 while 逐行讀取檔案內容，直至檔案結尾
+    while line:
+    #    print (line)
+        line=line.replace(" ","")
+        month_predict.append(line.replace("\n",""))
+        line = fp.readline()
+    fp.close()
+    return month_predict
 
-#查詢list in str
-#any('1101' in item for item in a)
-#查詢list in str
+
+
+
+## 更新最新的txt
+month_predict=take_month_predict()
+## Open file   指定 月份的代號txt  拿出來
+# take_month_predict2(202402)
+
+
+
+#取得初始報價 ， 當天報價也可以用這個function
+
+def get_start_price(year,month,day,stock_symbol):
+
+    # 獲取台積電股票
+    #stock_symbol = "2330.tw"  # 台積電在 Yahoo Finance 的代號
+    stock = yf.Ticker(stock_symbol)
+
+    # 設定目標日期
+    # 指定某個月的11號
+    target_date = datetime(year=year, month=month, day=day)
+
+    # 獲取指定日期的股票歷史資料
+    # 使用 period="1d" 表示只要那一天的資料
+    stock_history = stock.history(start=target_date.strftime("%Y-%m-%d"), end=(target_date + timedelta(days=1)).strftime("%Y-%m-%d"))
+
+    # 確保獲得資料
+    if not stock_history.empty:
+        # 打印收盤價
+        closing_price = stock_history['Close'][0]
+        #print(stock_symbol,f"這支股票在 {target_date.strftime('%Y年%m月%d日')} 的收盤價為: {closing_price}")
+        return round(closing_price,2),target_date.strftime("%Y-%m-%d")
+    else:
+
+        print("未找到指定日期的資料 往前一天")
+        target_date = target_date + timedelta(days=-1)
+        year_1 = target_date.year
+        month_1 = target_date.month
+        day_1 = target_date.day
+        get_start_price(year_1,month_1,day_1,stock_symbol)
+    
+        
+#取得最後報價
+
+def get_final_price(year,month,day,stock_symbol):
+
+    # 獲取台積電股票
+    #stock_symbol = "2330.tw"  # 台積電在 Yahoo Finance 的代號
+    stock = yf.Ticker(stock_symbol)
+
+    # 設定目標日期
+    # 指定某個月的11號
+    target_date = datetime(year=year, month=month, day=day)
+
+    # 獲取指定日期的股票歷史資料
+    # 使用 period="1d" 表示只要那一天的資料
+    stock_history = stock.history(start=target_date.strftime("%Y-%m-%d"), end=(target_date + timedelta(days=1)).strftime("%Y-%m-%d"))
+
+    # 確保獲得資料
+    if not stock_history.empty:
+        # 打印收盤價
+        closing_price = stock_history['Close'][0]
+        #print(stock_symbol,f"這支股票在 {target_date.strftime('%Y年%m月%d日')} 的收盤價為: {closing_price}")
+        return round(closing_price,2),target_date.strftime("%Y-%m-%d")
+    else:
+
+        print("未找到指定日期的資料 往後一天")
+        target_date = target_date + timedelta(days=1)
+        year_1 = target_date.year
+        month_1 = target_date.month
+        day_1 = target_date.day
+        get_final_price(year_1,month_1,day_1,stock_symbol)
+    
+        
+
+
+#取得預測結束日期
+def get_over_date():
+    nowyear,nowmonth,nowday=take_time()
+    if int(nowday) > 11:
+        pass
+    else:
+        if int(nowmonth)==1:
+            nowmonth=12
+            nowyear=int(nowyear)-1
+        else:
+            nowmonth=int(nowmonth)-1
+    predictmonth=str(nowmonth)
+    predictyear=str(nowyear)
+    
+    over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
+    
+    return over_date
+
+
+#對應公司名稱
 def search_name(name):
     company=[]
     df = pd.read_csv('公司/上市.csv')  
@@ -89,208 +166,121 @@ def search_name(name):
     b=df["有價證券代號及名稱"].tolist()
     df = pd.read_csv('公司/興櫃.csv')  
     c=df["有價證券代號及名稱"].tolist()
-    for i in a:
-        if i.__contains__(name) :
-            company=i
-            #print(i, " is containing")
-    for i in b:
-        if i.__contains__(name) :
-            company=i
-            #print(i, " is containing")
-    for i in c:
-        if i.__contains__(name) :
-            company=i
-            #print(i, " is containing")
-    return company
+    try:
+        for i in a:
+            if i.__contains__(name) :
+                company=i
+                #print(i, " is containing")
+        for i in b:
+            if i.__contains__(name) :
+                company=i
+                #print(i, " is containing")
+        for i in c:
+            if i.__contains__(name) :
+                company=i
+                #print(i, " is containing")
+        return company.replace("\u3000", " ")
+    except:
+        return name
+def check_tw_two(name):
+    company=[]
+    df = pd.read_csv('公司/上市.csv')  
+    a=df["有價證券代號及名稱"].tolist()
+    df = pd.read_csv('公司/上櫃.csv')  
+    b=df["有價證券代號及名稱"].tolist()
 
+    try:
+        for i in a:
+            if i.__contains__(name) :
+                company=i
+                #print(i, " is containing")
+                return name+".tw"
+        for i in b:
+            if i.__contains__(name) :
+                company=i
+                #print(i, " is containing")
+                return name+".two"
+    except:
+        return name
+def get_information(stock_symbol):
 
-with open('data.txt', 'r') as f:
-    myNames = [line.strip() for line in f]
+    #得到所有資訊
+
+    #得到公司名字
+    name=search_name(stock_symbol)
     
-txt=myNames[0]
-#txt = input('請輸入你文件的名稱：')
-
-## Open file   把當月份的代號txt  拿出來
-doc_name=txt+".txt"
-fp = open(doc_name, "r")
-line = fp.readline()
-month_predict=[]
-## 用 while 逐行讀取檔案內容，直至檔案結尾
-while line:
-#    print (line)
-    line=line.replace(" ","")
-    month_predict.append(line.replace("\n",""))
-    line = fp.readline()
-fp.close()
-
-
-
-nowyear,nowmonth,nowday=take_time()
-
-
-# nowyear = input('請輸入今天的年份：')
-# nowmonth = input('請輸入今天的月份：')
-# nowday = input('請輸入今天的日期：')
-
-predictyear=myNames[0][0:4]
-predictmonth=myNames[0][4:6]
-
-#predictyear = input('請輸入預測的年份：')
-#predictmonth = input('請輸入預測的月份：')
-
-predict_day=predictyear+predictmonth+"11"
-now_day=nowyear+nowmonth+nowday
-
-
-#取出上市個股數值
-for i in range(100):
-    try:
-        df_last_month=stock_value(predict_day)
-        break
-    except:
-        
-        from datetime import datetime
-        edit_time=datetime.strptime(predict_day, "%Y%m%d")
-        import datetime
-        predict_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
-        print(predict_day)
-        
-for i in range(100):
-    try:
-        df_now=stock_value(now_day)
-        break
-    except:
-        from datetime import datetime
-        edit_time=datetime.strptime(now_day, "%Y%m%d")
-        import datetime
-        now_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
-        print(now_day)
-        
-
-
-
-
-
-
-nowyear2=str(int(nowyear)-1911)
-predictyear2=str(int(predictyear)-1911)
-predict_day2=predictyear2+"/"+predictmonth+"/"+"11"
-now_day2=nowyear2+"/"+nowmonth+"/"+nowday
-
-
-
-
-#取出上櫃個股數值
-for i in range(100):
-    try:
-        print(predict_day2)
-        df2_last_month=stock_value2(predict_day2)
-        break
-    except:
-        from datetime import datetime
-        predict_day_temp=str(int(predict_day2[0:3])+1911)+predict_day2[3:]
-        edit_time=datetime.strptime(predict_day_temp, "%Y/%m/%d")
-        import datetime
-        predict_day_temp= (edit_time+datetime.timedelta(days=-1)).strftime("%Y/%m/%d")
-        predict_day_temp_year=str(int(predict_day_temp[0:4])-1911)
-        predict_day2=  predict_day_temp_year+predict_day_temp[4:]                                 
-        print(predict_day2)                               
-                                          
-for i in range(100):
-    try:
-        print(now_day2)
-        df2_now=stock_value2(now_day2)
-        break
-    except:
-        from datetime import datetime
-        now_day_temp=str(int(now_day2[0:3])+1911)+now_day2[3:]
-        
-        edit_time=datetime.strptime(now_day_temp, "%Y/%m/%d")
-        import datetime
-        now_day_temp= (edit_time+datetime.timedelta(days=-1)).strftime("%Y/%m/%d")
-        now_day_temp_year=str(int(now_day_temp[0:4])-1911)
-        now_day2=  now_day_temp_year+now_day_temp[4:]                                 
-       
-        print(now_day2)      
-
-
-
-
-df=df_now
-for i in range(len(month_predict)):
-    a=df[pd.to_numeric(df['證券代號'], errors='coerce') == float(month_predict[i])]
-    try:
-        b=a.values.tolist()[0]
-        print(b[0])
-    except:
-        pass
-
-
-
-#把預測的股票價錢都拿出來
-now_list=[]
-for i in range(len(month_predict)):
-    temp=[]
-    index=float(month_predict[i])
-    #print(type(index),index)
-    try:
-        start_value=take_value(df_last_month,index)
-        end_value=take_value(df_now,index)
-    except:
-        start_value=take_value2(df2_last_month,index)
-        end_value=take_value2(df2_now,index)
-    #print(i,str(index).replace(".0",""),start_value,end_value)
-    temp.append(str(index).replace(".0",""))
-    temp.append("")
-    temp.append(start_value)
-    temp.append(end_value)
-    now_list.append(temp)
-
-
-
-
-
-# #不要亂執行   拿來刪檔案用得
-# db =  sqlite3.connect('db.sqlite3')
-# ##db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
-# db.execute("delete from basicHistory")
-# db.commit()
-# db =  sqlite3.connect('db.sqlite3')
-# ##db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
-# #db.execute("delete from technicHistory")
-# db.commit()
-
-
-over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
-
-
-# 更新月營收策略  當月股價
-# for i in range(len(now_list)):
-#     final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
-#     print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
-
-
     
+    #先得到初始價格跟時間
+    year,month,day=take_time()
+    if int(day)<11:
+        month=int(month)-1
+    start_price,start_date=get_start_price(int(year),int(month),11,check_tw_two(stock_symbol))
+
+    #再得到目前的價格跟時間
+    year,month,day=take_time()
+    current_price,final_update=get_final_price(int(year),int(month),int(day),check_tw_two(stock_symbol))
+
+    #得到報酬率
+    now_return=(float(current_price)-float(start_price))/float(start_price)
+    now_return= round(now_return*100,2)
+    #print(now_return)
+    if float(now_return)>0:
+        types="+"
+    else:
+        types="-"
+    print(name,start_price,start_date,current_price,final_update,now_return,types)
+    return name,start_price,start_date,current_price,final_update,now_return,types
 
 
+print("更新 basicCurrent db")
 
+
+#更新左邊的
 # 更新月營收策略  當月股價
 db =  sqlite3.connect('db.sqlite3')
 #db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
 db.execute("delete from basicCurrent")
 db.commit()
 pk=1
-for i in range(len(now_list)):
-    final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
-    #print(predictmonth)
-    if predictmonth=="12":
-        predictmonth="01"  
-        over_date=predictyear+"-"+str(int(predictmonth))+"-"+"11" 
-    else:
-        over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11" 
-    print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
+
+#得到最後日期
+over_date=get_over_date()
+#寫進資料庫
+for i in range(len(month_predict)):
+    name,start_price,start_date,current_price,final_update,now_return,types=get_information(month_predict[i])
+
+    #print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
+    
     db =  sqlite3.connect('db.sqlite3')
     db.execute("INSERT INTO basicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
+    db.commit()
+    db.close()
+    pk=pk+1
+
+
+
+
+
+print("更新technicCurrent db")
+
+#更新右邊的
+# 更新月營收策略  當月股價
+db =  sqlite3.connect('db.sqlite3')
+#db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
+db.execute("delete from technicCurrent")
+db.commit()
+pk=1
+
+#得到最後日期
+over_date=get_over_date()
+#寫進資料庫
+for i in range(len(month_predict)):
+    name,start_price,start_date,current_price,final_update,now_return,types=get_information(month_predict[i])
+
+    #print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
+    
+    db =  sqlite3.connect('db.sqlite3')
+    db.execute("INSERT INTO technicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
     db.commit()
     db.close()
     pk=pk+1

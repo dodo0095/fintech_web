@@ -12,7 +12,7 @@ import datetime
 import math
 import sqlite3
 import re
-
+from django.db.models import Q
 
 
 def sent_dict():
@@ -766,3 +766,50 @@ def find_house_data(request):
 
     print("輸出成功")
     return Response(all_city_json, status=status.HTTP_201_CREATED)
+
+
+
+
+
+
+#歷史資訊
+
+@api_view(['GET'])
+def technihistory2(request):
+
+    date = request.GET.get('date', "2024-03")
+
+
+    dict_finalt={'board':"", 'final_update':"",'tableData':""}
+    if request.method == 'GET':
+#        data = technicHistory.objects.all()
+        data = technicHistory.objects.filter((Q(start_date__icontains=date)))
+
+
+        tableData=[]
+        total_return=0
+        total_start_price=0
+        total_final_price=0
+
+
+        for i in range(len(data)):
+            dict = {'id':data[i].id\
+                        #,'final_update':data[i].final_update\
+                        ,'stock_name':data[i].stock_name,'start_date':data[i].start_date\
+                        ,'start_price':data[i].buy_price\
+                        ,'over_date':data[i].over_date\
+                        ,'current_price':data[i].sell_price\
+                        ,'now_return':str(round(float(data[i].return_value),2))\
+                        ,'type':data[i].type\
+                            }
+            tableData.append(dict)
+            total_return=total_return+float(data[i].return_value)
+            total_return=round(total_return,2)
+            total_start_price=total_start_price+float(data[i].buy_price)
+            total_final_price=total_final_price+float(data[i].sell_price)
+
+        a=round(((total_final_price-total_start_price)/total_start_price)*100,2)
+
+        board= {"today": 'X',"total":str(a)}
+        dict_finalt={'board':board, 'final_update':date,'tableData':tableData}
+        return Response(dict_finalt)
