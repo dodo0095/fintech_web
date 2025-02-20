@@ -7,6 +7,7 @@ import time
 import datetime
 import requests
 from io import StringIO
+import yfinance as yf
 
 
 
@@ -17,7 +18,7 @@ def take_time():
     return a[0:4],a[4:6],a[6:8]
     
     
-    
+
 # 抓上市公司股價
 def stock_value(datestr):
     #把當月11號的台股資訊 更新
@@ -53,12 +54,12 @@ def stock_value2(datestr):
 #拿上市收盤價資料
 def take_value(df,id):
     take_info=df[pd.to_numeric(df['證券代號'], errors='coerce') == id]
-    value=float(take_info["收盤價"].values[0])
+    value=float(take_info["收盤價"].values)
     return value
 #拿上櫃收盤價資料
 def take_value2(df,id):
     take_info=df[pd.to_numeric(df['代號'], errors='coerce') == id]
-    value=float(take_info["收盤"].values[0])
+    value=float(take_info["收盤"].values)
     return value
 
 def change_parameter(save_list):
@@ -103,11 +104,24 @@ def search_name(name):
             #print(i, " is containing")
     return company
 
+def change(now_day):
+    from datetime import datetime, timedelta
+
+
+    # 將字串轉換為日期物件
+    date_obj = datetime.strptime(now_day, "%Y-%m-%d")
+
+    # 加一天
+    next_day = date_obj + timedelta(days=1)
+
+    # 將日期物件轉換回字串
+    next_day_str = next_day.strftime("%Y-%m-%d")
+    return (next_day_str)
 
 with open('data.txt', 'r') as f:
     myNames = [line.strip() for line in f]
     
-txt=myNames[0]
+txt=myNames[0]+"-2"
 #txt = input('請輸入你文件的名稱：')
 
 ## Open file   把當月份的代號txt  拿出來
@@ -138,151 +152,135 @@ predictmonth=myNames[0][4:6]
 #predictyear = input('請輸入預測的年份：')
 #predictmonth = input('請輸入預測的月份：')
 
-predict_day=predictyear+predictmonth+"11"
-now_day=nowyear+nowmonth+nowday
 
-
-#取出上市個股數值
-for i in range(100):
-    try:
-        df_last_month=stock_value(predict_day)
-        break
-    except:
-        
-        from datetime import datetime
-        edit_time=datetime.strptime(predict_day, "%Y%m%d")
-        import datetime
-        predict_day= (edit_time+datetime.timedelta(days=+1)).strftime("%Y%m%d")
-        print(predict_day)
-        
-for i in range(100):
-    try:
-        df_now=stock_value(now_day)
-        break
-    except:
-        from datetime import datetime
-        edit_time=datetime.strptime(now_day, "%Y%m%d")
-        import datetime
-        now_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
-        print(now_day)
-        
+predict_day=predictyear+"-"+predictmonth+"-"+"11"
+now_day=nowyear+"-"+nowmonth+"-"+nowday
 
 
 
 
 
-
-nowyear2=str(int(nowyear)-1911)
-predictyear2=str(int(predictyear)-1911)
-predict_day2=predictyear2+"/"+predictmonth+"/"+"11"
-now_day2=nowyear2+"/"+nowmonth+"/"+nowday
-
-
-
-
-#取出上櫃個股數值
-for i in range(100):
-    try:
-        print(predict_day2)
-        df2_last_month=stock_value2(predict_day2)
-        break
-    except:
-        from datetime import datetime
-        predict_day_temp=str(int(predict_day2[0:3])+1911)+predict_day2[3:]
-        edit_time=datetime.strptime(predict_day_temp, "%Y/%m/%d")
-        import datetime
-        predict_day_temp= (edit_time+datetime.timedelta(days=+1)).strftime("%Y/%m/%d")
-        predict_day_temp_year=str(int(predict_day_temp[0:4])-1911)
-        predict_day2=  predict_day_temp_year+predict_day_temp[4:]                                 
-        print(predict_day2)                               
-                                          
-for i in range(100):
-    try:
-        print(now_day2)
-        df2_now=stock_value2(now_day2)
-        break
-    except:
-        from datetime import datetime
-        now_day_temp=str(int(now_day2[0:3])+1911)+now_day2[3:]
-        
-        edit_time=datetime.strptime(now_day_temp, "%Y/%m/%d")
-        import datetime
-        now_day_temp= (edit_time+datetime.timedelta(days=-1)).strftime("%Y/%m/%d")
-        now_day_temp_year=str(int(now_day_temp[0:4])-1911)
-        now_day2=  now_day_temp_year+now_day_temp[4:]                                 
-       
-        print(now_day2)      
+if int(predictmonth)<12:
+	over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
+elif int(predictmonth)==12:
+	#over_date=str(int(predictyear+1))+"-"+"01"+"-"+"11"
+	over_date = str(int(predictyear) + 1) + "-" + "01" + "-" + "11"
 
 
 
 
-df=df_now
-for i in range(len(month_predict)):
-    a=df[pd.to_numeric(df['證券代號'], errors='coerce') == float(month_predict[i])]
-    try:
-        b=a.values.tolist()[0]
-        print(b[0])
-    except:
-        pass
-
-
-
-#把預測的股票價錢都拿出來
-now_list=[]
-for i in range(len(month_predict)):
-    temp=[]
-    index=float(month_predict[i])
-    #print(type(index),index)
-    try:
-        start_value=take_value(df_last_month,index)
-        end_value=take_value(df_now,index)
-    except:
-        start_value=take_value2(df2_last_month,index)
-        end_value=take_value2(df2_now,index)
-    #print(i,str(index).replace(".0",""),start_value,end_value)
-    temp.append(str(index).replace(".0",""))
-    temp.append("")
-    temp.append(start_value)
-    temp.append(end_value)
-    now_list.append(temp)
-
-
-
-
-
-# #不要亂執行   拿來刪檔案用得
-# db =  sqlite3.connect('db.sqlite3')
-# ##db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
-# db.execute("delete from basicHistory")
-# db.commit()
-# db =  sqlite3.connect('db.sqlite3')
-# ##db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
-# #db.execute("delete from technicHistory")
-# db.commit()
-
-
-over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11"
-
-
-# 更新月營收策略  當月股價
-# for i in range(len(now_list)):
-#     final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
-#     print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
-
-
+def get_price_difference(stock_symbol, start_date, end_date):
+    # 抓取指定股票的歷史數據
+    stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
     
+    # 檢查資料是否正確抓取
+    if stock_data.empty:
+        return "No data found for {stock_symbol} between {start_date} and {end_date}."
+    
+    # 獲取起始日期與結束日期的收盤價
+    start_price = stock_data['Close'].iloc[0]
+    end_price = stock_data['Close'].iloc[-1]
+    
+    # 計算價格差
+    price_difference = end_price - start_price
 
+    # 結果輸出
+    return {
+        "start_date": start_date,
+        "end_date": end_date,
+        "start_price": round(start_price,2),
+        "end_price": round(end_price,2),
+        "price_difference": price_difference
+    }
 
 
 # 更新月營收策略  當月股價
 db =  sqlite3.connect('db.sqlite3')
 #db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
+db.execute("delete from technicCurrent")
+db.commit()
+pk=1
+for i in range(len(month_predict)):
+    final_update=now_day
+    name=search_name(month_predict[i]).replace("\u3000", " ")
+    start_date=predict_day
+    next_day=change(now_day)
+    end_date=next_day
+    
+    try:
+        stock_symbol=month_predict[i]+".TW"
+        result = get_price_difference(stock_symbol, start_date, end_date)
+        start_price= result["start_price"]
+        current_price=result["end_price"]
+    except:
+        stock_symbol=month_predict[i]+".TWO"
+        result = get_price_difference(stock_symbol, start_date, end_date)
+        start_price= result["start_price"]
+        current_price=result["end_price"]
+
+
+    start_price= result["start_price"]
+    current_price=result["end_price"]
+    now_return=(float(current_price)-float(start_price))/float(start_price)
+    now_return= round(now_return*100,2)
+
+    if float(now_return)>0:
+        types="+"
+    else:
+        types="-"
+
+    if predictmonth=="12":
+        predictmonth="01"  
+        over_date=predictyear+"-"+str(int(predictmonth))+"-"+"11" 
+    else:
+        over_date=predictyear+"-"+str(int(predictmonth)+1)+"-"+"11" 
+    print(final_update,name,start_date,start_price,over_date,current_price,now_return,types)
+    db =  sqlite3.connect('db.sqlite3')
+    db.execute("INSERT INTO technicCurrent (id,final_update,stock_name,start_date,start_price,over_date,current_price,now_return,type)   VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(pk,final_update,name,start_date,start_price,over_date,current_price,now_return,types))
+    db.commit()
+    db.close()
+    pk=pk+1
+
+
+
+
+
+
+
+# 更新月營收策略  當月股價  basicCurrent
+db =  sqlite3.connect('db.sqlite3')
+#db.execute("INSERT INTO type_data (tag)   VALUES ('{}')".format(data))
 db.execute("delete from basicCurrent")
 db.commit()
 pk=1
-for i in range(len(now_list)):
-    final_update,name,start_date,start_price,current_price,now_return,types=change_parameter(now_list[i]) 
-    #print(predictmonth)
+for i in range(len(month_predict)):
+    final_update=now_day
+    name=search_name(month_predict[i]).replace("\u3000", " ")
+    start_date=predict_day
+    end_date=now_day
+    
+    try:
+        stock_symbol=month_predict[i]+".TW"
+        result = get_price_difference(stock_symbol, start_date, end_date)
+        start_price= result["start_price"]
+        current_price=result["end_price"]
+    except:
+        stock_symbol=month_predict[i]+".TWO"
+        result = get_price_difference(stock_symbol, start_date, end_date)
+        start_price= result["start_price"]
+        current_price=result["end_price"]
+
+
+    start_price= result["start_price"]
+    current_price=result["end_price"]
+    now_return=(float(current_price)-float(start_price))/float(start_price)
+    now_return= round(now_return*100,2)
+
+    if float(now_return)>0:
+        types="+"
+    else:
+        types="-"
+
     if predictmonth=="12":
         predictmonth="01"  
         over_date=predictyear+"-"+str(int(predictmonth))+"-"+"11" 
@@ -294,3 +292,6 @@ for i in range(len(now_list)):
     db.commit()
     db.close()
     pk=pk+1
+
+
+

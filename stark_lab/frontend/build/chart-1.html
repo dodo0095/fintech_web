@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>ETF 0050 與策略績效趨勢圖</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h2>ETF 0050 與策略績效趨勢圖</h2>
+    <canvas id="trendChart" width="600" height="400"></canvas>
+
+
+    <script>
+        // 節點名稱（每個月）
+
+
+
+        const labels = ['2024-1月', '2024-2月', '2024-3月', '2024-4月', '2024-5月', '2024-6月','2024-7月','2024-8月','2024-9月','2024-10月','2024-11月'.'2024-12月'];
+
+         // // ETF 0050 的績效資料（範例）
+        const etf0050Performance = [0.33, 10, 18, 18, 25, 43,25,20,30,35,31,35]; 
+
+        // 您的策略績效資料（範例）
+        const strategyPerformance = [0.67, 17, 31, 41, 52, 75,81,95,94,100 ,111,118];
+
+        const ctx = document.getElementById('trendChart').getContext('2d');
+
+        const trendChart = new Chart(ctx, {
+            type: 'line', // 線圖
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'ETF 0050',
+                        data: etf0050Performance,
+                        borderColor: 'rgba(54, 162, 235, 1)', // 藍色
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 8
+                    },
+                    {
+                        label: '我的策略',
+                        data: strategyPerformance,
+                        borderColor: 'rgba(255, 99, 132, 1)', // 紅色
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 8
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '月份',
+                            font: {
+                                size: 18 ,// 調整標籤字體大小
+                              weight: 'bold' // 調整標籤字體為粗體
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 18 // 調整字體大小
+                            }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '績效(%)',
+                            font: {
+                                size: 18 ,// 調整標籤字體大小
+                                  weight: 'bold' // 調整標籤字體為粗體
+                            
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 18 // 調整字體大小
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+
+
+
+
+    </script>
+</body>
+</html>

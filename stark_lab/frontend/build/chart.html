@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>ETF 0050 與策略績效長條圖</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>ETF 0050 與策略績效長條圖</h2>
+    <canvas id="barChart" width="600" height="400"></canvas>
+
+    <script>
+        // 定義月份標籤
+        const labels = ['2024-1月', '2024-2月', '2024-3月', '2024-4月', '2024-5月', '2024-6月','2024-7月','2024-8月'];
+
+        // ETF 0050 的報酬率資料（範例）
+        const etf0050Returns = [3.3, 7, 6.6, 0.18, 5.9,14.65,-14.5,-3.2];
+
+        // 您的策略報酬率資料（範例）
+        const strategyReturns = [6.7, 9.7, 11.93, 8.08, 7.27,15.53,3.37,8];
+
+        const ctx = document.getElementById('barChart').getContext('2d');
+
+        const barChart = new Chart(ctx, {
+            type: 'bar', // 長條圖
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'ETF 0050',
+                        data: etf0050Returns,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)', // 藍色
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '我的策略',
+                        data: strategyReturns,
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)', // 紅色
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '月份',
+                            font: {
+                                size: 20 // 修改橫坐標標籤字體大小
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 14 // 修改橫坐標刻度字體大小
+                            }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '報酬率 (%)',
+                            font: {
+                                size: 20 // 修改縱坐標標籤字體大小
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 14 // 修改縱坐標刻度字體大小
+                            },
+                            beginAtZero: true // 確保 Y 軸從零開始
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top', // 設定圖例位置
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false, // 防止工具提示重疊
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -54,12 +54,12 @@ def stock_value2(datestr):
 #拿上市收盤價資料
 def take_value(df,id):
     take_info=df[pd.to_numeric(df['證券代號'], errors='coerce') == id]
-    value=float(take_info["收盤價"].values)
+    value=float(take_info["收盤價"].values[0])
     return value
 #拿上櫃收盤價資料
 def take_value2(df,id):
     take_info=df[pd.to_numeric(df['代號'], errors='coerce') == id]
-    value=float(take_info["收盤"].values)
+    value=float(take_info["收盤"].values[0])
     return value
 
 def change_parameter(save_list):
@@ -154,7 +154,7 @@ for i in range(100):
         from datetime import datetime
         edit_time=datetime.strptime(predict_day, "%Y%m%d")
         import datetime
-        predict_day= (edit_time+datetime.timedelta(days=-1)).strftime("%Y%m%d")
+        predict_day= (edit_time+datetime.timedelta(days=+1)).strftime("%Y%m%d")
         print(predict_day)
         
 for i in range(100):
@@ -193,7 +193,7 @@ for i in range(100):
         predict_day_temp=str(int(predict_day2[0:3])+1911)+predict_day2[3:]
         edit_time=datetime.strptime(predict_day_temp, "%Y/%m/%d")
         import datetime
-        predict_day_temp= (edit_time+datetime.timedelta(days=-1)).strftime("%Y/%m/%d")
+        predict_day_temp= (edit_time+datetime.timedelta(days=+1)).strftime("%Y/%m/%d")
         predict_day_temp_year=str(int(predict_day_temp[0:4])-1911)
         predict_day2=  predict_day_temp_year+predict_day_temp[4:]                                 
         print(predict_day2)                               

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>ETF 0050 與策略績效長條圖</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>ETF 0050 與策略績效長條圖</h2>
+    <canvas id="barChart" width="600" height="400"></canvas>
+
+    <script>
+        // 定義月份標籤
+        const labels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+
+        // ETF 0050 的報酬率資料（範例）
+        const etf0050Returns = [2, 3, 4, 3, 2, 1, 5, 3, 4, 2, 3, 5];
+
+        // 您的策略報酬率資料（範例）
+        const strategyReturns = [1, 2, 3, 3, 4, 3, 2, 4, 3, 3, 4, 5];
+
+        const ctx = document.getElementById('barChart').getContext('2d');
+
+        const barChart = new Chart(ctx, {
+            type: 'bar', // 長條圖
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'ETF 0050',
+                        data: etf0050Returns,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)', // 藍色
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '我的策略',
+                        data: strategyReturns,
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)', // 紅色
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '月份'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '報酬率 (%)'
+                        },
+                        beginAtZero: true // 確保 Y 軸從零開始
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top', // 設定圖例位置
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false, // 防止工具提示重疊
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
