@@ -219,8 +219,8 @@ for i in range(len(month_predict)):
         current_price=result["end_price"]
 
 
-    start_price= result["start_price"]
-    current_price=result["end_price"]
+    start_price= result["start_price"][0]
+    current_price=result["end_price"][0]
     now_return=(float(current_price)-float(start_price))/float(start_price)
     now_return= round(now_return*100,2)
 
@@ -271,8 +271,8 @@ for i in range(len(month_predict)):
         current_price=result["end_price"]
 
 
-    start_price= result["start_price"]
-    current_price=result["end_price"]
+    start_price= result["start_price"][0]
+    current_price=result["end_price"][0]
     now_return=(float(current_price)-float(start_price))/float(start_price)
     now_return= round(now_return*100,2)
 
