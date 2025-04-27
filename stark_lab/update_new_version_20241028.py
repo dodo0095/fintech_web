@@ -253,12 +253,15 @@ db =  sqlite3.connect('db.sqlite3')
 db.execute("delete from basicCurrent")
 db.commit()
 pk=1
+
 for i in range(len(month_predict)):
     final_update=now_day
     name=search_name(month_predict[i]).replace("\u3000", " ")
     start_date=predict_day
-    end_date=now_day
-    
+    next_day=change(now_day)
+    end_date=next_day 
+
+
     try:
         stock_symbol=month_predict[i]+".TW"
         result = get_price_difference(stock_symbol, start_date, end_date)
