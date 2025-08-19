@@ -25,14 +25,20 @@
         // // 您的策略績效資料（範例）
         // const strategyPerformance = [0.67, 17, 31, 41, 52, 75,81,95,94,100 ,111,118];
 
-        const labels = ['2025-1月','2025-2月'];
-
+        const labels = [
+          '2025年一月份累積績效\n2025-01-11~2025-02-10',
+          '2025年二月份累積績效\n2025-01-11~2025-03-10',
+          '2025年三月份累積績效\n2025-01-11~2025-04-10',
+          '2025年四月份累積績效\n2025-01-11~2025-05-10',
+          '2025年五月份累積績效\n2025-01-11~2025-06-10',
+          '2025年六月份累積績效\n2025-01-11~2025-07-10',
+          '2025年七月份累積績效\n2025-01-11~2025-08-10'
+        ];
          // // ETF 0050 的績效資料（範例）
-        const etf0050Performance = [-0.7,-6.7]; 
+        const etf0050Performance = [-0.7,-6.7,-15.8,-10,-0.5,-0.2,4.6]; 
 
         // 您的策略績效資料（範例）
-        const strategyPerformance = [5.8, 5.4];
-
+        const strategyPerformance = [5.8, 5.4,-3,0.3,15,22,42];
 
 
         const ctx = document.getElementById('trendChart').getContext('2d');
@@ -66,14 +72,19 @@
                             display: true,
                             text: '月份',
                             font: {
-                                size: 18 ,// 調整標籤字體大小
-                              weight: 'bold' // 調整標籤字體為粗體
+                                size: 18,
+                                weight: 'bold'
                             }
                         },
                         ticks: {
                             font: {
-                                size: 18 // 調整字體大小
-                            }
+                                size: 18
+                            },
+                            callback: function(value, index, ticks) {
+                                return this.getLabelForValue(value).split('\n');
+                            },
+                            maxRotation: 0,
+                            minRotation: 0
                         }
                     },
                     y: {

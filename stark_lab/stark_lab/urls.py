@@ -61,5 +61,7 @@ urlpatterns = [
 
     url(r'^data_to_chart_2/',views.data_to_chart_2),
 
+    path('api/performances/', views.monthly_performance_api, name='performance_api'),
+
 
 ]

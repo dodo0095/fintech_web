@@ -2,8 +2,8 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework import viewsets
 from apiserver.serializers import  bot_apiSerializer,technicHistory_Serializer,technicCurrent_Serializer
-from apiserver.serializers import basicHistory_Serializer,basicCurrent_Serializer,article_Serializer,article2_Serializer
-from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent,article_1,article_2
+from apiserver.serializers import basicHistory_Serializer,basicCurrent_Serializer,article_Serializer,article2_Serializer,MonthlyPerformance_Serializer
+from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent,article_1,article_2,MonthlyPerformance
 from rest_framework import generics
 import django_filters.rest_framework
 from rest_framework.decorators import api_view
@@ -955,3 +955,10 @@ def data_to_chart_2(request):
     dict_finalt={'price':price,'date':date}
     return Response(dict_finalt)
 
+
+
+@api_view(['GET'])
+def monthly_performance_api(request):
+    data = MonthlyPerformance.objects.all().order_by('label')
+    serializer = MonthlyPerformance_Serializer(data, many=True)
+    return Response(serializer.data)

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apiserver',
 
 ]
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

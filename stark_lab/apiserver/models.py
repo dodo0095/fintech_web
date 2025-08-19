@@ -105,3 +105,13 @@ class article_2(models.Model):
 
 	class Meta:
 		db_table = "article_2"
+
+
+class MonthlyPerformance(models.Model):
+	label = models.CharField(max_length=100, help_text="月份標籤，例如：2025年一月份績效")
+	date_range = models.CharField(max_length=50, help_text="例如：2025-01-11~2025-02-10")
+	etf0050_return = models.FloatField(help_text="ETF 0050 的績效（百分比）")
+	strategy_return = models.FloatField(help_text="我的策略績效（百分比）")
+
+	class Meta:
+		db_table = "MonthlyPerformance"

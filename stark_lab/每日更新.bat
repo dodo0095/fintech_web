@@ -1,8 +1,11 @@
-cd C:\Users\BANDAI\Anaconda3\Scripts
-call activate.bat
-call activate.bat C:\Users\BANDAI\Anaconda3\envs\myenv
+@echo off
+call C:\ProgramData\Anaconda3\Scripts\activate py310
 
-cd C:\Users\BANDAI\Desktop\fintech_web\stark_lab
+set "PATH=C:\py310;%PATH%"
+set "PATH=C:\py310\Scripts;%PATH%"
+python --version
+
+cd C:\server website\fintech_web\stark_lab
 call python update_new_version_20241028.py
 
 pause
