@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-
+from pathlib import Path
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -23,9 +23,16 @@ FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
 SECRET_KEY = 'pn_2hj#n@u(nz@!6xbw1mxm1xdvif6eal8d@tf^1k$cb6=0(tb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ["https://starklab.tw", "https://www.starklab.tw"]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+#SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 CORS_ORIGIN_ALLOW_ALL = True # product : 註解
 CORS_ALLOW_CREDENTIALS = True # product : 註解
@@ -68,24 +75,24 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'stark_lab.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(FRONTEND_DIR, 'build')
-            # 'frontend/dist',
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+# TEMPLATES = [
+#     {
+#         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+#         'DIRS': [
+#             os.path.join(FRONTEND_DIR, 'build')
+#             # 'frontend/dist',
+#         ],
+#         'APP_DIRS': True,
+#         'OPTIONS': {
+#             'context_processors': [
+#                 'django.template.context_processors.debug',
+#                 'django.template.context_processors.request',
+#                 'django.contrib.auth.context_processors.auth',
+#                 'django.contrib.messages.context_processors.messages',
+#             ],
+#         },
+#     },
+# ]
 
 WSGI_APPLICATION = 'stark_lab.wsgi.application'
 
@@ -138,10 +145,70 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, '/')
+# collectstatic 的輸出請放在專案根目錄的「獨立」資料夾，不要塞進 build 裡
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# 前端原始靜態來源（只要到 build/static 就夠了）
 STATICFILES_DIRS = [
-    os.path.join(FRONTEND_DIR, 'build')
+    os.path.join(FRONTEND_DIR, "build", "static"),
 ]
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)  # 確保 logs 目錄存在
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s %(levelname)s %(name)s:%(lineno)d %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "app_file": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": str(LOG_DIR / "app.log"),
+            "when": "midnight",
+            "backupCount": 14,
+            "encoding": "utf-8",
+            "formatter": "verbose",
+            "delay": True,  # 檔案在第一次寫入時才開啟
+        },
+    },
+    "loggers": {
+        "django": {"handlers": ["console", "app_file"], "level": "INFO", "propagate": False},
+        "django.request": {"handlers": ["console", "app_file"], "level": "ERROR", "propagate": False},
+        "waitress": {"handlers": ["console", "app_file"], "level": "INFO", "propagate": False},
+    },
+}
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# --- Templates：只保留一份設定 ---
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            # 你的通用 template（可選）
+            #os.path.join(BASE_DIR, "templates"),
+            # 前端打包後的 HTML（例如 index.html、404.html）
+            os.path.join(FRONTEND_DIR, "build"),
+        ],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]

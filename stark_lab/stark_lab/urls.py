@@ -5,7 +5,7 @@ from rest_framework import routers
 from apiserver import views
 from django.conf.urls import url
 from django.views.generic import TemplateView
-
+from django.conf.urls import handler404
 
 router = routers.DefaultRouter()
 router.register(r'chose_robot', views.chose_robot, basename='chose_robot')
@@ -15,10 +15,13 @@ router.register(r'basicHistory', views.basicHistoryapi, basename='basicHistory')
 #router.register(r'basicCurrent', views.basicCurrentapi, basename='basicCurrent')
 router.register(r'articleapi', views.articleapi, basename='articleapi')
 router.register(r'articleapi2', views.articleapi2, basename='articleapi2')
+def custom_page_not_found(request, exception):
+    return render(request, "404.html", status=404)
 
+handler404 = custom_page_not_found
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    #path('admin/', admin.site.urls),
     #path('', TemplateView.as_view(template_name="bot.html")),
     path('bot.html', TemplateView.as_view(template_name="bot.html")),
     path('botBlog.html', TemplateView.as_view(template_name="botBlog.html")),
@@ -63,5 +66,5 @@ urlpatterns = [
 
     path('api/performances/', views.monthly_performance_api, name='performance_api'),
 
-
+    
 ]

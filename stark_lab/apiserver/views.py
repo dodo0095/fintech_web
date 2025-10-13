@@ -777,13 +777,13 @@ def find_house_data(request):
 @api_view(['GET'])
 def technihistory2(request):
 
-    date = request.GET.get('date', "2024-03")
+    #date = request.GET.get('date', "2024-03")
 
 
     dict_finalt={'board':"", 'final_update':"",'tableData':""}
     if request.method == 'GET':
-#        data = technicHistory.objects.all()
-        data = technicHistory.objects.filter((Q(start_date__icontains=date)))
+        data = technicHistory.objects.all()
+    #data = technicHistory.objects.filter((Q(start_date__icontains=date)))
 
 
         tableData=[]

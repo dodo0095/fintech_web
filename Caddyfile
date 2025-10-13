@@ -1,0 +1,69 @@
+starklab.tw, www.starklab.tw {
+    encode zstd gzip
+
+    # 先處理靜態檔
+    handle_path /static/* {
+        root * "C:\server website\fintech_web\stark_lab\staticfiles"
+        file_server
+    }
+
+    handle_path /media/* {
+        root * "C:\server website\fintech_web\stark_lab\media"
+        file_server
+    }
+
+    # 熱修：若前端用 /images/ 開頭
+    handle_path /images/* {
+        root * "C:\server website\fintech_web\staticfiles\stark_lab\images"
+        file_server
+    }
+
+    # 其餘請求才交給後端
+    handle {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    # HTTP -> HTTPS（可留可拿掉；Caddy 會自動開 HTTPS）
+    @http {
+        protocol http
+    }
+    redir @http https://{host}{uri}
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:"
+        Cross-Origin-Opener-Policy "same-origin"
+    }
+}
+
+
+# 實驗室網站
+lab.starklab.tw, www.lab.starklab.tw {
+    encode gzip
+
+    # 先讓 /static 與 /media 直接出檔案
+    handle_path /static/* {
+        root * "C:\server website\StarkLab\labweb\lab\staticfiles"
+        file_server
+    }
+
+
+    # 其他交給 Django (waitress) 反代
+    reverse_proxy 127.0.0.1:3000
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:"
+        Cross-Origin-Opener-Policy "same-origin"
+    }
+}
+
+# 教育平台
+edu.starklab.tw {
+    encode gzip
+    reverse_proxy 127.0.0.1:5000
+}
