@@ -1,29 +1,89 @@
-starklab.tw, www.starklab.tw {
+# =========================
+# 主站 starklab.tw
+# =========================
+starklab.tw {
     encode zstd gzip
 
-    # 先處理靜態檔
+    # 👉 1) 先短路常見掃描（放最前面，優先於 static / proxy）
+    @phpProbes path_regexp php (.*\.php.*)|(.*\/wp\/.*)|(^\/wp$)|(.*\/wp-admin\/.*)|(.*\/wp-includes\/.*)
+    handle @phpProbes {
+        respond 403
+    }
+
+    @configProbes path_regexp cfg (?i)(.*\/?config.*\.json$)|(.*appsettings.*\.json$)|(.*angular\.json$)|(.*tsconfig\.json$)|(.*\.env$)|(.*\/\.?aws\/.*)|(.*\.yml$)
+    handle @configProbes {
+        respond 403
+    }
+
+    @phpinfoProbes path_regexp phpinfo (?i)(.*phpinfo.*)|(^\/_profiler\/phpinfo$)|(^\/symfony\/_profiler\/phpinfo$)
+    handle @phpinfoProbes {
+        respond 403
+    }
+
+# 允許 ACME 憑證驗證用的 /.well-known/*
+@acme path /.well-known/*
+
+# 擋掉其他所有以 "." 開頭的隱藏路徑
+@dotProbes {
+    not path /.well-known/*          # ← 用 not 排除
+    path_regexp dotfiles ^/\..*      # ← 不用 lookahead，單純比對 "/." 開頭
+}
+handle @dotProbes {
+    respond 403
+}
+
+
+    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+    handle @dirScan {
+        respond 404
+    }
+
+    # 👉 2) 減少 404 噪音：favicon / apple-touch-icon 直接回 204（不進後端）
+    respond /favicon.ico 204
+    respond /apple-touch-icon.png 204
+    respond /apple-touch-icon-precomposed.png 204
+    respond /apple-touch-icon-120x120.png 204
+    respond /apple-touch-icon-120x120-precomposed.png 204
+    respond /static/favicon.png 204
+
+    # 👉 3) 可選：限制請求本文大小（防大檔炸彈；如需上傳檔案可調大或移除）
+    request_body {
+        max_size 1MB
+    }
+
+    # 👉 4) 你原本的「擋隱藏目錄 / .php」規則保留，但已由上面更精細的規則涵蓋
+    @blocked {
+        path_regexp blocked /\.(git|svn|hg|env)|(\.php)$
+    }
+    respond @blocked 403
+
+    # ✅ robots.txt（維持）
+    handle_path /robots.txt {
+        respond "User-agent: *\nDisallow:" 200
+        header Content-Type "text/plain"
+    }
+
+    # 先處理靜態檔（維持順序：在 proxy 之前）
     handle_path /static/* {
         root * "C:\server website\fintech_web\stark_lab\staticfiles"
         file_server
     }
-
     handle_path /media/* {
         root * "C:\server website\fintech_web\stark_lab\media"
         file_server
     }
-
-    # 熱修：若前端用 /images/ 開頭
+    # 熱修：前端 /images/
     handle_path /images/* {
         root * "C:\server website\fintech_web\staticfiles\stark_lab\images"
         file_server
     }
 
-    # 其餘請求才交給後端
+    # 其餘請求才交給後端（維持）
     handle {
         reverse_proxy 127.0.0.1:8000
     }
 
-    # HTTP -> HTTPS（可留可拿掉；Caddy 會自動開 HTTPS）
+    # HTTP -> HTTPS（維持）
     @http {
         protocol http
     }
@@ -38,19 +98,74 @@ starklab.tw, www.starklab.tw {
     }
 }
 
-
-# 實驗室網站
-lab.starklab.tw, www.lab.starklab.tw {
+# =========================
+# 實驗室站 lab.starklab.tw
+# =========================
+lab.starklab.tw {
     encode gzip
 
-    # 先讓 /static 與 /media 直接出檔案
+    # 👉 1) 短路掃描（一樣放最前）
+    @phpProbes path_regexp php (.*\.php.*)|(.*\/wp\/.*)|(^\/wp$)|(.*\/wp-admin\/.*)|(.*\/wp-includes\/.*)
+    handle @phpProbes {
+        respond 403
+    }
+    @configProbes path_regexp cfg (?i)(.*\/?config.*\.json$)|(.*appsettings.*\.json$)|(.*angular\.json$)|(.*tsconfig\.json$)|(.*\.env$)|(.*\/\.?aws\/.*)|(.*\.yml$)
+    handle @configProbes {
+        respond 403
+    }
+    @phpinfoProbes path_regexp phpinfo (?i)(.*phpinfo.*)|(^\/_profiler\/phpinfo$)|(^\/symfony\/_profiler\/phpinfo$)
+    handle @phpinfoProbes {
+        respond 403
+    }
+# 允許 ACME 憑證驗證用的 /.well-known/*
+@acme path /.well-known/*
+
+# 擋掉其他所有以 "." 開頭的隱藏路徑
+@dotProbes {
+    not path /.well-known/*          # ← 用 not 排除
+    path_regexp dotfiles ^/\..*      # ← 不用 lookahead，單純比對 "/." 開頭
+}
+handle @dotProbes {
+    respond 403
+}
+
+    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+    handle @dirScan {
+        respond 404
+    }
+
+    # 👉 2) favicon / apple-touch-icon 直接 204
+    respond /favicon.ico 204
+    respond /apple-touch-icon.png 204
+    respond /apple-touch-icon-precomposed.png 204
+    respond /apple-touch-icon-120x120.png 204
+    respond /apple-touch-icon-120x120-precomposed.png 204
+    respond /static/favicon.png 204
+
+    # 👉 3) 限制請求本文大小（視需求）
+    request_body {
+        max_size 1MB
+    }
+
+    # 你原本的 blocked（保留）
+    @blocked {
+        path_regexp blocked /\.(git|svn|hg|env)|(\.php)$
+    }
+    respond @blocked 403
+
+    # ✅ robots.txt（維持）
+    handle_path /robots.txt {
+        respond "User-agent: *\nDisallow:" 200
+        header Content-Type "text/plain"
+    }
+
+    # 靜態檔（維持）
     handle_path /static/* {
         root * "C:\server website\StarkLab\labweb\lab\staticfiles"
         file_server
     }
 
-
-    # 其他交給 Django (waitress) 反代
+    # 其他交給後端（維持）
     reverse_proxy 127.0.0.1:3000
 
     header {
@@ -62,8 +177,155 @@ lab.starklab.tw, www.lab.starklab.tw {
     }
 }
 
-# 教育平台
+# =========================
+# 教育平台 edu.starklab.tw
+# =========================
 edu.starklab.tw {
     encode gzip
+
+    # 👉 1) 短路掃描（一樣放最前）
+    @phpProbes path_regexp php (.*\.php.*)|(.*\/wp\/.*)|(^\/wp$)|(.*\/wp-admin\/.*)|(.*\/wp-includes\/.*)
+    handle @phpProbes {
+        respond 403
+    }
+    @configProbes path_regexp cfg (?i)(.*\/?config.*\.json$)|(.*appsettings.*\.json$)|(.*angular\.json$)|(.*tsconfig\.json$)|(.*\.env$)|(.*\/\.?aws\/.*)|(.*\.yml$)
+    handle @configProbes {
+        respond 403
+    }
+    @phpinfoProbes path_regexp phpinfo (?i)(.*phpinfo.*)|(^\/_profiler\/phpinfo$)|(^\/symfony\/_profiler\/phpinfo$)
+    handle @phpinfoProbes {
+        respond 403
+    }
+# 允許 ACME 憑證驗證用的 /.well-known/*
+@acme path /.well-known/*
+
+# 擋掉其他所有以 "." 開頭的隱藏路徑
+@dotProbes {
+    not path /.well-known/*          # ← 用 not 排除
+    path_regexp dotfiles ^/\..*      # ← 不用 lookahead，單純比對 "/." 開頭
+}
+handle @dotProbes {
+    respond 403
+}
+
+    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+    handle @dirScan {
+        respond 404
+    }
+
+    # 👉 2) favicon / apple-touch-icon 直接 204
+    respond /favicon.ico 204
+    respond /apple-touch-icon.png 204
+    respond /apple-touch-icon-precomposed.png 204
+    respond /apple-touch-icon-120x120.png 204
+    respond /apple-touch-icon-120x120-precomposed.png 204
+    respond /static/favicon.png 204
+
+    # 👉 3) 限制請求本文大小（視需求）
+    request_body {
+        max_size 1MB
+    }
+
+    # 你原本的 blocked（保留）
+    @blocked {
+        path_regexp blocked /\.(git|svn|hg|env)|(\.php)$
+    }
+    respond @blocked 403
+
+
+    # 其他交給後端（維持）
     reverse_proxy 127.0.0.1:5000
 }
+
+
+
+# =========================
+# 五金行庫存系統 hardware.starklab.tw
+# =========================
+hardware.starklab.tw {
+    encode gzip
+
+    # 👉 1) 短路掃描
+    @phpProbes path_regexp php (.*\.php.*)|(.*\/wp\/.*)|(^\/wp$)|(.*\/wp-admin\/.*)|(.*\/wp-includes\/.*)
+    handle @phpProbes {
+        respond 403
+    }
+    @configProbes path_regexp cfg (?i)(.*\/?config.*\.json$)|(.*appsettings.*\.json$)|(.*angular\.json$)|(.*tsconfig\.json$)|(.*\.env$)|(.*\/\.?aws\/.*)|(.*\.yml$)
+    handle @configProbes {
+        respond 403
+    }
+    @phpinfoProbes path_regexp phpinfo (?i)(.*phpinfo.*)|(^\/_profiler\/phpinfo$)|(^\/symfony\/_profiler\/phpinfo$)
+    handle @phpinfoProbes {
+        respond 403
+    }
+
+    # 允許 ACME 憑證驗證
+    @dotProbes {
+        not path /.well-known/*
+        path_regexp dotfiles ^/\..*
+    }
+    handle @dotProbes {
+        respond 403
+    }
+
+ @dirScan {
+        not path /products/*
+        not path /suppliers/*
+        not path /purchases/*
+        not path /categories/*
+        path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+    }
+    handle @dirScan {
+        respond 404
+    }
+
+
+
+    # 👉 2) favicon 直接 204
+    respond /favicon.ico 204
+    respond /apple-touch-icon.png 204
+    respond /apple-touch-icon-precomposed.png 204
+    respond /static/favicon.png 204
+
+    # 👉 3) 限制請求本文大小（圖片上傳調大為 10MB）
+    request_body {
+        max_size 10MB
+    }
+
+    @blocked {
+        path_regexp blocked /\.(git|svn|hg|env)|(\.php)$
+    }
+    respond @blocked 403
+
+    # ✅ robots.txt
+    handle_path /robots.txt {
+        respond "User-agent: *\nDisallow: /" 200
+        header Content-Type "text/plain"
+    }
+
+    # ✅ 靜態檔
+    handle_path /static/* {
+        root * "C:\server website\hardware_store\staticfiles"
+        file_server
+    }
+
+    # ✅ 媒體檔（商品圖片）
+    handle_path /media/* {
+        root * "C:\server website\hardware_store\media"
+        file_server
+    }
+
+    # 其他交給後端
+    handle {
+        reverse_proxy 127.0.0.1:2000
+    }
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:"
+        Cross-Origin-Opener-Policy "same-origin"
+    }
+}
+

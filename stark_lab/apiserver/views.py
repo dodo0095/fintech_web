@@ -777,13 +777,13 @@ def find_house_data(request):
 @api_view(['GET'])
 def technihistory2(request):
 
-    #date = request.GET.get('date', "2024-03")
+    date = request.GET.get('date', "2024-03")
 
 
     dict_finalt={'board':"", 'final_update':"",'tableData':""}
     if request.method == 'GET':
-        data = technicHistory.objects.all()
-    #data = technicHistory.objects.filter((Q(start_date__icontains=date)))
+        #data = technicHistory.objects.all()
+        data = technicHistory.objects.filter((Q(start_date__icontains=date)))
 
 
         tableData=[]
@@ -962,3 +962,15 @@ def monthly_performance_api(request):
     data = MonthlyPerformance.objects.all().order_by('label')
     serializer = MonthlyPerformance_Serializer(data, many=True)
     return Response(serializer.data)
+
+
+
+from django.shortcuts import render
+
+# 404 要有 exception 參數（可設預設值避免誤呼叫）
+def custom_page_not_found(request, exception=None):
+    return render(request, '404.html', {'path': request.path}, status=404)
+
+# 500 只能有 request；Django 不會傳 exception 進來
+def custom_server_error(request):
+    return render(request, '404.html', status=500)

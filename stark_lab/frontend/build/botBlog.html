@@ -1,64 +1,493 @@
-<!DOCTYPE html><!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
-    <meta name="keywords" content="StarkLab">
-    <meta name="description" content="StarkLab">
-    <link href="images/favicon.ico" rel="shortcut icon">
-    <title>StarkLab | 基本面歷史觀察清單</title>
-  <link href="/static/css/botBlog.css" rel="stylesheet"></head>
-  <body>
-    <div class="wrapper">
-      <div class="topper">
-        <div class="topper-content">
-          <div class="topper-mobile-opener"></div><a class="topper-logo" href="#">StartLab</a>
-          <div class="topper-navbar"><a class="js-selected" href="botBlog.html" target="_self">
-              <div><i class="icons icons-blog"></i></div><span class="font-regular">精彩文章</span></a><a href="bot.html" target="_self">
-              <div><i class="icons icons-robot"></i></div><span class="font-regular">選股機器人</span></a><a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">
-              <div><i class="icons icons-feedback"></i></div><span class="font-regular">Podcast</span></a><a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">
-              <div><i class="icons icons-fb"></i></div><span class="font-regular">FACEBOOK</span></a><a href="botAbout.html" target="_self">
-              <div><i class="icons icons-brain"></i></div><span class="font-regular">關於我</span></a><a href="watchCenter.html" target="_self">
-              <div><i class="icons icons-brain"></i></div><span class="font-regular">風向觀測站</span></a>
-          </div>
-        </div>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,股票分析,量化投資">
+  <meta name="description" content="StarkLab 精彩文章 — 產業時事分析與科技分享">
+  <link href="images/favicon.ico" rel="shortcut icon">
+  <title>StarkLab | 精彩文章</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #0D6FB8;
+      --blue-light: #1a85d6;
+      --blue-pale: #e8f3fc;
+      --blue-border: #bdd9f2;
+      --text: #1a1a2e;
+      --text-muted: #5a6a80;
+      --bg: #ffffff;
+      --bg-soft: #f7fafd;
+      --border: #e4ecf5;
+      --card-radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; list-style: none; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+    /* ── NAV (same as botAbout) ── */
+    .topper {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topper-content {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; height: 68px;
+    }
+    .topper-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark {
+      width: 34px; height: 34px; background: var(--blue); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700; font-size: 15px;
+    }
+    .logo-text { font-size: 17px; font-weight: 700; color: var(--text); }
+    .logo-text span { font-size: 12px; font-weight: 400; color: var(--text-muted); display: block; }
+    .topper-navbar { display: flex; align-items: center; gap: 2px; }
+    .topper-navbar a {
+      text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500;
+      padding: 7px 14px; border-radius: 6px; transition: all 0.2s; white-space: nowrap;
+    }
+    .topper-navbar a:hover { color: var(--blue); background: var(--blue-pale); }
+    .topper-navbar a.js-selected { color: var(--blue); background: var(--blue-pale); font-weight: 600; }
+    .topper-mobile-opener {
+      display: none; cursor: pointer; width: 36px; height: 36px;
+      flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+      border-radius: 6px; border: 1px solid var(--border);
+    }
+    .topper-mobile-opener span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 96px 24px 48px;
+      background: var(--bg-soft);
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header-inner { max-width: 1100px; margin: 0 auto; }
+    .page-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; color: var(--blue);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .page-eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--blue); border-radius: 1px; }
+    .page-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 5vw, 52px); line-height: 1.15; color: var(--text); margin-bottom: 16px;
+    }
+    .page-title em { color: var(--blue); font-style: normal; }
+    .page-desc { font-size: 15px; color: var(--text-muted); line-height: 1.75; max-width: 500px; }
+
+    /* ── CATEGORY TABS ── */
+    .category-bar {
+      position: sticky; top: 68px; z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .category-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; gap: 4px; height: 52px;
+    }
+    .cat-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 100px;
+      font-size: 13px; font-weight: 500; color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s;
+      border: 1.5px solid transparent;
+      background: transparent; white-space: nowrap;
+    }
+    .cat-btn:hover { color: var(--blue); background: var(--blue-pale); }
+    .cat-btn.active {
+      color: var(--blue); background: var(--blue-pale);
+      border-color: var(--blue-border); font-weight: 600;
+    }
+    .cat-dot { width: 6px; height: 6px; background: currentColor; border-radius: 50%; }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── SKELETON LOADER ── */
+    .skeleton-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .skeleton-card { border-radius: var(--card-radius); overflow: hidden; }
+    .skeleton-img { height: 190px; background: #e8eef5; border-radius: 8px; margin-bottom: 16px; animation: shimmer 1.4s infinite; }
+    .skeleton-line { height: 14px; background: #e8eef5; border-radius: 4px; margin-bottom: 10px; animation: shimmer 1.4s infinite; }
+    .skeleton-line.short { width: 60%; }
+    .skeleton-line.xshort { width: 40%; }
+    @keyframes shimmer {
+      0% { opacity: 1; } 50% { opacity: 0.45; } 100% { opacity: 1; }
+    }
+
+    /* ── ARTICLE GRID ── */
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    /* ── ARTICLE CARD ── */
+    .article-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+    }
+    .article-card:hover {
+      border-color: var(--blue-border);
+      box-shadow: 0 8px 28px rgba(13,111,184,0.1);
+      transform: translateY(-3px);
+    }
+    .card-img-wrap {
+      width: 100%; height: 190px; overflow: hidden; background: var(--bg-soft);
+      flex-shrink: 0;
+    }
+    .card-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.35s;
+    }
+    .article-card:hover .card-img-wrap img { transform: scale(1.04); }
+    .card-body { padding: 18px 18px 20px; display: flex; flex-direction: column; flex: 1; }
+    .card-tag {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; color: var(--blue);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: var(--text);
+      line-height: 1.45; margin-bottom: 10px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-abstract {
+      font-size: 13.5px; color: var(--text-muted); line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 16px; flex: 1;
+    }
+    .card-author {
+      display: flex; align-items: center; gap: 10px;
+      padding-top: 14px; border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .card-author img {
+      width: 32px; height: 32px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0;
+      border: 2px solid var(--border);
+    }
+    .card-author-info .author-name { font-size: 12px; font-weight: 600; color: var(--text); }
+    .card-author-info .author-date { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    /* ── LOAD MORE / SPINNER ── */
+    .load-trigger { height: 40px; }
+    .spinner-wrap {
+      text-align: center; padding: 32px 0;
+      display: none;
+    }
+    .spinner-wrap.visible { display: block; }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .end-msg {
+      text-align: center; padding: 40px;
+      font-size: 13px; color: var(--text-muted);
+      display: none;
+    }
+    .end-msg.visible { display: block; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 80px 24px;
+      display: none;
+    }
+    .empty-state.visible { display: block; }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; color: var(--text-muted); }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--text); padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-mark { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+    .footer-brand-text { font-weight: 700; font-size: 15px; color: white; }
+    .footer-brand-text small { display: block; font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .footer-nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-nav a { font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; }
+    .footer-nav a:hover { color: white; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .articles-grid, .skeleton-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .topper-navbar { display: none; }
+      .topper-navbar.js-active {
+        display: flex; flex-direction: column;
+        position: fixed; top: 68px; left: 0; right: 0; bottom: 0;
+        background: white; padding: 16px; gap: 4px; overflow-y: auto;
+        border-top: 1px solid var(--border);
+      }
+      .topper-navbar.js-active a { width: 100%; padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border); border-radius: 0; }
+      .topper-mobile-opener { display: flex; }
+      .articles-grid, .skeleton-grid { grid-template-columns: 1fr; }
+      .category-bar { top: 68px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="topper">
+  <div class="topper-content">
+    <a class="topper-logo" href="botAbout.html">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">
+        StarkLab
+        <span>史塔克實驗室</span>
       </div>
-      <main class="container">
-        <div class="bot-content">
-          <section class="s1">
-            <div class="sub-nav">
-              <div class="navBtn navBtn1">產業時事分析</div>
-              <div class="navBtn navBtn2">科技分享
-                <div class="navBtn navBtn3"> </div>
-                <div class="navBtn navBtn4"> </div>
-              </div>
-            </div>
-            <div class="s1-block">
-              <div class="writings-frame" id="writings-frame"></div>
-            </div>
-          </section>
-        </div>
-      </main>
-      <footer class="footer">
-        <div class="footer-content"><a class="footer-logo" href="#"></a>
-          <div class="footer-main">
-            <ul class="footer-sitemap">
-              <li><a href="#">理念</a></li>
-              <li><a href="#">指標紅綠燈</a></li>
-              <li><a href="#">選股機器人</a></li>
-              <li><a href="#">風險評估機器</a></li>
-              <li><a href="#">意見回饋</a></li>
-            </ul><span class="footer-copyright">Copyright © 2020 史塔克實驗室 版權所有.</span>
+    </a>
+    <div class="topper-mobile-opener" id="mobileOpener">
+      <span></span><span></span><span></span>
+    </div>
+    <nav class="topper-navbar" id="navbar">
+      <a href="botBlog.html" class="js-selected">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">Facebook</a>
+      <a href="https://starklab.tw">回到首頁</a>
+    </nav>
+  </div>
+</header>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-eyebrow">精彩文章</div>
+    <h1 class="page-title">用數據說話，<em>讓觀點更有力</em></h1>
+    <p class="page-desc">產業分析、量化投資心得、科技趨勢——我們把複雜的事說得清楚一點。</p>
+  </div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="category-bar">
+  <div class="category-inner">
+    <div class="cat-btn active" data-api="/api/articleapi/?format=json" data-label="產業時事分析">
+      <span class="cat-dot"></span> 產業時事分析
+    </div>
+    <div class="cat-btn" data-api="/api/articleapi2/?format=json" data-label="科技分享">
+      <span class="cat-dot"></span> 科技分享
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- Skeleton (shown while loading) -->
+  <div class="skeleton-grid" id="skeleton">
+    <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line xshort"></div></div>
+    <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line xshort"></div></div>
+    <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line xshort"></div></div>
+  </div>
+
+  <!-- Article grid -->
+  <div class="articles-grid" id="articles-grid" style="display:none;"></div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">📭</div>
+    <div class="empty-title">目前還沒有文章</div>
+    <div class="empty-desc">請稍後再來看看</div>
+  </div>
+
+  <!-- Infinite scroll trigger -->
+  <div class="load-trigger" id="load-trigger"></div>
+  <div class="spinner-wrap" id="spinner"><div class="spinner"></div></div>
+  <div class="end-msg" id="end-msg">— 已載入全部文章 —</div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">S</div>
+      <div class="footer-brand-text">
+        StarkLab
+        <small>史塔克實驗室 版權所有</small>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <a href="botBlog.html">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">Facebook</a>
+      <a href="https://starklab.tw">回到首頁</a>
+    </nav>
+    <div class="footer-copy">© 2020 – 2025 StarkLab</div>
+  </div>
+</footer>
+
+<script>
+  // ── Mobile nav ──
+  document.getElementById('mobileOpener').addEventListener('click', () => {
+    document.getElementById('navbar').classList.toggle('js-active');
+  });
+
+  // ── State ──
+  const PAGE_SIZE = 9;        // cards per "page" for infinite scroll
+  let allArticles = [];       // full list from API
+  let renderedCount = 0;      // how many we've shown so far
+  let loading = false;
+  let currentApi = '/api/articleapi/?format=json';
+  let currentLabel = '產業時事分析';
+
+  const grid      = document.getElementById('articles-grid');
+  const skeleton  = document.getElementById('skeleton');
+  const spinner   = document.getElementById('spinner');
+  const endMsg    = document.getElementById('end-msg');
+  const emptyState= document.getElementById('empty-state');
+  const trigger   = document.getElementById('load-trigger');
+
+  // ── Build card HTML ──
+  function buildCard(article, label) {
+    const a = document.createElement('a');
+    a.className = 'article-card';
+    a.href = article.link || '#';
+    a.target = '_blank';
+    a.rel = 'noopener';
+
+    const imgSrc = article.title_picture || '';
+    const authorImg = article.author_picture || '';
+
+    a.innerHTML = `
+      <div class="card-img-wrap">
+        <img src="${imgSrc}" alt="${article.title || ''}" loading="lazy" onerror="this.style.display='none'">
+      </div>
+      <div class="card-body">
+        <span class="card-tag">${label}</span>
+        <div class="card-title">${article.title || '（無標題）'}</div>
+        <div class="card-abstract">${article.abstract || ''}</div>
+        <div class="card-author">
+          <img src="${authorImg}" alt="${article.author_name || ''}" onerror="this.style.display='none'">
+          <div class="card-author-info">
+            <div class="author-name">${article.author_name || ''}</div>
+            <div class="author-date">${article.date || ''}</div>
           </div>
         </div>
-      </footer>
-    </div>
-  <script type="text/javascript" src="/static/js/botBlog.js"></script></body>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-180599162-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-180599162-1');
-  </script>
+      </div>`;
+    return a;
+  }
+
+  // ── Render next PAGE_SIZE cards ──
+  function renderMore() {
+    if (loading) return;
+    const slice = allArticles.slice(renderedCount, renderedCount + PAGE_SIZE);
+    if (slice.length === 0) return;
+
+    loading = true;
+    spinner.classList.add('visible');
+
+    // Small artificial delay (1 frame) so browser stays responsive
+    requestAnimationFrame(() => {
+      const frag = document.createDocumentFragment();
+      slice.forEach(a => frag.appendChild(buildCard(a, currentLabel)));
+      grid.appendChild(frag);
+      renderedCount += slice.length;
+
+      spinner.classList.remove('visible');
+      loading = false;
+
+      if (renderedCount >= allArticles.length) {
+        endMsg.classList.add('visible');
+        io.unobserve(trigger); // stop observing — all done
+      }
+    });
+  }
+
+  // ── Intersection Observer for infinite scroll ──
+  const io = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) renderMore();
+  }, { rootMargin: '200px' });
+
+  // ── Fetch articles ──
+  async function fetchArticles(apiUrl, label) {
+    // Reset UI
+    grid.style.display = 'none';
+    grid.innerHTML = '';
+    skeleton.style.display = 'grid';
+    emptyState.classList.remove('visible');
+    endMsg.classList.remove('visible');
+    spinner.classList.remove('visible');
+    allArticles = [];
+    renderedCount = 0;
+    loading = false;
+
+    currentApi = apiUrl;
+    currentLabel = label;
+
+    try {
+      const res = await fetch(apiUrl);
+      if (!res.ok) throw new Error('Network error');
+      const data = await res.json();
+
+      skeleton.style.display = 'none';
+
+      if (!data || data.length === 0) {
+        emptyState.classList.add('visible');
+        return;
+      }
+
+      allArticles = data;
+      grid.style.display = 'grid';
+
+      // Render first batch immediately, then observe trigger
+      renderMore();
+      io.observe(trigger);
+
+    } catch (err) {
+      console.error('Fetch error:', err);
+      skeleton.style.display = 'none';
+      emptyState.classList.add('visible');
+    }
+  }
+
+  // ── Category tab clicks ──
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      io.unobserve(trigger);
+      fetchArticles(btn.dataset.api, btn.dataset.label);
+    });
+  });
+
+  // ── Initial load ──
+  fetchArticles(currentApi, currentLabel);
+</script>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-180599162-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-180599162-1');
+</script>
+</body>
 </html>

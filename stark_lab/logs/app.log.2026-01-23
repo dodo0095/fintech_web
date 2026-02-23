@@ -1,0 +1,2 @@
+2026-01-23 01:13:07 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /
+2026-01-23 10:18:02 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /

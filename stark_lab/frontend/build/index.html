@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,股票分析,量化投資">
+  <meta name="description" content="史塔克實驗室 — 一群熱愛股市的資料科學家，用 Python 與機器學習，讓投資更有科學根據。">
+  <link href="images/favicon.ico" rel="shortcut icon">
+  <title>StarkLab | 史塔克實驗室</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #0D6FB8;
+      --blue-light: #1a85d6;
+      --blue-pale: #e8f3fc;
+      --blue-border: #bdd9f2;
+      --text: #1a1a2e;
+      --text-muted: #5a6a80;
+      --bg: #ffffff;
+      --bg-soft: #f7fafd;
+      --border: #e4ecf5;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; list-style: none; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    .topper {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topper-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .topper-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--blue);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .logo-text span {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-muted);
+      display: block;
+    }
+    .topper-navbar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .topper-navbar a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .topper-navbar a:hover { color: var(--blue); background: var(--blue-pale); }
+    .topper-navbar a.js-selected { color: var(--blue); background: var(--blue-pale); font-weight: 600; }
+    .topper-mobile-opener {
+      display: none;
+      cursor: pointer;
+      width: 36px; height: 36px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .topper-mobile-opener span {
+      display: block;
+      width: 18px; height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 120px 24px 88px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .hero-blob {
+      position: absolute;
+      top: -80px; right: -140px;
+      width: 580px; height: 580px;
+      background: radial-gradient(ellipse at 60% 40%, #d6eeff 0%, #edf6ff 55%, transparent 75%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: drift 10s ease-in-out infinite;
+    }
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-18px) scale(1.03); }
+    }
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 72px;
+      align-items: center;
+      position: relative;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.1s forwards;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 28px; height: 2px;
+      background: var(--blue);
+      border-radius: 1px;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(40px, 5.5vw, 68px);
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.2s forwards;
+    }
+    .hero-title .blue { color: var(--blue); }
+    .hero-desc {
+      font-size: 16px;
+      line-height: 1.85;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.3s forwards;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.4s forwards;
+    }
+    .btn-blue {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--blue); color: white;
+      text-decoration: none; padding: 13px 26px;
+      border-radius: 8px; font-size: 14px; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-blue:hover { background: var(--blue-light); box-shadow: 0 6px 20px rgba(13,111,184,0.3); transform: translateY(-1px); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--text);
+      text-decoration: none; padding: 13px 26px;
+      border-radius: 8px; font-size: 14px; font-weight: 500;
+      border: 1.5px solid var(--border); transition: all 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--blue-border); color: var(--blue); background: var(--blue-pale); }
+
+    .hero-card {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.5s forwards;
+    }
+    .hero-card-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .kpi {
+      background: white; border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 16px;
+    }
+    .kpi-val {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px; color: var(--blue);
+      line-height: 1; margin-bottom: 6px;
+    }
+    .kpi-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+    .hcf-list { display: flex; flex-direction: column; gap: 8px; }
+    .hcf-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-muted);
+      padding: 10px 12px; background: white;
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .hcf-dot { width: 7px; height: 7px; background: var(--blue); border-radius: 50%; flex-shrink: 0; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 96px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; color: var(--blue);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--blue); border-radius: 1px; }
+    .sec-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(28px, 4vw, 44px); line-height: 1.2;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .sec-title em { color: var(--blue); font-style: normal; }
+    .rule { width: 40px; height: 3px; background: var(--blue); border-radius: 2px; margin: 18px 0 48px; }
+
+    /* ── ABOUT ── */
+    .about-bg { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+    .about-body { font-size: 15.5px; line-height: 1.9; color: var(--text-muted); }
+    .about-body p { margin-bottom: 18px; }
+    .about-body strong { color: var(--text); font-weight: 600; }
+    .quote-box {
+      margin: 28px 0; border-left: 3px solid var(--blue);
+      padding: 18px 22px; background: white;
+      border-radius: 0 10px 10px 0;
+      box-shadow: 0 2px 12px rgba(13,111,184,0.06);
+    }
+    .quote-box p {
+      font-family: 'DM Serif Display', serif;
+      font-size: 17px; line-height: 1.65;
+      color: var(--text); font-style: italic; margin: 0 0 10px;
+    }
+    .quote-box cite { font-size: 12px; color: var(--blue); font-style: normal; font-weight: 600; letter-spacing: 0.04em; }
+    .about-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .acard {
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; padding: 22px 20px; transition: all 0.25s;
+    }
+    .acard:hover { border-color: var(--blue-border); box-shadow: 0 8px 24px rgba(13,111,184,0.1); transform: translateY(-3px); }
+    .acard-icon {
+      width: 42px; height: 42px; background: var(--blue-pale);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 14px;
+    }
+    .acard-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .acard-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── PODCAST ── */
+    .podcast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+    .podcast-body { font-size: 15.5px; line-height: 1.85; color: var(--text-muted); margin-bottom: 32px; }
+    .podcast-links { display: flex; flex-direction: column; gap: 10px; }
+    .plink {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; background: white;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      text-decoration: none; color: var(--text); transition: all 0.22s;
+    }
+    .plink:hover { border-color: var(--blue); background: var(--blue-pale); transform: translateX(4px); }
+    .plink-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .plink-icon.apple { background: #1c1c1e; }
+    .plink-icon.soundon { background: #1c3fa8; }
+    .plink-icon.spotify { background: #1db954; }
+    .plink-info strong { display: block; font-size: 14px; font-weight: 600; }
+    .plink-info span { font-size: 12px; color: var(--text-muted); }
+
+    .podcast-visual {
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px 32px; text-align: center;
+    }
+    .pv-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 24px; }
+    .waveform { display: flex; align-items: center; justify-content: center; gap: 4px; height: 64px; margin-bottom: 24px; }
+    .wb { width: 4px; border-radius: 2px; background: var(--blue); animation: wv 1.2s ease-in-out infinite; }
+    @keyframes wv { 0%, 100% { transform: scaleY(0.25); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+    .pv-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .pv-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+    .pv-controls { display: flex; align-items: center; justify-content: center; gap: 20px; color: var(--text-muted); }
+    .pv-play {
+      width: 44px; height: 44px; background: var(--blue);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 16px; cursor: pointer; transition: all 0.2s;
+    }
+    .pv-play:hover { background: var(--blue-light); transform: scale(1.05); }
+    .pv-skip { cursor: pointer; transition: color 0.2s; font-size: 20px; }
+    .pv-skip:hover { color: var(--blue); }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--text); padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-mark { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+    .footer-brand-text { font-weight: 700; font-size: 15px; color: white; }
+    .footer-brand-text small { display: block; font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .footer-nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-nav a { font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; }
+    .footer-nav a:hover { color: white; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 860px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+      .hero-card { display: none; }
+      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .podcast-grid { grid-template-columns: 1fr; gap: 48px; }
+    }
+    @media (max-width: 600px) {
+      .topper-navbar { display: none; }
+      .topper-navbar.js-active {
+        display: flex; flex-direction: column;
+        position: fixed; top: 68px; left: 0; right: 0; bottom: 0;
+        background: white; padding: 16px; gap: 4px; overflow-y: auto;
+        border-top: 1px solid var(--border);
+      }
+      .topper-navbar.js-active a { width: 100%; padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border); border-radius: 0; }
+      .topper-mobile-opener { display: flex; }
+      .section { padding: 64px 20px; }
+      .about-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="topper">
+  <div class="topper-content">
+    <a class="topper-logo" href="#">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">
+        StarkLab
+        <span>史塔克實驗室</span>
+      </div>
+    </a>
+    <div class="topper-mobile-opener" id="mobileOpener">
+      <span></span><span></span><span></span>
+    </div>
+    <nav class="topper-navbar" id="navbar">
+      <a href="botBlog.html">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">Facebook</a>
+      <a href="botAbout.html" class="js-selected">關於我們</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">史塔克實驗室 · Since 2020</div>
+      <h1 class="hero-title">
+        投資，不應該<br>只靠<span class="blue">感覺</span>
+      </h1>
+      <p class="hero-desc">
+        我們是一群對股市充滿熱忱的資料科學家，從 2020 年開始，用 Python 與機器學習把投資這件事說清楚、講明白——讓數字替你說話，讓策略有所依據。
+      </p>
+      <div class="hero-actions">
+        <a href="botBlog.html" class="btn-blue">閱讀文章</a>
+        <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank" class="btn-outline">收聽 Podcast</a>
+      </div>
+    </div>
+    <div>
+      <div class="hero-card">
+        <div class="hero-card-label">我們在做什麼</div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-val">5+</div>
+            <div class="kpi-desc">年持續耕耘量化投資研究</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val">AI</div>
+            <div class="kpi-desc">機器學習個股分析引擎</div>
+          </div>
+        </div>
+        <div class="hcf-list">
+          <div class="hcf-item"><div class="hcf-dot"></div>每月更新個股基本面歷史清單</div>
+          <div class="hcf-item"><div class="hcf-dot"></div>量化策略研究與分享</div>
+          <div class="hcf-item"><div class="hcf-dot"></div>Podcast 深度剖析市場趨勢</div>
+          <div class="hcf-item"><div class="hcf-dot"></div>Facebook 社群即時互動</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section about-bg">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div>
+        <div class="eyebrow">關於我們</div>
+        <h2 class="sec-title">不盲目、<em>有根據</em>地投資</h2>
+        <div class="rule"></div>
+        <div class="about-body">
+          <p>
+            Stock 音近「史塔克」，這個名字不只是個玩笑——它代表著我們對股票市場最原始的好奇心。2020 年夏天，幾個志同道合的朋友決定把各自在機器學習與資料分析上的所學，實際用在投資這件事上。
+          </p>
+          <p>
+            我們相信，在這個資訊過載的年代，<strong>大數據與 AI 不該只是頭條新聞的詞彙</strong>，而是每個人都能用來輔助決策的工具。在 StarkLab，我們用 Python 親手打造量化投資策略，並把每一個實驗結果、每一次回測，都誠實地分享給社群。
+          </p>
+          <div class="quote-box">
+            <p>「不要懵懵懂懂的隨意買股票，要在投資前紮實的做一些功課。」</p>
+            <cite>— 威廉‧歐尼爾（William J. O'Neil）</cite>
+          </div>
+          <p>
+            無論你是剛踏入市場的新手，還是已有多年經驗的老手，歡迎來這裡和我們一起討論、一起成長。這條路很長，但不用一個人走。
+          </p>
+        </div>
+      </div>
+      <div class="about-cards">
+        <div class="acard">
+          <div class="acard-icon">📊</div>
+          <div class="acard-title">基本面歷史清單</div>
+          <div class="acard-desc">追蹤台股個股長期基本面變化，用數據看清企業體質。</div>
+        </div>
+        <div class="acard">
+          <div class="acard-icon">🧠</div>
+          <div class="acard-title">機器學習分析</div>
+          <div class="acard-desc">集成多種 AI 模型，系統化評估個股優劣勢，降低主觀判斷。</div>
+        </div>
+        <div class="acard">
+          <div class="acard-icon">📝</div>
+          <div class="acard-title">深度投資文章</div>
+          <div class="acard-desc">不定期發布財經分析與量化研究心得，淺顯易懂，有憑有據。</div>
+        </div>
+        <div class="acard">
+          <div class="acard-icon">🎙️</div>
+          <div class="acard-title">Podcast 節目</div>
+          <div class="acard-desc">邊通勤邊充電，用聲音帶你認識機器學習與投資的交集。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PODCAST -->
+<section class="section">
+  <div class="section-inner">
+    <div class="podcast-grid">
+      <div>
+        <div class="eyebrow">Podcast</div>
+        <h2 class="sec-title">用耳朵<em>學投資</em></h2>
+        <div class="rule"></div>
+        <p class="podcast-body">
+          不是每個人都有時間坐下來看文章，所以我們開了這個節目。在《史塔克實驗室》Podcast 裡，我們聊 AI 怎麼看股票、量化策略怎麼跑、市場發生了什麼事——用輕鬆的方式，聊嚴肅的事。
+        </p>
+        <div class="podcast-links">
+          <a href="https://reurl.cc/D63Dz6" target="_blank" class="plink">
+            <div class="plink-icon apple">🎵</div>
+            <div class="plink-info"><strong>Apple Podcasts</strong><span>點擊前往收聽</span></div>
+          </a>
+          <a href="https://reurl.cc/n0OXad" target="_blank" class="plink">
+            <div class="plink-icon soundon">🎧</div>
+            <div class="plink-info"><strong>SoundOn</strong><span>點擊前往收聽</span></div>
+          </a>
+          <a href="https://reurl.cc/Z71LrA" target="_blank" class="plink">
+            <div class="plink-icon spotify">▶</div>
+            <div class="plink-info"><strong>Spotify</strong><span>點擊前往收聽</span></div>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="podcast-visual">
+          <div class="pv-tag">Now Playing</div>
+          <div class="waveform">
+            <div class="wb" style="height:18%; animation-delay:0s"></div>
+            <div class="wb" style="height:55%; animation-delay:0.1s"></div>
+            <div class="wb" style="height:38%; animation-delay:0.2s"></div>
+            <div class="wb" style="height:75%; animation-delay:0.3s"></div>
+            <div class="wb" style="height:48%; animation-delay:0.4s"></div>
+            <div class="wb" style="height:88%; animation-delay:0.5s"></div>
+            <div class="wb" style="height:30%; animation-delay:0.6s"></div>
+            <div class="wb" style="height:65%; animation-delay:0.7s"></div>
+            <div class="wb" style="height:50%; animation-delay:0.8s"></div>
+            <div class="wb" style="height:82%; animation-delay:0.9s"></div>
+            <div class="wb" style="height:40%; animation-delay:1.0s"></div>
+            <div class="wb" style="height:70%; animation-delay:0.15s"></div>
+            <div class="wb" style="height:25%; animation-delay:0.25s"></div>
+            <div class="wb" style="height:60%; animation-delay:0.35s"></div>
+          </div>
+          <div class="pv-title">史塔克實驗室 Podcast</div>
+          <div class="pv-sub">AI 真的能預測股市嗎？</div>
+          <div class="pv-controls">
+            <span class="pv-skip">⏮</span>
+            <div class="pv-play">▶</div>
+            <span class="pv-skip">⏭</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">S</div>
+      <div class="footer-brand-text">
+        StarkLab
+        <small>史塔克實驗室 版權所有</small>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <a href="botBlog.html">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">Facebook</a>
+    </nav>
+    <div class="footer-copy">© 2020 – 2025 StarkLab</div>
+  </div>
+</footer>
+
+<script>
+  const opener = document.getElementById('mobileOpener');
+  const navbar = document.getElementById('navbar');
+  opener.addEventListener('click', () => navbar.classList.toggle('js-active'));
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.acard, .plink, .about-body p, .quote-box, .kpi').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(14px)';
+    el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+    io.observe(el);
+  });
+</script>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-180599162-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-180599162-1');
+</script>
+</body>
+</html>

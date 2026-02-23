@@ -18,7 +18,12 @@ router.register(r'articleapi2', views.articleapi2, basename='articleapi2')
 def custom_page_not_found(request, exception):
     return render(request, "404.html", status=404)
 
+def custom_server_error(request, exception):
+    return render(request, "404.html", status=500)
+
+
 handler404 = custom_page_not_found
+handler500= custom_server_error
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
@@ -26,7 +31,7 @@ urlpatterns = [
     path('bot.html', TemplateView.as_view(template_name="bot.html")),
     path('botBlog.html', TemplateView.as_view(template_name="botBlog.html")),
     path('botAbout.html', TemplateView.as_view(template_name="botAbout.html")),
-    path('', TemplateView.as_view(template_name="botAbout.html")),
+    path('', TemplateView.as_view(template_name="index.html")),
 
     path('botBasicHistory.html', TemplateView.as_view(template_name="botBasicHistory.html")),
     path('botBasicCurrent.html', TemplateView.as_view(template_name="botBasicCurrent.html")),
@@ -68,3 +73,7 @@ urlpatterns = [
 
     
 ]
+
+
+handler404 = 'apiserver.views.custom_page_not_found'  # 需要 exception 參數
+handler500 = 'apiserver.views.custom_server_error'    # 不要有 exception 參數
