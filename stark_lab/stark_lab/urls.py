@@ -58,12 +58,6 @@ urlpatterns = [
 
 
 
-    url(r'^api/news_get/(?P<search>)$',views.news_get),
-    url(r'^api/sentiment_score/(?P<search>)$',views.sentiment_score),
-
-    url(r'^find_house_data/',views.find_house_data),
-
-
     url(r'^chart/',views.chart_view),
     url(r'^chart_2/',views.chart_view_2),
 
