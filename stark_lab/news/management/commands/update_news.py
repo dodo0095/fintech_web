@@ -18,11 +18,13 @@ from news.fetchers import (
     events as f_events,
     valuation as f_valuation,
     heat as f_heat,
+    summary as f_summary,
 )
 from news.fetchers.common import now_iso
 
-# key -> (status 用的 script 名稱)，順序即執行順序；heat 需最後（讀其他 payload）
-ORDER = ["market", "headlines", "tsmc", "fed", "valuation", "events", "heat"]
+# key -> (status 用的 script 名稱)，順序即執行順序；
+# heat / summary 需在 market/valuation 之後（讀其他 payload 合成）
+ORDER = ["market", "headlines", "tsmc", "fed", "valuation", "events", "heat", "summary"]
 SCRIPT_NAME = {
     "market": "fetch_market.py",
     "headlines": "fetch_news.py",
@@ -31,6 +33,7 @@ SCRIPT_NAME = {
     "valuation": "fetch_valuation.py",
     "events": "fetch_events.py",
     "heat": "fetch_heat.py",
+    "summary": "fetch_summary.py",
 }
 
 
@@ -66,6 +69,7 @@ class Command(BaseCommand):
                         store.store_valuation(code, vp)
                     store.set_default_valuation(bundle["default_code"])
                     store.store_watchlist(bundle["watchlist"])
+                    payloads["valuation_default"] = bundle["symbols"].get(bundle["default_code"])
                 elif key == "heat":
                     p = f_heat.build(
                         news=payloads.get("headlines"),
@@ -74,6 +78,14 @@ class Command(BaseCommand):
                         market=payloads.get("market"),
                     )
                     store.store_heat(p)
+                    payloads["heat"] = p
+                elif key == "summary":
+                    p = f_summary.build(
+                        market=payloads.get("market") or store.read_market(),
+                        heat=payloads.get("heat") or store.read_heat(),
+                        valuation=payloads.get("valuation_default") or store.read_valuation(),
+                    )
+                    store.store_summary(p)
                 results[key] = True
                 self.stdout.write(self.style.SUCCESS("  [ok] {}".format(key)))
             except Exception as e:
