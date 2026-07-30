@@ -9,10 +9,13 @@
 
 $ErrorActionPreference = "Continue"
 
-# --- 設定：專案使用的 Python 執行檔（改成你環境的路徑）---
+# --- 設定：專案使用的 Python 執行檔（含 django/yfinance 等依賴）---
+# 優先序：環境變數 STARKLAB_PYTHON > 部署機 py310 > PATH 上的 python
 $PythonExe = $env:STARKLAB_PYTHON
+if (-not $PythonExe -and (Test-Path "C:\py310\python.exe")) {
+    $PythonExe = "C:\py310\python.exe"          # 部署機 py310 環境
+}
 if (-not $PythonExe) {
-    # 後備：PATH 上的 python（需先 activate 對應 conda env）
     $PythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source
 }
 
