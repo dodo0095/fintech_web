@@ -33,7 +33,7 @@ handle @dotProbes {
 }
 
 
-    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])(\/|$)
     handle @dirScan {
         respond 404
     }
@@ -129,7 +129,7 @@ handle @dotProbes {
     respond 403
 }
 
-    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])(\/|$)
     handle @dirScan {
         respond 404
     }
@@ -208,7 +208,7 @@ handle @dotProbes {
     respond 403
 }
 
-    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+    @dirScan path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])(\/|$)
     handle @dirScan {
         respond 404
     }
@@ -273,7 +273,7 @@ hardware.starklab.tw {
         not path /suppliers/*
         not path /purchases/*
         not path /categories/*
-        path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])\/?
+        path_regexp dirs (?i)\/(backup|old|new|site|site1|main|web|portal|cms|blog2?|store|shop|wordpress|wp|en|de|fr|us|v2|202[3-5])(\/|$)
     }
     handle @dirScan {
         respond 404

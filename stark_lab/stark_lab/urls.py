@@ -27,6 +27,10 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
 
+    # 消息面收集平台（news app）
+    path('news.html', TemplateView.as_view(template_name="news.html")),
+    path('api/news/', include('news.urls')),
+
     # 現在的選股
     path('api/basicCurrent/', views.basicCurrentapi2),
     path('api/technicCurrent/', views.technicCurrentapi2),
