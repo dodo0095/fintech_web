@@ -43,6 +43,10 @@ urlpatterns = [
     #path('chose_robot/', views.chose_robot),
     path('api/', include(router.urls)),
 
+    # 消息面收集平台（news app）
+    path('news.html', TemplateView.as_view(template_name="news.html")),
+    path('api/news/', include('news.urls')),
+
 
     #現在的選股
     url(r'^api/basicCurrent/',views.basicCurrentapi2),

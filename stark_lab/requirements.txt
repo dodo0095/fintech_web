@@ -37,3 +37,12 @@ virtualenv==16.7.9
 virtualenv-clone==0.5.3
 virtualenvwrapper==4.8.4
 wrapt==1.11.2
+
+# --- news app（消息面收集平台）抓取依賴 ---
+# 注意：jsonfield==3.1.0（上方已列）供 news models 的 JSONField 使用。
+yfinance
+feedparser>=6.0.11
+beautifulsoup4>=4.12.0
+# multitasking 為 yfinance 依賴；0.0.13+ 使用 type[...] 語法需 Python 3.9+，
+# Python 3.8 環境必須釘在 0.0.11，否則 import yfinance 會 TypeError。
+multitasking==0.0.11

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'apiserver',
+    'news',
 
 ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

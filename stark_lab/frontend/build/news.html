@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="個股資訊整合平台 — 市場總覽、重大新聞、本益比河流圖" />
+    <title>StarkLab News | 個股資訊整合</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <link rel="stylesheet" href="/static/news/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <p class="tagline"><a href="/" style="color:inherit;text-decoration:none">← 回 StarkLab 首頁</a></p>
+        <h1>StarkLab News</h1>
+        <p class="tagline">不想花時間整理資訊 — 開盤前重點一站看完</p>
+        <div class="meta-bar">
+          <span>最後更新：<strong id="global-updated">載入中…</strong></span>
+          <span id="freshness-badge" class="badge">檢查中</span>
+          <span>時段：<strong id="session-label">—</strong></span>
+          <span class="sched">排程：每天 04:00 / 08:00 / 14:00 / 20:00</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div id="signal-banner" class="signal-banner" hidden></div>
+      <div class="grid">
+        <!-- ROW 1 · 市場總覽 + 消息面熱度 -->
+        <section class="cell c8">
+          <div class="cell-head">
+            <span class="eyebrow">市場總覽 · 美股 / 國際</span>
+            <h2>道瓊 / 那斯達克 / S&amp;P 500 / 台積電 ADR</h2>
+          </div>
+          <div id="market-status" class="state-box" hidden></div>
+          <div id="market-cards" class="cards" aria-live="polite"></div>
+
+          <div class="cell-head market-tw-head">
+            <span class="eyebrow">市場總覽 · 台股</span>
+            <h2>加權 / 櫃買 / 0050 / 台積電</h2>
+          </div>
+          <div id="market-tw-status" class="state-box" hidden></div>
+          <div id="market-tw-cards" class="cards" aria-live="polite"></div>
+        </section>
+
+        <section class="cell c4 card heat-card">
+          <div class="cell-head">
+            <span class="eyebrow">消息面熱度</span>
+            <h2>情緒溫度計</h2>
+          </div>
+          <div id="heat-status" class="state-box" hidden></div>
+          <div id="heat-gauge" role="img" aria-label="消息面情緒溫度計"></div>
+          <div id="heat-drivers" class="heat-drivers"></div>
+          <p class="heat-explain">指針越偏右（紅）＝消息面越熱絡、樂觀；越偏左（藍）＝越冷清、保守。分數由新聞情緒、大盤動能、消息量與聯準會傾向合成。<b>過熱</b>常出現在相對高點，留意追高。</p>
+          <p class="heat-note">參考情緒指標，非投資建議</p>
+        </section>
+
+        <!-- ROW 2 · 主角：本益比河流圖 + 側欄 -->
+        <section class="cell c8 card">
+          <div class="cell-head">
+            <span class="eyebrow">核心功能</span>
+            <h2 id="val-title">本益比河流圖</h2>
+            <span class="cell-tag">看現在貴不貴</span>
+          </div>
+          <div class="val-toolbar">
+            <div class="lookup">
+              <input id="val-ticker" type="text" value="2330 台積電" placeholder="輸入代碼，如 2317" aria-label="輸入股票代碼（觀察名單 2330/2317/2454/2308）" />
+              <button id="val-go" type="button">查詢</button>
+            </div>
+            <div class="seg" id="val-metric" role="tablist">
+              <span data-metric="PE" class="on" role="tab">本益比 PE</span>
+              <span data-metric="PB" role="tab">淨值比 PB</span>
+            </div>
+            <div class="val-zone">
+              目前 <strong id="val-pe">—</strong>
+              <span id="val-zone" class="zone-badge">—</span>
+            </div>
+          </div>
+          <div id="chart-status" class="state-box" hidden></div>
+          <div class="chart-panel">
+            <div id="river-chart" role="img" aria-label="本益比河流圖"></div>
+          </div>
+          <div class="band-key" id="band-key"></div>
+          <p class="val-explain" id="val-explain"></p>
+        </section>
+
+        <aside class="cell c4 side">
+          <div class="card">
+            <div class="cell-head">
+              <span class="eyebrow">關注事件</span>
+              <h2>非農 / 月頻數據</h2>
+              <span class="cell-tag">有資料才顯示</span>
+            </div>
+            <div id="events-status" class="state-box" hidden></div>
+            <div id="events-list" class="events-grid"></div>
+          </div>
+          <div class="card">
+            <div class="cell-head">
+              <span class="eyebrow">今日盤勢</span>
+              <h2>重點整理</h2>
+            </div>
+            <ul id="support-list" class="bullets"></ul>
+          </div>
+        </aside>
+
+        <!-- ROW 3 · 三個新聞格子（等寬、各 5 篇） -->
+        <section class="cell c4 card">
+          <div class="cell-head">
+            <span class="eyebrow">美國重大新聞</span>
+            <h2>前五大</h2>
+          </div>
+          <div id="news-status" class="state-box" hidden></div>
+          <div id="news-list" class="news"></div>
+        </section>
+
+        <section class="cell c4 card">
+          <div class="cell-head">
+            <span class="eyebrow">TSMC 個股新聞</span>
+            <h2>台積電專區</h2>
+          </div>
+          <div id="tsmc-status" class="state-box" hidden></div>
+          <div id="tsmc-list" class="news"></div>
+        </section>
+
+        <section class="cell c4 card">
+          <div class="cell-head">
+            <span class="eyebrow">聯準會發言</span>
+            <h2>Fed 重點</h2>
+          </div>
+          <div id="fed-status" class="state-box" hidden></div>
+          <div id="fed-list" class="news"></div>
+        </section>
+
+        <!-- ROW 4 · 全球摘要 + 今日速結 -->
+        <section class="cell c8 card">
+          <div class="cell-head">
+            <span class="eyebrow">全球經濟局勢</span>
+            <h2>一早摘要</h2>
+            <span class="cell-tag">3–5 點條列</span>
+          </div>
+          <ul id="summary-list" class="bullets"></ul>
+        </section>
+
+        <section class="cell c4 card today-card">
+          <div class="cell-head"><span class="eyebrow">今日速結</span><h2>一句話掌握</h2></div>
+          <p id="today-summary" class="today-summary">產生中…</p>
+          <p class="today-note">依大盤、消息面熱度與估值自動生成 · 非投資建議</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p id="source-status" class="src-status"></p>
+      <p>
+        StarkLab News · 資料由 Django API 提供（<code>/api/news/*</code>）·
+        排程更新：<code>python manage.py update_news</code>（每天 04:00 / 08:00 / 14:00 / 20:00）
+      </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="/static/news/app.js"></script>
+  </body>
+</html>
