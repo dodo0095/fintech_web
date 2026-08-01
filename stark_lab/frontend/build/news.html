@@ -21,6 +21,12 @@
         font-weight: 700;
         margin-right: 0.1rem;
       }
+      /* 桌機版：右側側欄與左側河流圖同一 grid row 已等高，
+         讓側欄最後一張卡（重點整理）撐滿剩餘高度，底框對齊河流圖卡片底部。
+         只在桌機生效，避免影響 900px 以下側欄改為橫排的版面。 */
+      @media (min-width: 901px) {
+        .side > .card:last-child { flex: 1 1 auto; }
+      }
     </style>
   </head>
   <body>
