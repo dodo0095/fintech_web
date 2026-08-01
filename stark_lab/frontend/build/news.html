@@ -21,12 +21,14 @@
         font-weight: 700;
         margin-right: 0.1rem;
       }
-      /* 桌機版：右側側欄與左側河流圖同一 grid row 已等高，
-         讓側欄最後一張卡（重點整理）撐滿剩餘高度，底框對齊河流圖卡片底部。
-         只在桌機生效，避免影響 900px 以下側欄改為橫排的版面。 */
+      /* 桌機版：右側側欄與左側河流圖同一 grid row 已等高（側欄已被撐滿），
+         但 flex column 不會把定高傳給子卡，故最後一張卡無法撐開。
+         改用 grid（auto 1fr）：關注事件自然高、重點整理吃掉剩餘高度，
+         底框即對齊河流圖卡片底部。只在桌機生效，不影響 900px 以下橫排版面。 */
       @media (min-width: 901px) {
-        .side > .card:last-child { flex: 1 1 auto; }
+        .side { display: grid; grid-template-rows: auto 1fr; align-content: stretch; }
       }
+
     </style>
   </head>
   <body>
