@@ -1,6 +1,1 @@
-2026-02-24 03:57:29 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-02-24 04:11:34 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-02-24 04:15:28 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-02-24 04:16:39 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-02-24 04:19:09 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-02-24 04:42:30 INFO waitress:485 Serving on http://127.0.0.1:8000
+2026-08-01 08:52:55 WARNING waitress.queue:114 Task queue depth is 1
