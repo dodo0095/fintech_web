@@ -10,6 +10,18 @@
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
     />
     <link rel="stylesheet" href="/static/news/style.css" />
+    <style>
+      /* 今日盤勢重點整理：清單容器為 flex，會吃掉 <ol> 的數字 marker，
+         改用 CSS counter 以 ::before 顯式編號 1. 2. 3. */
+      #support-list { counter-reset: pt; padding-left: 0.1rem; }
+      #support-list > li { counter-increment: pt; }
+      #support-list > li::before {
+        content: counter(pt) ". ";
+        color: var(--accent);
+        font-weight: 700;
+        margin-right: 0.1rem;
+      }
+    </style>
   </head>
   <body>
     <header class="site-header">
@@ -55,7 +67,9 @@
           <div id="heat-status" class="state-box" hidden></div>
           <div id="heat-gauge" role="img" aria-label="消息面情緒溫度計"></div>
           <div id="heat-drivers" class="heat-drivers"></div>
-          <p class="heat-explain">指針越偏右（紅）＝消息面越熱絡、樂觀；越偏左（藍）＝越冷清、保守。分數由新聞情緒、大盤動能、消息量與聯準會傾向合成。<b>過熱</b>常出現在相對高點，留意追高。此為每日 4 次更新的快照，反映最近一個交易日大盤表現與近期新聞，非盤中即時值。</p>
+          <p class="heat-explain">指針越偏右（紅）＝消息面越熱絡、樂觀；<br />越偏左（藍）＝越冷清、保守。</p>
+          <p class="heat-explain">分數由新聞情緒、大盤動能、消息量與聯準會傾向合成，<b>過熱</b>常出現在相對高點，留意追高。</p>
+          <p class="heat-explain">數值為每日 4 次更新的快照，反映最近一個交易日大盤與近期新聞，非盤中即時值。</p>
           <p class="heat-note">參考情緒指標，非投資建議</p>
         </section>
 
