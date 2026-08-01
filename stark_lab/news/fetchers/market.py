@@ -20,39 +20,26 @@ TW_INDICES = [
 ]
 
 
-def _fi_get(fi, *keys):
-    for k in keys:
-        try:
-            v = fi.get(k) if isinstance(fi, dict) else getattr(fi, k, None)
-            v = safe_float(v)
-            if v is not None:
-                return v
-        except Exception:
-            continue
-    return None
-
-
 def fetch_quote(symbol: str) -> dict:
+    """取得報價與漲跌幅。
+
+    NOTE: 漲跌幅基準一律採 history 最近兩根收盤價，不用 fast_info.previous_close。
+    該欄位對部分海外掛牌（如台積電 ADR TSM）曾回傳與實際收盤不符的髒值
+    （實測 412.77，正確應為前一交易日收盤附近），導致漲跌幅誤算超過 2 個百分點。
+    history 的收盤序列（含當日即時更新的最後一根）沒有這個問題，四大指數 +
+    ADR + 0050 + 2330 實測皆正確，一併修掉 2330.TW 先前的小數點誤差。
+    """
     import yfinance as yf
 
     t = yf.Ticker(symbol)
-    price = prev = None
-    try:
-        fi = t.fast_info
-        price = _fi_get(fi, "last_price", "lastPrice", "regular_market_price")
-        prev = _fi_get(fi, "previous_close", "previousClose")
-    except Exception:
-        pass
-
-    if price is None or prev is None:
-        hist = t.history(period="5d")
-        if hist is None or hist.empty:
-            raise RuntimeError("no history for {}".format(symbol))
-        closes = hist["Close"].dropna()
-        if closes.empty:
-            raise RuntimeError("empty close for {}".format(symbol))
-        price = safe_float(closes.iloc[-1])
-        prev = safe_float(closes.iloc[-2]) if len(closes) >= 2 else price
+    hist = t.history(period="5d")
+    if hist is None or hist.empty:
+        raise RuntimeError("no history for {}".format(symbol))
+    closes = hist["Close"].dropna()
+    if closes.empty:
+        raise RuntimeError("empty close for {}".format(symbol))
+    price = safe_float(closes.iloc[-1])
+    prev = safe_float(closes.iloc[-2]) if len(closes) >= 2 else price
 
     if price is None:
         raise RuntimeError("no price for {}".format(symbol))
