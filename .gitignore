@@ -1,0 +1,10 @@
+# 日誌檔（執行時自動產生，不進版控）
+stark_lab/logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
