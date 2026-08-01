@@ -14,7 +14,17 @@ INDICES = [
 
 TW_INDICES = [
     ("加權指數", "^TWII"),
-    ("櫃買指數", "^TWOII"),
+    # "^TWOII" 在 Yahoo 已查無資料（fast_info 兩欄位皆 None，history 直接
+    # possibly delisted）。改用 IX0043.TWO（"TPEX CAPITALIZATION WEIGHTED
+    # ST[OCK INDEX]"，命名規則對照 ^TWII 的 "TSEC CAPITALIZATION WEIGHTED
+    # ST[OCK INDEX]"，確認是櫃買指數本尊）。
+    # 已知限制：Yahoo 對這檔 index 的 chart API 目前只回得出 1 天的日 K
+    # （validRanges 只有 1d/5d，且 5d 查詢仍只回 1 筆），不像 ^TWII 有完整
+    # 歷史，所以 fetch_quote() 算不出兩天收盤價差，change/change_pct 會是
+    # 0（不是抓取失敗，是真的沒有前一天可比較的資料）。history_metadata 裡
+    # 雖然有 chartPreviousClose 這個欄位，但實測對 TSM／2330.TW／^TWII 都跟
+    # 真實前一日收盤對不上（曾經是本次 bug 的成因），不能拿來當替代基準。
+    ("櫃買指數", "IX0043.TWO"),
     ("元大台灣50", "0050.TW"),
     ("台積電", "2330.TW"),
 ]
