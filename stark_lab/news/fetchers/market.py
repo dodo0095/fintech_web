@@ -49,12 +49,14 @@ def fetch_quote(symbol: str) -> dict:
     if closes.empty:
         raise RuntimeError("empty close for {}".format(symbol))
     price = safe_float(closes.iloc[-1])
-    prev = safe_float(closes.iloc[-2]) if len(closes) >= 2 else price
+    # 只有一根收盤（無前一交易日可比，如櫃買 IX0043.TWO：Yahoo chart API 僅回 1 日 K）
+    # 時 prev 為 None，change/change_pct 回 None，前端顯示「—」而非誤導性的 0.00%。
+    prev = safe_float(closes.iloc[-2]) if len(closes) >= 2 else None
 
     if price is None:
         raise RuntimeError("no price for {}".format(symbol))
     if prev is None or prev == 0:
-        change = change_pct = 0.0
+        change = change_pct = None
     else:
         change = round(price - prev, 4)
         change_pct = round((price - prev) / prev * 100, 4)
