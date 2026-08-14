@@ -367,7 +367,15 @@ def technihistory2(request):
             total_start_price=total_start_price+float(data[i].buy_price)
             total_final_price=total_final_price+float(data[i].sell_price)
 
-        a=round(((total_final_price-total_start_price)/total_start_price)*100,2)
+        #a=round(((total_final_price-total_start_price)/total_start_price)*100,2)
+        if total_start_price and total_start_price != 0:
+            a = round(((total_final_price - total_start_price) / total_start_price) * 100, 2)
+        else:
+        # 依你的 API 設計選擇合適的回應方式
+            a = None  # 或 0，或直接回傳錯誤訊息給前端
+        # logger.warning(f"total_start_price is zero/None for request params: {request.query_params}")
+
+
 
         board= {"today": 'X',"total":str(a)}
         dict_finalt={'board':board, 'final_update':date,'tableData':tableData}
