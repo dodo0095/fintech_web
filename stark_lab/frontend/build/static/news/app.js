@@ -56,8 +56,13 @@ function escapeAttr(str) { return escapeHtml(str).replace(/'/g, "&#39;"); }
 async function loadJSON(path) {
   try {
     const res = await fetch(path, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return { ok: true, data: await res.json() };
+    let data = null;
+    try { data = await res.json(); } catch (e) { data = null; }
+    if (!res.ok) {
+      const msg = (data && data.detail) || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    return { ok: true, data };
   } catch (err) {
     console.warn(`Failed to load ${path}:`, err);
     return { ok: false, error: err.message || String(err) };
@@ -109,7 +114,7 @@ function renderTodaySummary(marketRes, heatRes, valuationRes) {
     mktPart = avg > 0.3 ? "美股偏強" : avg < -0.3 ? "美股偏弱" : "美股漲跌互見";
   }
   // 消息面熱度
-  const heatPart = h && h.level ? `消息面${h.level}` : "";
+  const heatPart = h && h.level ? `消息面風險${h.level}` : "";
   // 估值
   let valPart = "";
   let valHot = false, valCold = false;
@@ -119,11 +124,10 @@ function renderTodaySummary(marketRes, heatRes, valuationRes) {
     valCold = /低點|偏低/.test(v.zone_label);
   }
   // 綜合語氣
-  const heatHot = h && (["過熱", "偏熱"].includes(h.level) || (typeof h.score === "number" && h.score >= 70));
-  const heatCold = h && (["冰冷", "偏冷"].includes(h.level) || (typeof h.score === "number" && h.score <= 30));
+  const heatHot = h && (["嚴重", "偏熱", "過熱"].includes(h.level) || h.trend === "severe" || h.trend === "hot" || (typeof h.score === "number" && h.score >= 70));
   let take = "";
-  if (valHot && heatHot) take = "盤前偏防禦，留意追高";
-  else if (valCold && heatCold) take = "留意是否為相對低基期";
+  if (valHot && heatHot) take = "估值偏高且消息面風險偏熱，留意風險";
+  else if (heatHot) take = "消息面風險偏熱";
   else if (mktPart === "美股偏弱") take = "台股開盤留意賣壓";
   else if (mktPart === "美股偏強") take = "台股開盤氣氛偏多";
 
@@ -142,16 +146,12 @@ function renderSignal(valuationRes, heatRes) {
   const zone = v ? v.zone_label || "" : "";
   const valHot = /高點|偏高/.test(zone);
   const valCold = /低點|偏低/.test(zone);
-  const heatHot = h && (["過熱", "偏熱"].includes(h.level) || (typeof h.score === "number" && h.score >= 70));
-  const heatCold = h && (["冰冷", "偏冷"].includes(h.level) || (typeof h.score === "number" && h.score <= 30));
+  const heatHot = h && (["嚴重", "偏熱", "過熱"].includes(h.level) || h.trend === "severe" || h.trend === "hot" || (typeof h.score === "number" && h.score >= 70));
   if (valHot && heatHot) {
     el.className = "signal-banner hot";
     el.hidden = false;
-    el.innerHTML = `⚠ <b>雙訊號提醒：</b>${escapeHtml(v.name || "標的")} 估值處於相對高檔（${escapeHtml(zone)}），且消息面偏熱（${escapeHtml(h.level)} ${h.score}）——追高請留意風險。<span class="sig-note">非投資建議</span>`;
-  } else if (valCold && heatCold) {
-    el.className = "signal-banner cold";
-    el.hidden = false;
-    el.innerHTML = `❄ <b>雙訊號：</b>${escapeHtml(v.name || "標的")} 估值相對低檔且消息面偏冷——可留意是否為相對低基期。<span class="sig-note">非投資建議</span>`;
+    const raw = typeof h.news_score === "number" ? h.news_score : h.score;
+    el.innerHTML = `⚠ <b>雙訊號提醒：</b>${escapeHtml(v.name || "標的")} 估值處於相對高檔（${escapeHtml(zone)}），且消息面風險${escapeHtml(h.level || "")}（${raw}）——留意風險。<span class="sig-note">非投資建議</span>`;
   } else {
     el.hidden = true;
   }
@@ -225,10 +225,18 @@ function newsItemHtml(item, opts = {}, idx = 0) {
     ? `<span class="stance ${item.stance}">${item.stance === "hawk" ? "偏鷹" : item.stance === "dove" ? "偏鴿" : "中性"}</span>`
     : "";
   const tags = (item.tags || []).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+  const heatTags = [];
+  if (item.war) heatTags.push(`<span class="tag war">戰爭級</span>`);
+  if (item.name_lock) heatTags.push(`<span class="tag war">管制／制裁</span>`);
+  (item.hits_off || []).forEach((w) => heatTags.push(`<span class="tag risk">${escapeHtml(w)}</span>`));
+  (item.hits_on || []).forEach((w) => heatTags.push(`<span class="tag cool">${escapeHtml(w)}</span>`));
+  if (typeof item.heat === "number" && item.heat !== 0) {
+    heatTags.push(`<span class="tag">${item.heat > 0 ? "+" : ""}${item.heat}</span>`);
+  }
   return `<div class="news-item">${rank}<div class="news-body">
       <a class="title" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title || "（無標題）")}</a>
       ${summary}
-      <div class="meta"><span class="src">${escapeHtml(item.source || "—")}</span><span title="${escapeAttr(formatDateTime(item.time))}">${relTime(item.time)}</span>${stance}${tags}</div>
+      <div class="meta"><span class="src">${escapeHtml(item.source || "—")}</span><span title="${escapeAttr(formatDateTime(item.time))}">${relTime(item.time)}</span>${stance}${tags}${heatTags.join("")}</div>
     </div></div>`;
 }
 
@@ -272,6 +280,7 @@ function renderHeat(result) {
   if (!result.ok || !result.data) { setStatus(status, "note", "熱度資料暫不可用。"); gEl.style.display = "none"; return null; }
   const d = result.data;
   const score = typeof d.score === "number" ? d.score : 50;
+  const raw = typeof d.news_score === "number" ? d.news_score : score;
   const level = d.level || "—";
   gEl.style.display = "block";
   const chart = echarts.getInstanceByDom(gEl) || echarts.init(gEl);
@@ -283,7 +292,7 @@ function renderHeat(result) {
       anchor: { show: true, size: 10, itemStyle: { color: "#1b2330" } },
       axisTick: { show: false }, splitLine: { length: 11, lineStyle: { color: "#fff", width: 2 } }, axisLabel: { show: false },
       title: { show: false },
-      detail: { valueAnimation: true, offsetCenter: [0, "34%"], formatter: () => `${level}  ${score}`, fontSize: 15, fontWeight: 700, color: "#1b2330" },
+      detail: { valueAnimation: true, offsetCenter: [0, "34%"], formatter: () => `${level}  ${raw}`, fontSize: 15, fontWeight: 700, color: "#1b2330" },
       data: [{ value: score }],
     }],
   }, true);
@@ -484,34 +493,91 @@ function drawValuation() {
   }
 }
 
+const FOCUS_KEY = "news-focus-code";
+
+function parseTicker(raw) {
+  const m = String(raw || "").match(/[0-9]{3,6}[A-Za-z]?/i);
+  return m ? m[0].toUpperCase() : "";
+}
+function readFocus() {
+  try {
+    return parseTicker(localStorage.getItem(FOCUS_KEY)) || "2330";
+  } catch (e) {
+    return "2330";
+  }
+}
+function writeFocus(code) {
+  try { localStorage.setItem(FOCUS_KEY, code); } catch (e) { /* ignore */ }
+}
+function setFocusInputs(code, name) {
+  const label = name ? `${code} ${name}` : code;
+  ["#val-ticker", "#stock-ticker"].forEach((sel) => {
+    const el = $(sel);
+    if (el) el.value = label;
+  });
+  const title = $("#stock-title");
+  if (title) title.textContent = name ? `${name}專區` : "個股專區";
+}
+
+function resetMetricUI() {
+  const seg = $("#val-metric");
+  if (seg) seg.querySelectorAll("span").forEach((x) => x.classList.toggle("on", x.dataset.metric === "PE"));
+}
+
+async function applyFocus(code, { fallback = true } = {}) {
+  code = parseTicker(code) || "2330";
+  writeFocus(code);
+  valFile = `/api/news/valuation/${code}`;
+  const stockStatus = $("#tsmc-status");
+  const chartStatus = $("#chart-status");
+  if (stockStatus) setStatus(stockStatus, "note", `載入 ${code} 新聞…`);
+  if (chartStatus) setStatus(chartStatus, "note", `計算 ${code} 河流圖…`);
+
+  const [stock, heat, val] = await Promise.all([
+    loadJSON(`/api/news/stock/${encodeURIComponent(code)}`),
+    loadJSON(`/api/news/heat?code=${encodeURIComponent(code)}`),
+    loadJSON(`/api/news/valuation/${encodeURIComponent(code)}`),
+  ]);
+
+  if (stock.ok && stock.data) {
+    const name = stock.data.name || "";
+    setFocusInputs(code, name);
+    renderNewsList(stock, "#tsmc-list", "#tsmc-status", { rank: true, limit: 5, label: `${name || code}新聞` });
+  } else if (fallback && code !== "2330") {
+    if (stockStatus) setStatus(stockStatus, "note", stock.error || `查無「${code}」，改回台積電。`);
+    return applyFocus("2330", { fallback: false });
+  } else if (stockStatus) {
+    setStatus(stockStatus, "error", stock.error || "個股新聞載入失敗。");
+  }
+
+  if (heat.ok) renderHeat(heat);
+
+  if (val.ok && val.data) {
+    valMetric = "PE";
+    resetMetricUI();
+    renderValuation(val);
+  } else if (chartStatus) {
+    setStatus(chartStatus, "note", val.error || `「${code}」暫時畫不出河流圖。`);
+  }
+  if (val.ok || heat.ok) renderSignal(val, heat);
+  return { stock, heat, val };
+}
+
 /* ---------- 控制項：代碼查詢 / PE-PB 切換 ---------- */
 function wireControls() {
   const go = $("#val-go");
   const input = $("#val-ticker");
-  const status = $("#chart-status");
-  function resetMetricUI() {
-    const seg = $("#val-metric");
-    if (seg) seg.querySelectorAll("span").forEach((x) => x.classList.toggle("on", x.dataset.metric === "PE"));
+  async function queryFrom(el) {
+    const code = parseTicker(el && el.value);
+    if (!code) return;
+    await applyFocus(code);
   }
-  async function query() {
-    const m = (input.value || "").match(/[0-9A-Za-z]{2,6}/);
-    const code = m ? m[0] : "";
-    const loaded = valState ? String(valState.symbol || "").split(".")[0] : "";
-    if (!code || code === loaded) return;
-    setStatus(status, "note", `查詢 ${code}…`);
-    const res = await loadJSON(`/api/news/valuation/${code}`);
-    if (res.ok && res.data) {
-      valMetric = "PE";
-      resetMetricUI();
-      valFile = `/api/news/valuation/${code}`;
-      renderValuation(res);
-      input.value = `${code} ${res.data.name || ""}`.trim();
-    } else {
-      setStatus(status, "note", `查無「${code}」。觀察名單：2330 台積電 / 2317 鴻海 / 2454 聯發科 / 2308 台達電。（其他標的需在後端執行 STOCK_SYMBOL=代碼.TW python scripts/fetch_valuation.py）`);
-    }
-  }
-  if (go) go.addEventListener("click", query);
-  if (input) input.addEventListener("keydown", (e) => { if (e.key === "Enter") query(); });
+  if (go) go.addEventListener("click", () => queryFrom(input));
+  if (input) input.addEventListener("keydown", (e) => { if (e.key === "Enter") queryFrom(input); });
+  const sGo = $("#stock-go");
+  const sInput = $("#stock-ticker");
+  if (sGo) sGo.addEventListener("click", () => queryFrom(sInput));
+  if (sInput) sInput.addEventListener("keydown", (e) => { if (e.key === "Enter") queryFrom(sInput); });
 
   const seg = $("#val-metric");
   if (seg) {
@@ -519,7 +585,7 @@ function wireControls() {
       sp.addEventListener("click", () => {
         const metric = sp.dataset.metric;
         if (metric === "PB" && (!valState || !valState.pb)) {
-          setStatus(status, "note", "此標的暫無淨值比（PB）資料。");
+          setStatus($("#chart-status"), "note", "此標的暫無淨值比（PB）資料。");
           return;
         }
         seg.querySelectorAll("span").forEach((x) => x.classList.remove("on"));
@@ -533,24 +599,21 @@ function wireControls() {
 
 /* ---------- boot ---------- */
 async function loadAndRender() {
-  const [market, news, tsmc, valuation, events, fed, summary, heat, status] = await Promise.all([
+  const focus = readFocus();
+  const [market, news, events, fed, summary, status] = await Promise.all([
     loadJSON("/api/news/market"),
     loadJSON("/api/news/headlines"),
-    loadJSON("/api/news/tsmc"),
-    loadJSON(valFile),
     loadJSON("/api/news/events"),
     loadJSON("/api/news/fed"),
     loadJSON("/api/news/summary"),
-    loadJSON("/api/news/heat"),
     loadJSON("/api/news/status"),
   ]);
+  const focusRes = await applyFocus(focus, { fallback: focus !== "2330" });
 
   const updated = [
     renderMarket(market),
-    renderHeat(heat),
+    focusRes && focusRes.heat && focusRes.heat.ok ? focusRes.heat.data.updated_at : null,
     renderNewsList(news, "#news-list", "#news-status", { rank: true, limit: 5, label: "重大新聞" }),
-    renderNewsList(tsmc, "#tsmc-list", "#tsmc-status", { rank: true, limit: 5, label: "台積電新聞" }),
-    renderValuation(valuation),
     renderEvents(events),
     renderNewsList(fed, "#fed-list", "#fed-status", { rank: true, limit: 5, label: "聯準會發言" }),
     renderBullets(summary, "#summary-list", "global"),
@@ -558,8 +621,7 @@ async function loadAndRender() {
   ];
   setGlobalMeta(updated, status);
   renderSourceStatus(status);
-  renderSignal(valuation, heat);
-  renderTodaySummary(market, heat, valuation);
+  renderTodaySummary(market, focusRes.heat, focusRes.val);
   $("#session-label").textContent = guessSession();
 }
 

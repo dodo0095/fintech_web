@@ -71,11 +71,14 @@ class Command(BaseCommand):
                     store.store_watchlist(bundle["watchlist"])
                     payloads["valuation_default"] = bundle["symbols"].get(bundle["default_code"])
                 elif key == "heat":
+                    prev = store.read_heat()
                     p = f_heat.build(
-                        news=payloads.get("headlines"),
-                        tsmc=payloads.get("tsmc"),
-                        fed=payloads.get("fed"),
-                        market=payloads.get("market"),
+                        news=payloads.get("headlines") or store.read_headlines(),
+                        tsmc=payloads.get("tsmc") or store.read_tsmc(),
+                        fed=payloads.get("fed") or store.read_fed(),
+                        prev=prev,
+                        name_code="2330",
+                        name_name="台積電",
                     )
                     store.store_heat(p)
                     payloads["heat"] = p

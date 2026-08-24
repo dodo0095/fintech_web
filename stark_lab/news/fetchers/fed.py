@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import re
 
+from news.heat_v1 import annotate_items
+
 from .common import now_iso
 from .news_common import cnyes, enrich, fetch, gnews
 
@@ -36,6 +38,7 @@ def build() -> dict:
     cands.sort(key=lambda x: (1 if x["summary"] else 0, x["_ts"]), reverse=True)
     top = cands[:5]
 
+    annotate_items(top)
     out = [
         {
             "rank": i,
@@ -45,6 +48,10 @@ def build() -> dict:
             "url": e["url"],
             "time": e["time"],
             "stance": stance("{} {}".format(e["title"], e["summary"])),
+            "heat": e.get("heat", 0),
+            "hits_off": e.get("hits_off") or [],
+            "hits_on": e.get("hits_on") or [],
+            "war": bool(e.get("war")),
         }
         for i, e in enumerate(top, start=1)
     ]

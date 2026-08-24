@@ -88,7 +88,7 @@ def _store_news(category, payload, meta_kind, meta_extra_keys=()):
                 stance=it.get("stance"),
             ))
         NewsItem.objects.bulk_create(objs)
-        meta = {"updated_at": payload.get("updated_at", "")}
+        meta = {"updated_at": payload.get("updated_at", ""), "items": items}
         for k in meta_extra_keys:
             meta[k] = payload.get(k)
         _set_snapshot(meta_kind, meta)
@@ -98,7 +98,11 @@ def _read_news(category, meta_kind, item_fields, extra_top=()):
     meta = _get_snapshot(meta_kind, {})
     out = {"updated_at": meta.get("updated_at", "")}
     for k in extra_top:
-        out[k] = meta.get(k)
+        if k != "items":
+            out[k] = meta.get(k)
+    if meta.get("items"):
+        out["items"] = meta["items"]
+        return out
     items = []
     for n in NewsItem.objects.filter(category=category).order_by("rank"):
         row = {}
@@ -121,15 +125,30 @@ def read_headlines():
 
 
 def store_tsmc(payload):
-    _store_news(NewsItem.CATEGORY_TSMC, payload, "tsmc_meta", meta_extra_keys=("symbol", "name"))
+    _store_news(
+        NewsItem.CATEGORY_TSMC, payload, "tsmc_meta",
+        meta_extra_keys=("symbol", "name", "code"),
+    )
 
 
 def read_tsmc():
     return _read_news(
         NewsItem.CATEGORY_TSMC, "tsmc_meta",
         ["rank", "title", "summary", "source", "url", "time"],
-        extra_top=("symbol", "name"),
+        extra_top=("symbol", "name", "code"),
     )
+
+
+def store_stock_cache(code, payload):
+    """On-demand stock news; never overwrites tsmc NewsItem rows."""
+    kind = "stock_{}".format((code or "").upper())
+    _set_snapshot(kind, payload or {})
+
+
+def read_stock_cache(code):
+    kind = "stock_{}".format((code or "").upper())
+    obj = Snapshot.objects.filter(kind=kind).first()
+    return obj.payload if obj else None
 
 
 def store_fed(payload):

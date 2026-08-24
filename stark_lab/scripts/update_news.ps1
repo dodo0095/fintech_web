@@ -10,17 +10,21 @@
 $ErrorActionPreference = "Continue"
 
 # --- 設定：專案使用的 Python 執行檔（含 django/yfinance 等依賴）---
-# 優先序：環境變數 STARKLAB_PYTHON > 部署機 py310 > PATH 上的 python
+# stark_lab 專案根目錄（manage.py 所在）= scripts 的上一層
+$Root = Split-Path -Parent $PSScriptRoot
+$VenvPython = Join-Path $Root ".venv\Scripts\python.exe"
+
+# 優先序：環境變數 STARKLAB_PYTHON > 專案 .venv > 部署機 py310 > PATH 上的 python
 $PythonExe = $env:STARKLAB_PYTHON
+if (-not $PythonExe -and (Test-Path $VenvPython)) {
+    $PythonExe = $VenvPython
+}
 if (-not $PythonExe -and (Test-Path "C:\py310\python.exe")) {
     $PythonExe = "C:\py310\python.exe"          # 部署機 py310 環境
 }
 if (-not $PythonExe) {
     $PythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source
 }
-
-# stark_lab 專案根目錄（manage.py 所在）= scripts 的上一層
-$Root = Split-Path -Parent $PSScriptRoot
 $Manage = Join-Path $Root "manage.py"
 $LogDir = Join-Path $Root "logs"
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
