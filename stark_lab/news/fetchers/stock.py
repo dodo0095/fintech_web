@@ -20,14 +20,18 @@ def build(code=None, name=None, yahoo=None) -> dict:
     name = name or info["name"]
     yahoo = yahoo or info["yahoo"]
 
-    kw_parts = [re.escape(name), re.escape(code)]
+    kw_parts = [re.escape(code)]
+    if name:
+        kw_parts.insert(0, re.escape(name))
     if code == "2330":
         kw_parts.append("TSMC")
-    keyword = "|".join(kw_parts)
+    keyword = "|".join(p for p in kw_parts if p)
     if code == "2330":
         gq = "台積電 OR TSMC OR 2330 when:2d"
-    else:
+    elif name:
         gq = "{} OR {} when:2d".format(name, code)
+    else:
+        gq = "{} when:2d".format(code)
 
     sources = [
         ("鉅亨網", cnyes("tw_stock")),
@@ -36,7 +40,13 @@ def build(code=None, name=None, yahoo=None) -> dict:
     ]
     items = fetch(sources, keyword=keyword, max_per=60)
     if not items:
-        raise RuntimeError("no stock news for {}".format(code))
+        return {
+            "updated_at": now_iso(),
+            "symbol": yahoo,
+            "name": name or code,
+            "code": code,
+            "items": [],
+        }
 
     items.sort(key=lambda x: (1 if x["summary"] else 0, x["_ts"]), reverse=True)
     cands = items[:8]

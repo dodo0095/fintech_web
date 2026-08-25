@@ -14,7 +14,7 @@ from rest_framework import status
 
 from news import store
 from news.heat_v1 import annotate_items
-from news.tickers import lookup
+from news.tickers import lookup, yahoo_candidates
 from news.fetchers import heat as f_heat
 from news.fetchers import stock as f_stock
 from news.fetchers import valuation as f_valuation
@@ -129,17 +129,25 @@ def _stock_payload(info):
 def _heat_for(info):
     prev = store.read_heat() or {}
     if info["code"] == "2330" and prev.get("algo") == "heat_v1" and not info.get("_force"):
-        # scheduled snapshot is the default 2330 heat
         if prev.get("name_code") in (None, "", "2330"):
             return prev
-    stock = _stock_payload(info)
+    try:
+        stock = _stock_payload(info)
+    except Exception:
+        stock = {
+            "updated_at": "",
+            "symbol": info.get("yahoo") or "",
+            "name": info.get("name") or "",
+            "code": info["code"],
+            "items": [],
+        }
     return f_heat.build(
         news=store.read_headlines(),
         tsmc=stock,
         fed=store.read_fed(),
         prev=prev,
         name_code=info["code"],
-        name_name=info["name"],
+        name_name=info.get("name") or info["code"],
     )
 
 
@@ -160,6 +168,19 @@ def heat(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
     return Response(payload)
+
+
+@api_view(["GET"])
+def lookup_code(request, code):
+    info = lookup(code)
+    if not info:
+        return Response({"detail": "請輸入股票代號，例如 2317"}, status=status.HTTP_404_NOT_FOUND)
+    return Response({
+        "code": info["code"],
+        "name": info.get("name") or "",
+        "yahoo": info.get("yahoo") or "",
+        "candidates": yahoo_candidates(info),
+    })
 
 
 @api_view(["GET"])
@@ -215,7 +236,9 @@ def _valuation_payload(info):
         again = store.read_valuation(code)
         if _fresh(again, hours=VAL_TTL_HOURS):
             return again
-        payload = f_valuation.build_symbol(info["yahoo"], info["name"])
+        payload = f_valuation.build_symbol_try(
+            code, info.get("name") or code, preferred_yahoo=info.get("yahoo"),
+        )
         if payload is None:
             return None
         store.store_valuation(code, payload)

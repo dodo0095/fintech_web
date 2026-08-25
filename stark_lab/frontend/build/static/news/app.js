@@ -495,8 +495,9 @@ function drawValuation() {
 const FOCUS_KEY = "news-focus-code";
 
 function parseTicker(raw) {
-  const m = String(raw || "").match(/[0-9]{3,6}[A-Za-z]?/i);
-  return m ? m[0].toUpperCase() : "";
+  const s = String(raw || "").trim().toUpperCase().replace(/\.(TWO|TW)\s*$/i, "");
+  const m = s.match(/[0-9]{3,6}[A-Z]?/);
+  return m ? m[0] : "";
 }
 function readFocus() {
   try {
@@ -523,14 +524,23 @@ function resetMetricUI() {
   if (seg) seg.querySelectorAll("span").forEach((x) => x.classList.toggle("on", x.dataset.metric === "PE"));
 }
 
-async function applyFocus(code, { fallback = true } = {}) {
-  code = parseTicker(code) || "2330";
+async function applyFocus(code) {
+  code = parseTicker(code);
+  if (!code) {
+    setStatus($("#chart-status"), "note", "請輸入股票代號，例如 2317（不用加 .TW）。");
+    return { stock: { ok: false }, heat: { ok: false }, val: { ok: false } };
+  }
   writeFocus(code);
   valFile = `/api/news/valuation/${code}`;
   const stockStatus = $("#tsmc-status");
   const chartStatus = $("#chart-status");
-  if (stockStatus) setStatus(stockStatus, "note", `載入 ${code} 新聞…`);
-  if (chartStatus) setStatus(chartStatus, "note", `計算 ${code} 河流圖…`);
+  setFocusInputs(code, "");
+  if (stockStatus) setStatus(stockStatus, "note", `載入 ${code}…`);
+  if (chartStatus) setStatus(chartStatus, "note", `查詢 ${code}…`);
+
+  const meta = await loadJSON(`/api/news/lookup/${encodeURIComponent(code)}`);
+  const name = meta.ok && meta.data ? (meta.data.name || "") : "";
+  if (name) setFocusInputs(code, name);
 
   const [stock, heat, val] = await Promise.all([
     loadJSON(`/api/news/stock/${encodeURIComponent(code)}`),
@@ -538,15 +548,13 @@ async function applyFocus(code, { fallback = true } = {}) {
     loadJSON(`/api/news/valuation/${encodeURIComponent(code)}`),
   ]);
 
+  const filled = (stock.ok && stock.data && stock.data.name) || (val.ok && val.data && val.data.name) || name;
+  if (filled) setFocusInputs(code, filled);
+
   if (stock.ok && stock.data) {
-    const name = stock.data.name || "";
-    setFocusInputs(code, name);
-    renderNewsList(stock, "#tsmc-list", "#tsmc-status", { rank: true, limit: 5, label: `${name || code}新聞` });
-  } else if (fallback && code !== "2330") {
-    if (stockStatus) setStatus(stockStatus, "note", stock.error || `查無「${code}」，改回台積電。`);
-    return applyFocus("2330", { fallback: false });
+    renderNewsList(stock, "#tsmc-list", "#tsmc-status", { rank: true, limit: 5, label: `${filled || code}新聞` });
   } else if (stockStatus) {
-    setStatus(stockStatus, "error", stock.error || "個股新聞載入失敗。");
+    setStatus(stockStatus, "error", stock.error || `${code} 新聞載入失敗，仍停留在此代號。`);
   }
 
   if (heat.ok) renderHeat(heat);
@@ -607,7 +615,7 @@ async function loadAndRender() {
     loadJSON("/api/news/summary"),
     loadJSON("/api/news/status"),
   ]);
-  const focusRes = await applyFocus(focus, { fallback: focus !== "2330" });
+  const focusRes = await applyFocus(focus);
 
   const updated = [
     renderMarket(market),

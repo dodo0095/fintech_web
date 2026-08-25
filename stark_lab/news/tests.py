@@ -60,6 +60,24 @@ class TickerLookupTests(SimpleTestCase):
     def test_unknown(self):
         self.assertIsNone(lookup("ZZZZZ"))
 
+    def test_code_only_strips_suffix(self):
+        a = lookup("2317")
+        b = lookup("2317.TW")
+        c = lookup("2317.TWO")
+        self.assertEqual(a["code"], "2317")
+        self.assertEqual(b["code"], "2317")
+        self.assertEqual(c["code"], "2317")
+        self.assertEqual(a["name"], "鴻海")
+
+    def test_yahoo_try_tw_then_two(self):
+        from news.tickers import yahoo_candidates
+        listed = yahoo_candidates({"code": "2330", "yahoo": "2330.TW"})
+        self.assertEqual(listed[0], "2330.TW")
+        self.assertEqual(listed[1], "2330.TWO")
+        otc = yahoo_candidates({"code": "5483", "yahoo": "5483.TWO"})
+        self.assertEqual(otc[0], "5483.TWO")
+        self.assertEqual(otc[1], "5483.TW")
+
 
 class NewsApiTests(TestCase):
     def test_unknown_stock_404(self):

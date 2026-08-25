@@ -56,19 +56,47 @@ def _load() -> None:
                     _by_name[nk] = info
 
 
-def lookup(query: str) -> Optional[dict]:
-    """Accept '2330', '2330 台積電', '台積電'."""
-    _load()
+def _normalize_query(query: str) -> str:
     q = (query or "").strip()
+    q = re.sub(r"\.(TWO|TW)\s*$", "", q, flags=re.I)
+    return q
+
+
+def lookup(query: str) -> Optional[dict]:
+    """Accept '2330', '2330.TW', '2317.TWO', '2330 台積電'. Name optional.
+
+    Numeric codes always resolve (CSV name if known). Yahoo suffix is
+    tried as .TW then .TWO by the caller.
+    """
+    _load()
+    q = _normalize_query(query)
     if not q:
         return None
     m = _CODE_RE.search(q)
     if m:
-        info = _by_code.get(m.group(1).upper())
+        code = m.group(1).upper()
+        info = _by_code.get(code)
         if info:
             return dict(info)
+        return {
+            "code": code,
+            "name": "",
+            "yahoo": "{}.TW".format(code),
+            "market": "",
+        }
     info = _by_name.get(_norm_name(q))
     return dict(info) if info else None
+
+
+def yahoo_candidates(info: dict) -> List[str]:
+    """Preferred exchange first, then the other. User never types TW/TWO."""
+    code = (info or {}).get("code") or ""
+    if not code:
+        return []
+    pref = ((info.get("yahoo") or "").split(".")[-1] or "TW").upper()
+    if pref == "TWO":
+        return ["{}.TWO".format(code), "{}.TW".format(code)]
+    return ["{}.TW".format(code), "{}.TWO".format(code)]
 
 
 def default_focus() -> dict:

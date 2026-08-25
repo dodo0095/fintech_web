@@ -7,6 +7,7 @@ urlpatterns = [
     path("market", views.market),
     path("headlines", views.headlines),
     path("tsmc", views.tsmc),
+    path("lookup/<str:code>", views.lookup_code),
     path("stock/<str:code>", views.stock),
     path("fed", views.fed),
     path("heat", views.heat),

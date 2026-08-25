@@ -329,6 +329,19 @@ def build_symbol(symbol, name):
     return payload
 
 
+def build_symbol_try(code, name, preferred_yahoo=None):
+    """Try .TW then .TWO (or TWO first if the listing file says 上櫃)."""
+    from news.tickers import yahoo_candidates
+
+    info = {"code": str(code or "").split(".")[0], "yahoo": preferred_yahoo or ""}
+    last = None
+    for symbol in yahoo_candidates(info):
+        last = build_symbol(symbol, name or code)
+        if last:
+            return last
+    return last
+
+
 def build() -> dict:
     env_sym = os.environ.get("STOCK_SYMBOL")
     if env_sym:
