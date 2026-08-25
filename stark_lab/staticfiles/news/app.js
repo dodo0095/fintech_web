@@ -150,8 +150,8 @@ function renderSignal(valuationRes, heatRes) {
   if (valHot && heatHot) {
     el.className = "signal-banner hot";
     el.hidden = false;
-    const raw = typeof h.news_score === "number" ? h.news_score : h.score;
-    el.innerHTML = `⚠ <b>雙訊號提醒：</b>${escapeHtml(v.name || "標的")} 估值處於相對高檔（${escapeHtml(zone)}），且消息面風險${escapeHtml(h.level || "")}（${raw}）——留意風險。<span class="sig-note">非投資建議</span>`;
+    const pct = typeof h.score === "number" ? h.score : "—";
+    el.innerHTML = `⚠ <b>雙訊號提醒：</b>${escapeHtml(v.name || "標的")} 估值處於相對高檔（${escapeHtml(zone)}），且消息面風險${escapeHtml(h.level || "")}（${pct}）——留意風險。<span class="sig-note">非投資建議</span>`;
   } else {
     el.hidden = true;
   }
@@ -280,7 +280,6 @@ function renderHeat(result) {
   if (!result.ok || !result.data) { setStatus(status, "note", "熱度資料暫不可用。"); gEl.style.display = "none"; return null; }
   const d = result.data;
   const score = typeof d.score === "number" ? d.score : 50;
-  const raw = typeof d.news_score === "number" ? d.news_score : score;
   const level = d.level || "—";
   gEl.style.display = "block";
   const chart = echarts.getInstanceByDom(gEl) || echarts.init(gEl);
@@ -292,7 +291,7 @@ function renderHeat(result) {
       anchor: { show: true, size: 10, itemStyle: { color: "#1b2330" } },
       axisTick: { show: false }, splitLine: { length: 11, lineStyle: { color: "#fff", width: 2 } }, axisLabel: { show: false },
       title: { show: false },
-      detail: { valueAnimation: true, offsetCenter: [0, "34%"], formatter: () => `${level}  ${raw}`, fontSize: 15, fontWeight: 700, color: "#1b2330" },
+      detail: { valueAnimation: true, offsetCenter: [0, "34%"], formatter: () => `${level}  ${score}`, fontSize: 15, fontWeight: 700, color: "#1b2330" },
       data: [{ value: score }],
     }],
   }, true);
