@@ -341,8 +341,8 @@ def technihistory2(request):
 
     dict_finalt={'board':"", 'final_update':"",'tableData':""}
     if request.method == 'GET':
-        #data = technicHistory.objects.all()
-        data = technicHistory.objects.filter((Q(start_date__icontains=date)))
+        data = technicHistory.objects.all()
+        #data = technicHistory.objects.filter((Q(start_date__icontains=date)))
 
 
         tableData=[]
