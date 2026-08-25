@@ -191,10 +191,14 @@ def stock(request, code):
     try:
         payload = _stock_payload(info)
     except Exception as exc:
-        return Response(
-            {"detail": "新聞抓取失敗：{}".format(exc)},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
+        payload = {
+            "updated_at": "",
+            "symbol": info.get("yahoo") or "",
+            "name": info.get("name") or info["code"],
+            "code": info["code"],
+            "items": [],
+            "error": "新聞抓取失敗：{}".format(exc),
+        }
     return Response(payload)
 
 

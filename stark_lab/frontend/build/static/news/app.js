@@ -552,7 +552,12 @@ async function applyFocus(code) {
   if (filled) setFocusInputs(code, filled);
 
   if (stock.ok && stock.data) {
-    renderNewsList(stock, "#tsmc-list", "#tsmc-status", { rank: true, limit: 5, label: `${filled || code}新聞` });
+    const got = String(stock.data.code || stock.data.symbol || "").replace(/\.(TW|TWO)$/i, "");
+    if (got && got !== code) {
+      if (stockStatus) setStatus(stockStatus, "error", `回傳代號 ${got} 與查詢 ${code} 不符，未套用。`);
+    } else {
+      renderNewsList(stock, "#tsmc-list", "#tsmc-status", { rank: true, limit: 5, label: `${filled || code}新聞` });
+    }
   } else if (stockStatus) {
     setStatus(stockStatus, "error", stock.error || `${code} 新聞載入失敗，仍停留在此代號。`);
   }
