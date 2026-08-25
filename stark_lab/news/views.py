@@ -243,8 +243,6 @@ def _valuation_payload(info):
         payload = f_valuation.build_symbol_try(
             code, info.get("name") or code, preferred_yahoo=info.get("yahoo"),
         )
-        if payload is None:
-            return None
         store.store_valuation(code, payload)
         return payload
 
@@ -261,17 +259,26 @@ def valuation_by_code(request, code):
         )
     try:
         payload = _valuation_payload(info)
+    except ImportError as exc:
+        return Response(
+            {"detail": "估值套件未安裝：{}。請在上線機執行 python -m pip install yfinance pandas".format(exc)},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
     except Exception as exc:
         return Response(
-            {"detail": "估值計算失敗：{}".format(exc)},
-            status=status.HTTP_502_BAD_GATEWAY,
+            {
+                "detail": "暫時畫不出河流圖：{}".format(exc),
+                "code": info["code"],
+                "name": info.get("name") or "",
+            },
+            status=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
     if payload is None:
         return Response(
             {
                 "detail": "這檔財報資料不足，暫時畫不出河流圖",
                 "code": info["code"],
-                "name": info["name"],
+                "name": info.get("name") or "",
             },
             status=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )

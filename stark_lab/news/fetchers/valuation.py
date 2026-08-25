@@ -24,24 +24,55 @@ WATCHLIST = [
 N_LINES = 6
 
 
+def _hist_to_series(hist):
+    if hist is None or getattr(hist, "empty", True):
+        return [], []
+    if "Close" not in hist.columns:
+        # yfinance download may use MultiIndex columns
+        if hasattr(hist.columns, "get_level_values"):
+            try:
+                hist = hist.copy()
+                hist.columns = [c[0] if isinstance(c, tuple) else c for c in hist.columns]
+            except Exception:
+                pass
+    if "Close" not in getattr(hist, "columns", []):
+        return [], []
+    hist = hist.dropna(subset=["Close"])
+    if len(hist) < 60:
+        return [], []
+    dates, closes = [], []
+    for idx, row in hist.iterrows():
+        try:
+            d = idx.tz_localize(None).strftime("%Y-%m-%d") if hasattr(idx, "tz_localize") else str(idx)[:10]
+        except Exception:
+            d = str(idx)[:10]
+        c = safe_float(row["Close"])
+        if c is None:
+            continue
+        dates.append(d)
+        closes.append(round(c, 4))
+    return dates, closes
+
+
 def _get_price(t):
     for period in ("5y", "3y", "2y", "1y"):
-        hist = t.history(period=period, auto_adjust=False)
-        if hist is not None and not hist.empty:
-            hist = hist.dropna(subset=["Close"])
-            if len(hist) >= 60:
-                dates, closes = [], []
-                for idx, row in hist.iterrows():
-                    try:
-                        d = idx.tz_localize(None).strftime("%Y-%m-%d") if hasattr(idx, "tz_localize") else str(idx)[:10]
-                    except Exception:
-                        d = str(idx)[:10]
-                    c = safe_float(row["Close"])
-                    if c is None:
-                        continue
-                    dates.append(d)
-                    closes.append(round(c, 4))
+        try:
+            hist = t.history(period=period, auto_adjust=False)
+        except Exception:
+            hist = None
+        dates, closes = _hist_to_series(hist)
+        if dates:
+            return dates, closes
+    try:
+        import yfinance as yf
+        sym = getattr(t, "ticker", None) or getattr(t, "_symbol", None)
+        if sym:
+            hist = yf.download(sym, period="5y", auto_adjust=False, progress=False, threads=False)
+            dates, closes = _hist_to_series(hist)
+            if dates:
                 return dates, closes
+    except Exception:
+        pass
     return [], []
 
 
@@ -333,13 +364,25 @@ def build_symbol_try(code, name, preferred_yahoo=None):
     """Try .TW then .TWO (or TWO first if the listing file says 上櫃)."""
     from news.tickers import yahoo_candidates
 
+    try:
+        import yfinance  # noqa: F401
+    except ImportError:
+        raise ImportError("正式機未安裝 yfinance，請執行：python -m pip install yfinance pandas")
+
     info = {"code": str(code or "").split(".")[0], "yahoo": preferred_yahoo or ""}
-    last = None
+    errors = []
     for symbol in yahoo_candidates(info):
-        last = build_symbol(symbol, name or code)
+        try:
+            last = build_symbol(symbol, name or code)
+        except ImportError:
+            raise
+        except Exception as exc:
+            errors.append("{} ({})".format(symbol, exc))
+            continue
         if last:
             return last
-    return last
+        errors.append("{} 股價或本益比資料不足".format(symbol))
+    raise RuntimeError("；".join(errors) or "無法計算河流圖")
 
 
 def build() -> dict:

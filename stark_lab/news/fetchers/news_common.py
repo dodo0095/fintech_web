@@ -101,14 +101,60 @@ def enrich(items):
     return items
 
 
+def _rss_entries_stdlib(url):
+    """stdlib RSS reader — production may not have feedparser installed."""
+    import urllib.request
+    import xml.etree.ElementTree as ET
+
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "Mozilla/5.0 (compatible; StarkLabNews/1.0)"}
+    )
+    with urllib.request.urlopen(req, timeout=12) as resp:
+        raw = resp.read()
+    root = ET.fromstring(raw)
+    entries = []
+    for item in root.iter("item"):
+        def _text(tag):
+            el = item.find(tag)
+            return (el.text or "") if el is not None else ""
+
+        entries.append({
+            "title": _text("title"),
+            "summary": _text("description"),
+            "description": _text("description"),
+            "link": _text("link"),
+            "published": _text("pubDate"),
+            "updated": _text("pubDate"),
+        })
+    return entries
+
+
+def _rss_entries(url, max_per):
+    try:
+        import feedparser
+    except ImportError:
+        return _rss_entries_stdlib(url)[:max_per]
+    feed = feedparser.parse(url)
+    out = []
+    for e in feed.entries[:max_per]:
+        out.append({
+            "title": e.get("title") or "",
+            "summary": e.get("summary") or e.get("description") or "",
+            "description": e.get("description") or "",
+            "link": e.get("link") or "",
+            "published": e.get("published") or e.get("updated") or "",
+            "updated": e.get("updated") or e.get("published") or "",
+        })
+    return out
+
+
 def fetch(sources, keyword=None, max_per: int = 50):
     """sources: list[(name, url)]。cnYES 來源取真實摘要，Google 僅標題。
 
     keyword: 需符合的正規式（比對 title+summary），None 不過濾。
     回傳去重、濾噪音後的 list（未截斷數量，呼叫端自行排序取前 N）。
+    feedparser 沒裝時改走標準庫 RSS。
     """
-    import feedparser
-
     kw = re.compile(keyword) if keyword else None
     seen = set()
     out = []
@@ -116,8 +162,8 @@ def fetch(sources, keyword=None, max_per: int = 50):
     for name, url in sources:
         has_summary = "cnyes" in url
         try:
-            feed = feedparser.parse(url)
-            for e in feed.entries[:max_per]:
+            entries = _rss_entries(url, max_per)
+            for e in entries:
                 title = _strip(e.get("title") or "")
                 if not title:
                     continue
