@@ -75,10 +75,10 @@
           <div id="heat-status" class="state-box" hidden></div>
           <div id="heat-gauge" role="img" aria-label="消息面情緒溫度計"></div>
           <div id="heat-drivers" class="heat-drivers"></div>
-          <p class="heat-explain">指針越偏右（紅）＝消息面越熱絡、樂觀；<br />越偏左（藍）＝越冷清、保守。</p>
-          <p class="heat-explain">分數由新聞情緒、大盤動能、消息量與聯準會傾向合成，<b>過熱</b>常出現在相對高點，留意追高。</p>
-          <p class="heat-explain">數值為每日 4 次更新的快照，反映最近一個交易日大盤與近期新聞，非盤中即時值。</p>
-          <p class="heat-note">參考情緒指標，非投資建議</p>
+          <p class="heat-explain">指針越偏右（紅）＝消息面<strong>風險越熱</strong>（關稅／制裁／戰爭等）；<br />越偏左（藍）＝相對冷靜。</p>
+          <p class="heat-explain">分數由美國新聞、聯準會與目前關注個股的標題，用同一套風險詞規則打成 <b>0–100</b>。數字與指針同一套：越高＝風險越熱。</p>
+          <p class="heat-explain">排程每日 4 次更新預設台積電快照；你改個股時會即時重算，非盤中逐筆即時。</p>
+          <p class="heat-note">參考風險熱度，非投資建議</p>
         </section>
 
         <!-- ROW 2 · 主角：本益比河流圖 + 側欄 -->
@@ -90,7 +90,7 @@
           </div>
           <div class="val-toolbar">
             <div class="lookup">
-              <input id="val-ticker" type="text" value="2330 台積電" placeholder="輸入代碼，如 2317" aria-label="輸入股票代碼（觀察名單 2330/2317/2454/2308）" />
+              <input id="val-ticker" type="text" value="2330 台積電" placeholder="輸入代碼或名稱，如 2317" aria-label="輸入股票代碼或名稱" />
               <button id="val-go" type="button">查詢</button>
             </div>
             <div class="seg" id="val-metric" role="tablist">
@@ -143,8 +143,12 @@
 
         <section class="cell c4 card">
           <div class="cell-head">
-            <span class="eyebrow">TSMC 個股新聞</span>
-            <h2>台積電專區</h2>
+            <span class="eyebrow" id="stock-eyebrow">個股新聞</span>
+            <h2 id="stock-title">台積電專區</h2>
+          </div>
+          <div class="lookup stock-lookup">
+            <input id="stock-ticker" type="text" value="2330 台積電" placeholder="輸入代碼或名稱，如 2317" aria-label="輸入個股代碼或名稱" />
+            <button id="stock-go" type="button">查詢</button>
           </div>
           <div id="tsmc-status" class="state-box" hidden></div>
           <div id="tsmc-list" class="news"></div>

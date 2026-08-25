@@ -69,8 +69,11 @@ def build(market=None, heat=None, valuation=None) -> dict:
         mood = "偏多走揚" if avg > 0.3 else "偏弱承壓" if avg < -0.3 else "平盤震盪"
         support.append("美台主要指數平均 %s，大盤%s。" % (_fmt_pct(avg), mood))
 
-    if heat.get("score") is not None:
-        support.append("消息面熱度 %s（%s）。" % (heat.get("score"), heat.get("level", "")))
+    if heat.get("level") or heat.get("news_score") is not None:
+        raw = heat.get("news_score")
+        if raw is None:
+            raw = heat.get("score")
+        support.append("消息面風險熱度 %s（%s）。" % (raw, heat.get("level", "")))
         for d in (heat.get("drivers") or [])[:2]:
             support.append("%s。" % d)
 

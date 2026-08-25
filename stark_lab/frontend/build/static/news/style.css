@@ -201,6 +201,10 @@ main.container { max-width: 1180px; margin: 0 auto; padding: 0 1.1rem 2.5rem; }
 }
 .src { padding: 0.03rem 0.4rem; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line-soft); }
 .tag { padding: 0.05rem 0.4rem; border-radius: 3px; background: #f0f2f5; color: #5a6472; font-size: 0.7rem; border: 1px solid var(--line-soft); }
+.tag.risk { background: var(--up-soft); color: var(--up); }
+.tag.cool { background: var(--down-soft); color: var(--down); }
+.tag.war { background: #3b1d1d; color: #ffd0d0; }
+.stock-lookup { margin: 0 0 0.5rem; }
 .stance { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.45rem; border-radius: 4px; }
 .stance.hawk { background: var(--up-soft); color: var(--up); }
 .stance.dove { background: var(--down-soft); color: var(--down); }
