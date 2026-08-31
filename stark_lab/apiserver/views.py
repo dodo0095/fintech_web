@@ -253,7 +253,12 @@ def technicCurrentapi2(request):
             total_start_price=total_start_price+float(data[i].start_price)
             total_final_price=total_final_price+float(data[i].current_price)
 
-        a=round(((total_final_price-total_start_price)/total_start_price)*100,2)
+        # a=round(((total_final_price-total_start_price)/total_start_price)*100,2)
+        if total_start_price and total_start_price != 0:
+            a = round(((total_final_price - total_start_price) / total_start_price) * 100, 2)
+        else:
+            a = 0.0  # 或依業務需求設為 None / 0
+
 
         board= {"today": 'X',"total":str(a)}
         dict_finalt={'board':board, 'final_update':data[0].final_update,'tableData':tableData}
