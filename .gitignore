@@ -8,6 +8,10 @@ __pycache__/
 .venv/
 **/.venv/
 
+# 環境設定（含機密，不進版控）
+.env
+**/.env
+
 # OS
 .DS_Store
 *.sqlite3
