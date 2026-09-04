@@ -12,20 +12,47 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 from pathlib import Path
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
+
+# 載入專案根目錄的 .env（含 SECRET_KEY、Email 等機密；.env 已在 .gitignore）
+# python-dotenv 為選用相依：未安裝時不致命，改由系統環境變數提供設定。
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(BASE_DIR, '.env'))
+except ImportError:
+    pass
+
+
+def _env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in ('1', 'true', 'yes', 'on')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'pn_2hj#n@u(nz@!6xbw1mxm1xdvif6eal8d@tf^1k$cb6=0(tb'
+# 一律從環境變數 / .env 讀取，不再硬編碼於原始碼（見 docs/reviews M2）。
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        'SECRET_KEY 未設定：請在 stark_lab/.env 或系統環境變數提供 SECRET_KEY。'
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = _env_bool('DJANGO_DEBUG', default=False)
 
-ALLOWED_HOSTS = ["*"]
+# 收斂 ALLOWED_HOSTS：預設正式網域＋本機開發，可用環境變數 DJANGO_ALLOWED_HOSTS
+# （逗號分隔）覆寫（見 docs/reviews M3）。
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS',
+        'starklab.tw,www.starklab.tw,localhost,127.0.0.1',
+    ).split(',') if h.strip()
+]
 CSRF_TRUSTED_ORIGINS = ["https://starklab.tw", "https://www.starklab.tw"]
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 #SECURE_SSL_REDIRECT = True
@@ -136,8 +163,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
-USE_L10N = True
 
 USE_TZ = True
 

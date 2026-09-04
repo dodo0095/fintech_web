@@ -1,48 +1,30 @@
-asgiref==3.2.3
-astroid==2.3.3
-certifi==2019.11.28
-chardet==3.0.4
-defusedxml==0.6.0
-Django==3.0.3
-django-allauth==0.41.0
-django-cors-headers==3.2.1
-django-filter==2.3.0
-django-filters==0.2.1
-django-utils-six==2.0
-djangorestframework==3.11.0
-djangorestframework-jwt==1.11.0
-djangorestframework-simplejwt==4.4.0
-idna==2.9
-isort==4.3.21
-jsonfield==3.1.0
-lazy-object-proxy==1.4.3
-mccabe==0.6.1
-oauthlib==3.1.0
-pbr==5.4.4
-Pillow==7.0.0
-psycopg2-binary==2.8.5
-PyJWT==1.7.1
-pylint==2.4.4
-python3-openid==3.1.0
-pytz==2019.3
-qrcode==6.1
-requests==2.23.0
-requests-oauthlib==1.3.0
-six==1.13.0
-sqlparse==0.3.0
-stevedore==1.31.0
-typed-ast==1.4.1
-urllib3==1.25.8
-virtualenv==16.7.9
-virtualenv-clone==0.5.3
-virtualenvwrapper==4.8.4
-wrapt==1.11.2
+# stark_lab 執行時相依（已精簡並升級至安全版本，2026-09-04）
+#
+# 變更說明（dependabot 弱點修補）：
+#   - 移除未被程式 import 的舊套件（django-allauth / djangorestframework-jwt /
+#     oauthlib / PyJWT / qrcode / psycopg2-binary / Pillow / pylint / astroid /
+#     isort / virtualenv* 等）——這些是 dependabot 弱點大宗但實際未使用。
+#   - Django 3.0.3 → 5.2 LTS（多個 CVE 修補；程式無破壞性 API，news 測試已驗證）。
+#   - 補上實際使用卻漏列的 waitress（serve.py 正式啟動）與 python-dotenv（載入 .env）。
+#   - 資料庫為 SQLite，不需 psycopg2。
+#
+# 部署機需 Python >= 3.10（Django 5.2 要求）。安裝：pip install -r requirements.txt
 
-# --- news app（消息面收集平台）抓取依賴 ---
-# 注意：jsonfield==3.1.0（上方已列）供 news models 的 JSONField 使用。
-yfinance
+# --- Web 框架 ---
+Django>=5.2,<5.3
+djangorestframework>=3.15.2
+django-filter>=24.3
+django-cors-headers>=4.4.0
+jsonfield>=3.1.0
+
+# --- 設定 / 部署 ---
+python-dotenv>=1.0.1
+waitress>=3.0.0
+
+# --- 資料抓取（news app：市場報價 / RSS 新聞 / 估值河流圖）---
+requests>=2.32.3
+pandas>=2.2.0
+numpy>=1.26.0
+yfinance>=0.2.60
 feedparser>=6.0.11
-beautifulsoup4>=4.12.0
-# multitasking 為 yfinance 依賴；0.0.13+ 使用 type[...] 語法需 Python 3.9+，
-# Python 3.8 環境必須釘在 0.0.11，否則 import yfinance 會 TypeError。
-multitasking==0.0.11
+beautifulsoup4>=4.12.3
