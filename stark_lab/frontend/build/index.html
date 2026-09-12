@@ -451,23 +451,14 @@
     </div>
     <div>
       <div class="hero-card">
-        <div class="hero-card-label">選股機器人 · 策略績效 vs 0050</div>
-        <div class="kpi-grid">
-          <div class="kpi">
-            <div class="kpi-val" id="perf-month">—</div>
-            <div class="kpi-desc">近一月 策略績效</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-val" id="perf-year">—</div>
-            <div class="kpi-desc">近一年 策略績效</div>
-          </div>
-        </div>
+        <div class="hero-card-label">我們在做什麼</div>
         <div class="hcf-list">
-          <div class="hcf-item"><div class="hcf-dot"></div><span id="perf-cmp-month">月：資料更新中…</span></div>
-          <div class="hcf-item"><div class="hcf-dot"></div><span id="perf-cmp-season">季：資料更新中…</span></div>
-          <div class="hcf-item"><div class="hcf-dot"></div><span id="perf-cmp-year">年：資料更新中…</span></div>
+          <div class="hcf-item"><div class="hcf-dot"></div>AI 選股機器人：每月更新台股觀察清單</div>
+          <div class="hcf-item"><div class="hcf-dot"></div>每週台股週報，用數據解讀盤勢</div>
+          <div class="hcf-item"><div class="hcf-dot"></div>機器學習量化策略研究與分享</div>
+          <div class="hcf-item"><div class="hcf-dot"></div>Podcast 深度剖析市場趨勢</div>
         </div>
-        <a href="/bot.html" class="btn-outline" style="margin-top:16px; width:100%; justify-content:center;">看完整績效與選股清單 →</a>
+        <a href="/bot.html" class="btn-outline" style="margin-top:20px; width:100%; justify-content:center;">認識選股機器人 →</a>
       </div>
     </div>
   </div>
@@ -652,46 +643,8 @@
 </script>
 
 <script>
-  // ── 工具：把績效字串格式化成 +X.XX% 並上色 ──
-  function fmtPct(raw) {
-    if (raw === null || raw === undefined || raw === '') return null;
-    var n = parseFloat(String(raw).replace('%', '').trim());
-    if (isNaN(n)) return null;
-    var s = (n > 0 ? '+' : '') + n.toFixed(2) + '%';
-    return { text: s, cls: n >= 0 ? 'perf-pos' : 'perf-neg' };
-  }
-  function setKpi(id, raw) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var f = fmtPct(raw);
-    if (f) { el.textContent = f.text; el.classList.add(f.cls); }
-    else { el.textContent = '—'; }
-  }
-  function cmpLine(label, stratRaw, etfRaw) {
-    var a = fmtPct(stratRaw), b = fmtPct(etfRaw);
-    if (!a && !b) return label + '：資料更新中…';
-    return label + '：策略 ' + (a ? a.text : '—') + '　｜　0050 ' + (b ? b.text : '—');
-  }
-
-  // ── 即時策略績效 vs 0050 ──
-  (function loadPerformance() {
-    fetch('/api/chose_robot/?format=json')
-      .then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (data) {
-        var rows = Array.isArray(data) ? data : (data && data.results ? data.results : []);
-        if (!rows.length) return;
-        var b = rows[0];
-        setKpi('perf-month', b.monthly_return);
-        setKpi('perf-year', b.year_return);
-        var m = document.getElementById('perf-cmp-month');
-        var s = document.getElementById('perf-cmp-season');
-        var y = document.getElementById('perf-cmp-year');
-        if (m) m.textContent = cmpLine('月', b.monthly_return, b.monthly_0050_return);
-        if (s) s.textContent = cmpLine('季', b.season_return, b.season_0050_return);
-        if (y) y.textContent = cmpLine('年', b.year_return, b.year_0050_return);
-      })
-      .catch(function () {});
-  })();
+  // ── 預設封面圖（文章沒圖或圖失效時使用）──
+  var DEFAULT_COVER = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='800'%20height='420'%3E%3Cdefs%3E%3ClinearGradient%20id='g'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%230D6FB8'/%3E%3Cstop%20offset='1'%20stop-color='%231a85d6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width='800'%20height='420'%20fill='url(%23g)'/%3E%3Ctext%20x='48'%20y='232'%20font-family='sans-serif'%20font-size='60'%20font-weight='700'%20fill='white'%3EStarkLab%3C/text%3E%3Ctext%20x='50'%20y='284'%20font-family='sans-serif'%20font-size='24'%20fill='white'%20opacity='0.85'%3EData-Driven%20Investing%3C/text%3E%3C/svg%3E";
 
   // ── 最新週報（取最新 3 篇）──
   (function loadWeekly() {
@@ -708,15 +661,19 @@
           var card = document.createElement('a');
           card.className = 'weekly-card';
           card.href = '/blog/' + a.id + '/';
-          var img = a.title_picture
-            ? '<img class="weekly-img" src="' + a.title_picture + '" alt="" onerror="this.style.display=\'none\'">'
-            : '';
-          card.innerHTML = img +
-            '<div class="weekly-body">' +
-              '<div class="weekly-date">' + (a.date || '') + '</div>' +
-              '<div class="weekly-title">' + (a.title || '') + '</div>' +
-              '<div class="weekly-abs">' + (a.abstract || '') + '</div>' +
-            '</div>';
+          var im = document.createElement('img');
+          im.className = 'weekly-img';
+          im.alt = a.title || '';
+          im.src = a.title_picture || DEFAULT_COVER;
+          im.onerror = function () { this.onerror = null; this.src = DEFAULT_COVER; };
+          var body = document.createElement('div');
+          body.className = 'weekly-body';
+          body.innerHTML =
+            '<div class="weekly-date">' + (a.date || '') + '</div>' +
+            '<div class="weekly-title">' + (a.title || '') + '</div>' +
+            '<div class="weekly-abs">' + (a.abstract || '') + '</div>';
+          card.appendChild(im);
+          card.appendChild(body);
           grid.appendChild(card);
         });
       })
