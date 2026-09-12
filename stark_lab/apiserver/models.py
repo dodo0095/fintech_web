@@ -87,6 +87,12 @@ class article_1(models.Model):
 	author_name= models.TextField(default="")
 	date= models.TextField(default="")
 	link= models.TextField(default="")
+	# ↓ 自建部落格：正文（HTML）與相關欄位。content 有值 → 站內閱讀頁；
+	#   content 空 + link 有值 → 舊文，詳情頁自動導回原文（方格子）。
+	content= models.TextField(default="", blank=True)
+	slug= models.TextField(default="", blank=True)
+	source_docx= models.TextField(default="", blank=True)
+	updated= models.TextField(default="", blank=True)
 
 	class Meta:
 		db_table = "article_1"
@@ -102,6 +108,10 @@ class article_2(models.Model):
 	author_name= models.TextField(default="")
 	date= models.TextField(default="")
 	link= models.TextField(default="")
+	content= models.TextField(default="", blank=True)
+	slug= models.TextField(default="", blank=True)
+	source_docx= models.TextField(default="", blank=True)
+	updated= models.TextField(default="", blank=True)
 
 	class Meta:
 		db_table = "article_2"

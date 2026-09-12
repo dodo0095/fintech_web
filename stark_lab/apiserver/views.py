@@ -3,6 +3,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from apiserver.serializers import  bot_apiSerializer,technicHistory_Serializer,technicCurrent_Serializer
 from apiserver.serializers import basicHistory_Serializer,basicCurrent_Serializer,article_Serializer,article2_Serializer,MonthlyPerformance_Serializer
+from apiserver.serializers import article_ListSerializer,article2_ListSerializer
 from apiserver.models import bot,technicHistory,technicCurrent,basicHistory,basicCurrent,article_1,article_2,MonthlyPerformance
 from rest_framework import generics
 import django_filters.rest_framework
@@ -278,6 +279,12 @@ class articleapi(viewsets.ModelViewSet):
    # queryset = pttdata.objects.filter(id = 412)
     serializer_class = article_Serializer
 
+    def get_serializer_class(self):
+        # 列表用瘦身版（不含 content），單篇 retrieve 才回完整欄位
+        if self.action == 'list':
+            return article_ListSerializer
+        return article_Serializer
+
     def get_queryset(self):
         """
         Optionally restricts the returned purchases to a given user,
@@ -290,7 +297,7 @@ class articleapi(viewsets.ModelViewSet):
 
 
         if username is not None:
-            queryset = queryset.filter(title=str(title))
+            queryset = queryset.filter(title=str(username))
         return queryset
 
 
@@ -302,6 +309,11 @@ class articleapi2(viewsets.ModelViewSet):
     lookup_url_kwarg = "email"
    # queryset = pttdata.objects.filter(id = 412)
     serializer_class = article2_Serializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return article2_ListSerializer
+        return article2_Serializer
 
     def get_queryset(self):
         """
@@ -315,7 +327,7 @@ class articleapi2(viewsets.ModelViewSet):
 
 
         if username is not None:
-            queryset = queryset.filter(title=str(title))
+            queryset = queryset.filter(title=str(username))
         return queryset
 
 
@@ -535,6 +547,41 @@ def monthly_performance_api(request):
     serializer = MonthlyPerformance_Serializer(data, many=True)
     return Response(serializer.data)
 
+
+
+# ─────────────────────────────────────────────────────────────
+# 自建部落格：文章閱讀頁（伺服器端渲染，利於 SEO）
+#   /blog/<id>/        → article_1（產業時事分析）
+#   /blog/tech/<id>/   → article_2（科技分享）
+# 舊文章（content 空、只有 link）→ 302 導回原文（方格子），平滑過渡。
+# ─────────────────────────────────────────────────────────────
+from django.shortcuts import render, redirect
+
+def article_detail(request, pk, cat=1):
+    Model = article_1 if int(cat) == 1 else article_2
+    try:
+        art = Model.objects.get(pk=pk)
+    except Model.DoesNotExist:
+        return custom_page_not_found(request)
+
+    content = (art.content or "").strip()
+    link = (art.link or "").strip()
+    # 舊文：沒有站內正文但有外部連結 → 導回原文
+    if not content and link:
+        return redirect(link)
+
+    is_tech = int(cat) == 2
+    label = "科技分享" if is_tech else "產業時事分析"
+    canonical = request.build_absolute_uri(request.path)
+
+    ctx = {
+        "art": art,
+        "label": label,
+        "is_tech": is_tech,
+        "canonical": canonical,
+        "list_url": "/botBlog.html",
+    }
+    return render(request, "blog-post.html", ctx)
 
 
 from django.shortcuts import render

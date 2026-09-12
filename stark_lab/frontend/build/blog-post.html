@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,股票分析,量化投資,台股">
+  <meta name="description" content="{{ art.abstract|striptags }}">
+  <link href="images/favicon.ico" rel="shortcut icon">
+  <title>{{ art.title }}｜StarkLab 史塔克實驗室</title>
+
+  <!-- SEO：正本永遠指回主站，方格子/FB 轉貼都算主站的分數 -->
+  <link rel="canonical" href="{{ canonical }}">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="StarkLab 史塔克實驗室">
+  <meta property="og:title" content="{{ art.title }}">
+  <meta property="og:description" content="{{ art.abstract|striptags }}">
+  <meta property="og:url" content="{{ canonical }}">
+  {% if art.title_picture %}<meta property="og:image" content="{{ art.title_picture }}">{% endif %}
+  <meta name="twitter:card" content="summary_large_image">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ art.title|escapejs }}",
+    "description": "{{ art.abstract|striptags|escapejs }}",
+    {% if art.title_picture %}"image": "{{ art.title_picture }}",{% endif %}
+    "datePublished": "{{ art.date }}",
+    "author": { "@type": "Organization", "name": "{{ art.author_name|default:'史塔克實驗室'|escapejs }}" },
+    "publisher": { "@type": "Organization", "name": "StarkLab 史塔克實驗室" },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "{{ canonical }}" }
+  }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #0D6FB8; --blue-light: #1a85d6; --blue-pale: #e8f3fc; --blue-border: #bdd9f2;
+      --text: #1a1a2e; --text-muted: #5a6a80; --bg: #ffffff; --bg-soft: #f7fafd; --border: #e4ecf5;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.75; }
+
+    /* NAV（與其他頁一致） */
+    .topper { position: fixed; top: 0; left: 0; width: 100%; z-index: 999;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border); }
+    .topper-content { max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    .topper-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark { width: 34px; height: 34px; background: var(--blue); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+    .logo-text { font-size: 17px; font-weight: 700; color: var(--text); }
+    .logo-text span { font-size: 12px; font-weight: 400; color: var(--text-muted); display: block; }
+    .topper-navbar { display: flex; align-items: center; gap: 2px; }
+    .topper-navbar a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500;
+      padding: 7px 14px; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+    .topper-navbar a:hover { color: var(--blue); background: var(--blue-pale); }
+
+    /* ARTICLE */
+    .article-wrap { max-width: 760px; margin: 0 auto; padding: 104px 24px 40px; }
+    .breadcrumb { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--blue); }
+    .art-tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--blue);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+    .art-title { font-family: 'DM Serif Display', 'Noto Sans TC', serif;
+      font-size: clamp(30px, 5vw, 46px); line-height: 1.2; margin-bottom: 20px; }
+    .art-meta { display: flex; align-items: center; gap: 12px; padding-bottom: 24px;
+      margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .art-meta img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+    .art-meta .m-name { font-size: 14px; font-weight: 600; }
+    .art-meta .m-date { font-size: 13px; color: var(--text-muted); }
+    .art-cover { width: 100%; border-radius: 12px; margin-bottom: 32px; }
+
+    /* 正文排版 */
+    .art-body { font-size: 17px; color: #23324a; }
+    .art-body p { margin: 0 0 20px; }
+    .art-body h1, .art-body h2, .art-body h3 { font-weight: 700; line-height: 1.35; color: var(--text); margin: 36px 0 14px; }
+    .art-body h1 { font-size: 28px; } .art-body h2 { font-size: 24px; } .art-body h3 { font-size: 20px; }
+    .art-body h2 { padding-left: 14px; border-left: 4px solid var(--blue); }
+    .art-body a { color: var(--blue); text-decoration: underline; }
+    .art-body ul, .art-body ol { margin: 0 0 20px 1.4em; }
+    .art-body li { margin-bottom: 8px; }
+    .art-body img { max-width: 100%; height: auto; border-radius: 10px; margin: 20px 0; display: block; }
+    .art-body blockquote { margin: 24px 0; padding: 14px 20px; background: var(--bg-soft);
+      border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0; color: var(--text-muted); }
+    .art-body table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; }
+    .art-body th, .art-body td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; }
+    .art-body th { background: var(--blue-pale); color: var(--text); font-weight: 600; }
+    .art-body strong { color: var(--text); }
+    .table-scroll { overflow-x: auto; }
+
+    /* 原文出處 */
+    .origin-note { margin: 36px 0 0; padding: 14px 18px; background: var(--bg-soft);
+      border: 1px solid var(--border); border-radius: 10px; font-size: 13.5px; color: var(--text-muted); }
+    .origin-note a { color: var(--blue); }
+
+    /* 訂閱 CTA（Phase 2 接電子報，先留位） */
+    .subscribe { margin: 48px 0 0; padding: 32px; background: var(--blue-pale);
+      border: 1px solid var(--blue-border); border-radius: 16px; text-align: center; }
+    .subscribe h3 { font-size: 20px; margin-bottom: 8px; }
+    .subscribe p { font-size: 14px; color: var(--text-muted); margin-bottom: 18px; }
+    .subscribe a { display: inline-block; background: var(--blue); color: #fff; text-decoration: none;
+      padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+
+    .back-row { margin-top: 40px; }
+    .back-row a { color: var(--blue); text-decoration: none; font-weight: 600; font-size: 14px; }
+
+    /* FOOTER */
+    .footer { background: var(--text); padding: 48px 24px 32px; margin-top: 64px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-mark { width: 36px; height: 36px; background: var(--blue); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; }
+    .footer-brand-text { font-weight: 700; font-size: 15px; color: white; }
+    .footer-brand-text small { display: block; font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .footer-nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-nav a { font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none; }
+    .footer-nav a:hover { color: white; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    @media (max-width: 600px) {
+      .topper-navbar { display: none; }
+      .article-wrap { padding-top: 92px; }
+      .art-body { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topper">
+  <div class="topper-content">
+    <a class="topper-logo" href="/index.html">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">StarkLab <span>史塔克實驗室</span></div>
+    </a>
+    <nav class="topper-navbar">
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="/bot.html">選股機器人</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">Podcast</a>
+      <a href="/index.html">關於我們</a>
+    </nav>
+  </div>
+</header>
+
+<article class="article-wrap">
+  <div class="breadcrumb">
+    <a href="/index.html">首頁</a> ／ <a href="{{ list_url }}">精彩文章</a> ／ {{ label }}
+  </div>
+
+  <span class="art-tag">{{ label }}</span>
+  <h1 class="art-title">{{ art.title }}</h1>
+
+  <div class="art-meta">
+    {% if art.author_picture %}<img src="{{ art.author_picture }}" alt="{{ art.author_name }}" onerror="this.style.display='none'">{% endif %}
+    <div>
+      <div class="m-name">{{ art.author_name|default:"史塔克實驗室" }}</div>
+      <div class="m-date">{{ art.date }}</div>
+    </div>
+  </div>
+
+  {% if art.title_picture %}
+    <img class="art-cover" src="{{ art.title_picture }}" alt="{{ art.title }}" onerror="this.style.display='none'">
+  {% endif %}
+
+  <div class="art-body">
+    {{ art.content|safe }}
+  </div>
+
+  {% if art.link %}
+  <div class="origin-note">📌 本文首發於 StarkLab 史塔克實驗室。原文同步發表於 <a href="{{ art.link }}" target="_blank" rel="noopener">此處</a>。</div>
+  {% endif %}
+
+  <div class="subscribe">
+    <h3>喜歡這種用數據說話的分析？</h3>
+    <p>追蹤史塔克實驗室，第一時間收到每週台股觀點與選股機器人動態。</p>
+    <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">追蹤 Facebook</a>
+  </div>
+
+  <div class="back-row">
+    <a href="{{ list_url }}">← 回到所有文章</a>
+  </div>
+</article>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">S</div>
+      <div class="footer-brand-text">StarkLab <small>史塔克實驗室 版權所有</small></div>
+    </div>
+    <nav class="footer-nav">
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="/bot.html">選股機器人</a>
+      <a href="/index.html">關於我們</a>
+    </nav>
+    <div class="footer-copy">© 2020 – 2026 StarkLab</div>
+  </div>
+</footer>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LX8V41PCYV');
+</script>
+</body>
+</html>

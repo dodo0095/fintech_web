@@ -28,3 +28,7 @@ numpy>=1.26.0
 yfinance>=0.2.60
 feedparser>=6.0.11
 beautifulsoup4>=4.12.3
+
+# --- 自建部落格：Word(.docx) → HTML 上稿管線（publish_docx / backfill_weekly）---
+mammoth>=1.6.0
+PyYAML>=6.0

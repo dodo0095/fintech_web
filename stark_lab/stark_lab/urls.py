@@ -27,6 +27,10 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
 
+    # 自建部落格：文章閱讀頁（伺服器端渲染）
+    path('blog/<int:pk>/', views.article_detail, name='article_detail'),
+    path('blog/tech/<int:pk>/', views.article_detail, {'cat': 2}, name='article_detail_tech'),
+
     # 消息面收集平台（news app）
     path('news.html', TemplateView.as_view(template_name="news.html")),
     path('api/news/', include('news.urls')),

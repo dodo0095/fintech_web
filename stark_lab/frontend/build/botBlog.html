@@ -369,9 +369,10 @@
   function buildCard(article, label) {
     const a = document.createElement('a');
     a.className = 'article-card';
-    a.href = article.link || '#';
-    a.target = '_blank';
-    a.rel = 'noopener';
+    // 連到站內文章頁（正本）；詳情頁若為舊文無正文會自動導回原文
+    const isTech = currentApi.indexOf('articleapi2') !== -1;
+    a.href = (isTech ? '/blog/tech/' : '/blog/') + article.id + '/';
+    a.target = '_self';
 
     const imgSrc = article.title_picture || '';
     const authorImg = article.author_picture || '';
@@ -482,12 +483,12 @@
   fetchArticles(currentApi, currentLabel);
 </script>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-180599162-1"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'UA-180599162-1');
+  gtag('config', 'G-LX8V41PCYV');
 </script>
 </body>
 </html>

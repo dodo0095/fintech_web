@@ -49,6 +49,25 @@ class article2_Serializer(serializers.ModelSerializer):
         fields = '__all__'
         #fields = ("tag")
 
+
+# 列表用：不夾帶肥大的 content 正文，讓 botBlog 卡片列表載入快。
+_ARTICLE_LIST_FIELDS = (
+    "id", "title", "title_picture", "abstract",
+    "author_picture", "author_name", "date", "link",
+)
+
+
+class article_ListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = article_1
+        fields = _ARTICLE_LIST_FIELDS
+
+
+class article2_ListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = article_2
+        fields = _ARTICLE_LIST_FIELDS
+
 class MonthlyPerformance_Serializer(serializers.ModelSerializer):
     class Meta:
         model = MonthlyPerformance
