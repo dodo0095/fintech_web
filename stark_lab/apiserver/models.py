@@ -117,6 +117,19 @@ class article_2(models.Model):
 		db_table = "article_2"
 
 
+class Subscriber(models.Model):
+	email = models.EmailField(unique=True)
+	source = models.CharField(max_length=50, default="home", blank=True, help_text="訂閱來源，例如 home / blog")
+	created = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		db_table = "subscriber"
+		ordering = ["-created"]
+
+	def __str__(self):
+		return self.email
+
+
 class MonthlyPerformance(models.Model):
 	label = models.CharField(max_length=100, help_text="月份標籤，例如：2025年一月份績效")
 	date_range = models.CharField(max_length=50, help_text="例如：2025-01-11~2025-02-10")

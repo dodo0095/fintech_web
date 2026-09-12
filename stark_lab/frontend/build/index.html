@@ -346,8 +346,48 @@
     .footer-nav a:hover { color: white; }
     .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
 
+    /* ── 績效漲跌色 ── */
+    .perf-pos { color: #d13438; }   /* 台股習慣：紅漲 */
+    .perf-neg { color: #128a3e; }   /* 綠跌 */
+
+    /* ── 最新週報 ── */
+    .weekly-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .weekly-empty { grid-column: 1 / -1; color: var(--text-muted); font-size: 14px; padding: 24px 0; }
+    .weekly-card {
+      background: white; border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; text-decoration: none; color: inherit;
+      display: flex; flex-direction: column; transition: all 0.25s;
+    }
+    .weekly-card:hover { border-color: var(--blue-border); box-shadow: 0 8px 28px rgba(13,111,184,0.1); transform: translateY(-3px); }
+    .weekly-img { width: 100%; height: 170px; object-fit: cover; background: var(--bg-soft); }
+    .weekly-body { padding: 18px; display: flex; flex-direction: column; flex: 1; }
+    .weekly-date { font-size: 12px; color: var(--blue); font-weight: 600; margin-bottom: 8px; }
+    .weekly-title { font-size: 15.5px; font-weight: 700; line-height: 1.45; margin-bottom: 8px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .weekly-abs { font-size: 13px; color: var(--text-muted); line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ── 電子報 ── */
+    .newsletter-bg { background: var(--blue-pale); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .newsletter-inner { max-width: 640px; text-align: center; }
+    .newsletter-inner .eyebrow { justify-content: center; }
+    .newsletter-inner .sec-title { }
+    .newsletter-desc { font-size: 15px; color: var(--text-muted); line-height: 1.75; margin: 8px 0 28px; }
+    .newsletter-form { display: flex; gap: 10px; max-width: 480px; margin: 0 auto; }
+    .newsletter-input {
+      flex: 1; padding: 13px 16px; font-size: 14px; font-family: inherit;
+      border: 1.5px solid var(--blue-border); border-radius: 8px; background: white; color: var(--text);
+    }
+    .newsletter-input:focus { outline: none; border-color: var(--blue); }
+    .newsletter-form .btn-blue { white-space: nowrap; border: none; cursor: pointer; }
+    .newsletter-msg { margin-top: 14px; font-size: 13.5px; min-height: 20px; }
+    .newsletter-msg.ok { color: #128a3e; }
+    .newsletter-msg.err { color: #d13438; }
+
     /* ── MOBILE ── */
     @media (max-width: 860px) {
+      .weekly-grid { grid-template-columns: 1fr; }
+      .newsletter-form { flex-direction: column; }
       .hero-inner { grid-template-columns: 1fr; gap: 48px; }
       .hero-card { display: none; }
       .about-grid { grid-template-columns: 1fr; gap: 48px; }
@@ -411,24 +451,39 @@
     </div>
     <div>
       <div class="hero-card">
-        <div class="hero-card-label">我們在做什麼</div>
+        <div class="hero-card-label">選股機器人 · 策略績效 vs 0050</div>
         <div class="kpi-grid">
           <div class="kpi">
-            <div class="kpi-val">5+</div>
-            <div class="kpi-desc">年持續耕耘量化投資研究</div>
+            <div class="kpi-val" id="perf-month">—</div>
+            <div class="kpi-desc">近一月 策略績效</div>
           </div>
           <div class="kpi">
-            <div class="kpi-val">AI</div>
-            <div class="kpi-desc">機器學習個股分析引擎</div>
+            <div class="kpi-val" id="perf-year">—</div>
+            <div class="kpi-desc">近一年 策略績效</div>
           </div>
         </div>
         <div class="hcf-list">
-          <div class="hcf-item"><div class="hcf-dot"></div>每月更新個股基本面歷史清單</div>
-          <div class="hcf-item"><div class="hcf-dot"></div>量化策略研究與分享</div>
-          <div class="hcf-item"><div class="hcf-dot"></div>Podcast 深度剖析市場趨勢</div>
-          <div class="hcf-item"><div class="hcf-dot"></div>Facebook 社群即時互動</div>
+          <div class="hcf-item"><div class="hcf-dot"></div><span id="perf-cmp-month">月：資料更新中…</span></div>
+          <div class="hcf-item"><div class="hcf-dot"></div><span id="perf-cmp-season">季：資料更新中…</span></div>
+          <div class="hcf-item"><div class="hcf-dot"></div><span id="perf-cmp-year">年：資料更新中…</span></div>
         </div>
+        <a href="/bot.html" class="btn-outline" style="margin-top:16px; width:100%; justify-content:center;">看完整績效與選股清單 →</a>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- 最新週報 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="eyebrow">每週觀點</div>
+    <h2 class="sec-title">最新<em>台股週報</em></h2>
+    <div class="rule"></div>
+    <div class="weekly-grid" id="weekly-grid">
+      <div class="weekly-empty" id="weekly-empty">週報載入中…</div>
+    </div>
+    <div style="margin-top:32px;">
+      <a href="/botBlog.html" class="btn-blue">看所有文章</a>
     </div>
   </div>
 </section>
@@ -541,6 +596,20 @@
   </div>
 </section>
 
+<!-- 電子報訂閱 -->
+<section class="section newsletter-bg" id="newsletter">
+  <div class="section-inner newsletter-inner">
+    <div class="eyebrow">電子報</div>
+    <h2 class="sec-title">每週一封，<em>用數據看台股</em></h2>
+    <p class="newsletter-desc">留下 Email，第一時間收到台股週報、選股機器人動態與量化研究心得。不寄垃圾信，隨時可取消。</p>
+    <form class="newsletter-form" id="subscribe-form">
+      <input type="email" id="subscribe-email" class="newsletter-input" placeholder="你的 Email" required autocomplete="email">
+      <button type="submit" class="btn-blue" id="subscribe-btn">訂閱電子報</button>
+    </form>
+    <div class="newsletter-msg" id="subscribe-msg"></div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer class="footer">
   <div class="footer-inner">
@@ -580,6 +649,110 @@
     el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
     io.observe(el);
   });
+</script>
+
+<script>
+  // ── 工具：把績效字串格式化成 +X.XX% 並上色 ──
+  function fmtPct(raw) {
+    if (raw === null || raw === undefined || raw === '') return null;
+    var n = parseFloat(String(raw).replace('%', '').trim());
+    if (isNaN(n)) return null;
+    var s = (n > 0 ? '+' : '') + n.toFixed(2) + '%';
+    return { text: s, cls: n >= 0 ? 'perf-pos' : 'perf-neg' };
+  }
+  function setKpi(id, raw) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var f = fmtPct(raw);
+    if (f) { el.textContent = f.text; el.classList.add(f.cls); }
+    else { el.textContent = '—'; }
+  }
+  function cmpLine(label, stratRaw, etfRaw) {
+    var a = fmtPct(stratRaw), b = fmtPct(etfRaw);
+    if (!a && !b) return label + '：資料更新中…';
+    return label + '：策略 ' + (a ? a.text : '—') + '　｜　0050 ' + (b ? b.text : '—');
+  }
+
+  // ── 即時策略績效 vs 0050 ──
+  (function loadPerformance() {
+    fetch('/api/chose_robot/?format=json')
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (data) {
+        var rows = Array.isArray(data) ? data : (data && data.results ? data.results : []);
+        if (!rows.length) return;
+        var b = rows[0];
+        setKpi('perf-month', b.monthly_return);
+        setKpi('perf-year', b.year_return);
+        var m = document.getElementById('perf-cmp-month');
+        var s = document.getElementById('perf-cmp-season');
+        var y = document.getElementById('perf-cmp-year');
+        if (m) m.textContent = cmpLine('月', b.monthly_return, b.monthly_0050_return);
+        if (s) s.textContent = cmpLine('季', b.season_return, b.season_0050_return);
+        if (y) y.textContent = cmpLine('年', b.year_return, b.year_0050_return);
+      })
+      .catch(function () {});
+  })();
+
+  // ── 最新週報（取最新 3 篇）──
+  (function loadWeekly() {
+    fetch('/api/articleapi/?format=json')
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (data) {
+        var rows = Array.isArray(data) ? data : (data && data.results ? data.results : []);
+        var grid = document.getElementById('weekly-grid');
+        var empty = document.getElementById('weekly-empty');
+        if (!grid) return;
+        if (!rows.length) { if (empty) empty.textContent = '週報即將上線，敬請期待。'; return; }
+        grid.innerHTML = '';
+        rows.slice(0, 3).forEach(function (a) {
+          var card = document.createElement('a');
+          card.className = 'weekly-card';
+          card.href = '/blog/' + a.id + '/';
+          var img = a.title_picture
+            ? '<img class="weekly-img" src="' + a.title_picture + '" alt="" onerror="this.style.display=\'none\'">'
+            : '';
+          card.innerHTML = img +
+            '<div class="weekly-body">' +
+              '<div class="weekly-date">' + (a.date || '') + '</div>' +
+              '<div class="weekly-title">' + (a.title || '') + '</div>' +
+              '<div class="weekly-abs">' + (a.abstract || '') + '</div>' +
+            '</div>';
+          grid.appendChild(card);
+        });
+      })
+      .catch(function () {});
+  })();
+
+  // ── 電子報訂閱 ──
+  (function () {
+    var form = document.getElementById('subscribe-form');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = document.getElementById('subscribe-email').value.trim();
+      var msg = document.getElementById('subscribe-msg');
+      var btn = document.getElementById('subscribe-btn');
+      msg.className = 'newsletter-msg';
+      msg.textContent = '';
+      btn.disabled = true;
+      fetch('/api/subscribe/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, source: 'home' })
+      })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          msg.textContent = res.j.msg || (res.ok ? '訂閱成功！' : '訂閱失敗');
+          msg.className = 'newsletter-msg ' + (res.ok && res.j.ok ? 'ok' : 'err');
+          if (res.ok && res.j.ok) form.reset();
+        })
+        .catch(function () {
+          msg.textContent = '網路錯誤，請稍後再試';
+          msg.className = 'newsletter-msg err';
+        })
+        .finally(function () { btn.disabled = false; });
+    });
+  })();
 </script>
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>

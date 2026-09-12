@@ -27,6 +27,9 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
 
+    # 電子報訂閱
+    path('api/subscribe/', views.subscribe, name='subscribe'),
+
     # 自建部落格：文章閱讀頁（伺服器端渲染）
     path('blog/<int:pk>/', views.article_detail, name='article_detail'),
     path('blog/tech/<int:pk>/', views.article_detail, {'cat': 2}, name='article_detail_tech'),

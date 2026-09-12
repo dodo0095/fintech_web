@@ -557,6 +557,51 @@ def monthly_performance_api(request):
 # ─────────────────────────────────────────────────────────────
 from django.shortcuts import render, redirect
 
+# ─────────────────────────────────────────────────────────────
+# 電子報訂閱：公開 POST /api/subscribe/  {"email": "..."}
+# 用純 Django view + csrf_exempt，避免靜態表單處理 CSRF token 的麻煩。
+# ─────────────────────────────────────────────────────────────
+import json as _json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError as _ValidationError
+from apiserver.models import Subscriber
+
+
+@csrf_exempt
+@require_POST
+def subscribe(request):
+    # 支援 JSON 或表單 POST
+    email = ''
+    source = 'home'
+    try:
+        if request.content_type and 'application/json' in request.content_type:
+            body = _json.loads((request.body or b'').decode('utf-8') or '{}')
+            email = (body.get('email') or '').strip()
+            source = (body.get('source') or 'home').strip()[:50]
+        else:
+            email = (request.POST.get('email') or '').strip()
+            source = (request.POST.get('source') or 'home').strip()[:50]
+    except Exception:
+        return JsonResponse({'ok': False, 'msg': '格式錯誤'}, status=400)
+
+    if not email:
+        return JsonResponse({'ok': False, 'msg': '請輸入 Email'}, status=400)
+    try:
+        validate_email(email)
+    except _ValidationError:
+        return JsonResponse({'ok': False, 'msg': 'Email 格式不正確'}, status=400)
+
+    obj, created = Subscriber.objects.get_or_create(
+        email=email.lower(), defaults={'source': source}
+    )
+    if created:
+        return JsonResponse({'ok': True, 'msg': '訂閱成功，謝謝你！'})
+    return JsonResponse({'ok': True, 'msg': '你已經在訂閱名單囉 :)'})
+
+
 def article_detail(request, pk, cat=1):
     Model = article_1 if int(cat) == 1 else article_2
     try:
