@@ -1,58 +1,320 @@
-<!DOCTYPE html><!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
-    <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,股票分析">
-    <meta name="description" content="2020 年夏天，StarkLab開張了！由幾個志同道合的朋友湊在一起，共同研究股票市場並用機器學習來做量化投資，希望透過分享自己長時間的研究成果，創造對程式交易有興趣的投資朋友一起討論成長的園地。股票的英文是stock，音近「史塔克」，因此我們就取名為「史塔克研究室StarkLab」我們深信在這個資訊爆炸的時代，大數據或機器學習這些名詞不該只是個名詞，而是能真正運用在生活中。因此，在這個平台我們不僅推廣機器學習的科普知識，同時也運用Python創造屬於StarkLab自己的投資策略，並且不定時撰寫金融投資相關文章、分析使用AI人工智慧跑出來的個股優劣勢。 如同華爾街最資深也最成功的經驗老手之一威廉‧歐尼爾（William J.O’Neil）說過：「不要懵懵懂懂的隨意買股票，要在投資前紮實的做一些功課。」投資市場博大精深，若能透過科學方法驗證、不盲目操作，一定會有不同的收穫。 不管您是投資新手或投資老手，都歡迎追蹤我們、與我們一起討論或給我們建議回饋喲：） 非常歡迎大家來看我們的資訊 也歡迎大家收聽我們Podcast">
-    <link href="images/favicon.ico" rel="shortcut icon">
-    <title>StarkLab | 基本面歷史觀察清單</title>
-  <link href="/static/css/botAbout.css" rel="stylesheet"></head>
-  <body>
-    <div class="wrapper">
-      <div class="topper">
-        <div class="topper-content">
-          <div class="topper-mobile-opener"></div><a class="topper-logo" href="#">StartLab</a>
-          <div class="topper-navbar"><a href="botBlog.html" target="_self">
-              <div><i class="icons icons-blog"></i></div><span class="font-regular">精彩文章</span></a><a href="bot.html" target="_self">
-              <div><i class="icons icons-robot"></i></div><span class="font-regular">選股機器人</span></a><a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">
-              <div><i class="icons icons-feedback"></i></div><span class="font-regular">Podcast</span></a><a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">
-              <div><i class="icons icons-fb"></i></div><span class="font-regular">FACEBOOK</span></a><a class="js-selected" href="botAbout.html" target="_self">
-              <div><i class="icons icons-brain"></i></div><span class="font-regular">關於我</span></a><a href="watchCenter.html" target="_self">
-              <div><i class="icons icons-brain"></i></div><span class="font-regular">風向觀測站</span></a>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,量化投資,關於我們">
+  <meta name="description" content="史塔克實驗室 StarkLab — 一群熱愛股市的資料科學家，2020 年夏天成立，用 Python 與機器學習打造量化投資策略，並誠實分享每一次研究與回測。">
+  <link href="images/favicon.ico" rel="shortcut icon">
+  <title>StarkLab | 關於我們</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #0D6FB8; --blue-light: #1a85d6; --blue-pale: #e8f3fc; --blue-border: #bdd9f2;
+      --text: #1a1a2e; --text-muted: #5a6a80; --bg: #ffffff; --bg-soft: #f7fafd; --border: #e4ecf5;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; list-style: none; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    .topper { position: fixed; top: 0; left: 0; width: 100%; z-index: 999; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .topper-content { max-width: 1100px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    .topper-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark { width: 34px; height: 34px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+    .logo-text { font-size: 17px; font-weight: 700; color: var(--text); }
+    .logo-text span { font-size: 12px; font-weight: 400; color: var(--text-muted); display: block; }
+    .topper-navbar { display: flex; align-items: center; gap: 2px; }
+    .topper-navbar a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; padding: 7px 14px; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+    .topper-navbar a:hover { color: var(--blue); background: var(--blue-pale); }
+    .topper-navbar a.js-selected { color: var(--blue); background: var(--blue-pale); font-weight: 600; }
+    .topper-mobile-opener { display: none; cursor: pointer; width: 36px; height: 36px; flex-direction: column; justify-content: center; align-items: center; gap: 5px; border-radius: 6px; border: 1px solid var(--border); }
+    .topper-mobile-opener span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; }
+
+    /* ── HERO ── */
+    .hero { padding: 128px 24px 80px; position: relative; overflow: hidden; }
+    .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--border); }
+    .hero-blob { position: absolute; top: -100px; right: -160px; width: 560px; height: 560px; background: radial-gradient(ellipse at 60% 40%, #d6eeff 0%, #edf6ff 55%, transparent 75%); border-radius: 50%; pointer-events: none; animation: drift 10s ease-in-out infinite; }
+    @keyframes drift { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-18px) scale(1.03);} }
+    .hero-inner { max-width: 780px; margin: 0 auto; text-align: center; position: relative; }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+    .hero-eyebrow::before, .hero-eyebrow::after { content: ''; width: 24px; height: 2px; background: var(--blue); border-radius: 1px; }
+    .hero-title { font-family: 'DM Serif Display', serif; font-size: clamp(38px, 5.5vw, 62px); line-height: 1.14; color: var(--text); margin-bottom: 22px; }
+    .hero-title .blue { color: var(--blue); }
+    .hero-desc { font-size: 16px; line-height: 1.9; color: var(--text-muted); max-width: 620px; margin: 0 auto; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 88px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .about-bg { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+    .eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--blue); border-radius: 1px; }
+    .sec-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 4vw, 42px); line-height: 1.2; color: var(--text); margin-bottom: 14px; }
+    .sec-title em { color: var(--blue); font-style: normal; }
+    .rule { width: 40px; height: 3px; background: var(--blue); border-radius: 2px; margin: 18px 0 44px; }
+
+    /* ── ABOUT ── */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+    .about-body { font-size: 15.5px; line-height: 1.95; color: var(--text-muted); }
+    .about-body p { margin-bottom: 18px; }
+    .about-body strong { color: var(--text); font-weight: 600; }
+    .quote-box { margin: 28px 0; border-left: 3px solid var(--blue); padding: 18px 22px; background: white; border-radius: 0 10px 10px 0; box-shadow: 0 2px 12px rgba(13,111,184,0.06); }
+    .quote-box p { font-family: 'DM Serif Display', serif; font-size: 17px; line-height: 1.65; color: var(--text); font-style: italic; margin: 0 0 10px; }
+    .quote-box cite { font-size: 12px; color: var(--blue); font-style: normal; font-weight: 600; letter-spacing: 0.04em; }
+    .about-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .acard { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 22px 20px; transition: all 0.25s; }
+    .acard:hover { border-color: var(--blue-border); box-shadow: 0 8px 24px rgba(13,111,184,0.1); transform: translateY(-3px); }
+    .acard-icon { width: 42px; height: 42px; background: var(--blue-pale); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 14px; }
+    .acard-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .acard-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── PODCAST ── */
+    .podcast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+    .podcast-body { font-size: 15.5px; line-height: 1.85; color: var(--text-muted); margin-bottom: 32px; }
+    .podcast-links { display: flex; flex-direction: column; gap: 10px; }
+    .plink { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: white; border: 1.5px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); transition: all 0.22s; }
+    .plink:hover { border-color: var(--blue); background: var(--blue-pale); transform: translateX(4px); }
+    .plink-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; color: #fff; }
+    .plink-icon.apple { background: #1c1c1e; }
+    .plink-icon.soundon { background: #1c3fa8; }
+    .plink-icon.spotify { background: #1db954; }
+    .plink-info strong { display: block; font-size: 14px; font-weight: 600; }
+    .plink-info span { font-size: 12px; color: var(--text-muted); }
+    .podcast-visual { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px; text-align: center; }
+    .pv-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 24px; }
+    .waveform { display: flex; align-items: center; justify-content: center; gap: 4px; height: 64px; margin-bottom: 24px; }
+    .wb { width: 4px; border-radius: 2px; background: var(--blue); animation: wv 1.2s ease-in-out infinite; }
+    @keyframes wv { 0%,100%{transform:scaleY(0.25); opacity:0.4;} 50%{transform:scaleY(1); opacity:1;} }
+    .pv-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .pv-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* ── CTA ── */
+    .cta-bg { background: var(--blue-pale); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .cta-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+    .cta-inner .eyebrow { justify-content: center; }
+    .cta-desc { font-size: 15px; color: var(--text-muted); line-height: 1.75; margin: 8px 0 28px; }
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-blue { display: inline-flex; align-items: center; gap: 8px; background: var(--blue); color: white; text-decoration: none; padding: 13px 26px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+    .btn-blue:hover { background: var(--blue-light); box-shadow: 0 6px 20px rgba(13,111,184,0.3); transform: translateY(-1px); }
+    .btn-outline { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--text); text-decoration: none; padding: 13px 26px; border-radius: 8px; font-size: 14px; font-weight: 500; border: 1.5px solid var(--blue-border); transition: all 0.2s; }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); background: white; }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--text); padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-mark { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+    .footer-brand-text { font-weight: 700; font-size: 15px; color: white; }
+    .footer-brand-text small { display: block; font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .footer-nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-nav a { font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; }
+    .footer-nav a:hover { color: white; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 860px) {
+      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .podcast-grid { grid-template-columns: 1fr; gap: 48px; }
+      .about-cards { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .topper-navbar { display: none; }
+      .topper-navbar.js-active { display: flex; flex-direction: column; position: fixed; top: 68px; left: 0; right: 0; bottom: 0; background: white; padding: 16px; gap: 4px; overflow-y: auto; border-top: 1px solid var(--border); }
+      .topper-navbar.js-active a { width: 100%; padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border); border-radius: 0; }
+      .topper-mobile-opener { display: flex; }
+      .section { padding: 60px 20px; }
+      .about-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="topper">
+  <div class="topper-content">
+    <a class="topper-logo" href="/">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">StarkLab<span>史塔克實驗室</span></div>
+    </a>
+    <div class="topper-mobile-opener" id="mobileOpener"><span></span><span></span><span></span></div>
+    <nav class="topper-navbar" id="navbar">
+      <a href="/bot.html">選股機器人</a>
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank" rel="noopener">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank" rel="noopener">Facebook</a>
+      <a href="/botAbout.html" class="js-selected">關於我們</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">關於我們 · Since 2020</div>
+    <h1 class="hero-title">用<span class="blue">科學</span>的方式，<br>認真看待每一筆投資</h1>
+    <p class="hero-desc">
+      史塔克實驗室是一群對股市充滿熱忱的資料科學家。我們相信，投資不該只靠感覺——而是能被資料驗證、被策略支撐的一門功課。
+    </p>
+  </div>
+</section>
+
+<!-- 理念 -->
+<section class="section about-bg">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div>
+        <div class="eyebrow">我們的理念</div>
+        <h2 class="sec-title">不盲目、<em>有根據</em>地投資</h2>
+        <div class="rule"></div>
+        <div class="about-body">
+          <p>
+            股票的英文是 stock，音近「史塔克」——這個名字不只是個玩笑，它代表我們對股票市場最原始的好奇心。2020 年夏天，幾個志同道合的朋友湊在一起，決定把各自在<strong>機器學習與資料分析</strong>上的所學，實際用在投資這件事上，也希望創造一個對程式交易有興趣的朋友能一起討論、成長的園地。
+          </p>
+          <p>
+            我們深信，在這個資訊爆炸的時代，<strong>大數據與機器學習不該只是個名詞</strong>，而是能真正運用在生活中的工具。因此在這個平台，我們不僅推廣機器學習的科普知識，也運用 Python 打造屬於 StarkLab 自己的投資策略，並不定時撰寫金融投資文章、分析用 AI 跑出來的個股優劣勢。
+          </p>
+          <div class="quote-box">
+            <p>「不要懵懵懂懂的隨意買股票，要在投資前紮實的做一些功課。」</p>
+            <cite>— 威廉‧歐尼爾（William J. O'Neil）</cite>
           </div>
+          <p>
+            投資市場博大精深，若能透過科學方法驗證、不盲目操作，一定會有不同的收穫。不管你是投資新手或老手，都歡迎追蹤我們、與我們一起討論，或給我們建議與回饋 :)
+          </p>
         </div>
       </div>
-      <main class="container">
-        <div class="bot-content">
-          <section class="s1">
-            <div class="sub_title"><span>關於我們的理念</span></div>
-            <div class="s1-block">
-              <div class="aboutFrame"><span class="aboutContent">2020 年夏天，StarkLab開張了！由幾個志同道合的朋友湊在一起，共同研究股票市場並用機器學習來做量化投資，希望透過分享自己長時間的研究成果，創造對程式交易有興趣的投資朋友一起討論成長的園地。股票的英文是stock，音近「史塔克」，因此我們就取名為「史塔克研究室StarkLab」我們深信在這個資訊爆炸的時代，大數據或機器學習這些名詞不該只是個名詞，而是能真正運用在生活中。因此，在這個平台我們不僅推廣機器學習的科普知識，同時也運用Python創造屬於StarkLab自己的投資策略，並且不定時撰寫金融投資相關文章、分析使用AI人工智慧跑出來的個股優劣勢。<br><br>如同華爾街最資深也最成功的經驗老手之一威廉‧歐尼爾（William J.O’Neil）說過：「不要懵懵懂懂的隨意買股票，要在投資前紮實的做一些功課。」投資市場博大精深，若能透過科學方法驗證、不盲目操作，一定會有不同的收穫。<br><br>不管您是投資新手或投資老手，都歡迎追蹤我們、與我們一起討論或給我們建議回饋喲：） <br>  非常歡迎大家來看我們的資訊   也歡迎大家收聽我們Podcast<br><br> <br>  Podcasts:<br> Apple: https://reurl.cc/D63Dz6<br> SoundOn: https://reurl.cc/n0OXad<br>              Spotify :https://reurl.cc/Z71LrA<br> </span></div>
-            </div>
-          </section>
+      <div class="about-cards">
+        <div class="acard">
+          <div class="acard-icon">📊</div>
+          <div class="acard-title">量化選股策略</div>
+          <div class="acard-desc">用 Python 與機器學習打造可回測、可驗證的台股選股流程。</div>
         </div>
-      </main>
-      <footer class="footer">
-        <div class="footer-content"><a class="footer-logo" href="#"></a>
-          <div class="footer-main">
-            <ul class="footer-sitemap">
-              <li><a href="#">理念</a></li>
-              <li><a href="#">指標紅綠燈</a></li>
-              <li><a href="#">選股機器人</a></li>
-              <li><a href="#">風險評估機器</a></li>
-              <li><a href="#">意見回饋</a></li>
-            </ul><span class="footer-copyright">Copyright © 2020 史塔克實驗室 版權所有.</span>
-          </div>
+        <div class="acard">
+          <div class="acard-icon">🧠</div>
+          <div class="acard-title">機器學習科普</div>
+          <div class="acard-desc">把艱澀的 AI 與資料科學，用淺顯的方式分享給每位投資朋友。</div>
         </div>
-      </footer>
+        <div class="acard">
+          <div class="acard-icon">📝</div>
+          <div class="acard-title">深度投資文章</div>
+          <div class="acard-desc">不定期發布財經分析與量化研究心得，有憑有據、誠實透明。</div>
+        </div>
+        <div class="acard">
+          <div class="acard-icon">🎙️</div>
+          <div class="acard-title">Podcast 節目</div>
+          <div class="acard-desc">用聲音帶你認識機器學習與投資的交集，通勤也能充電。</div>
+        </div>
+      </div>
     </div>
-  <script type="text/javascript" src="/static/js/botAbout.js"></script></body>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-LX8V41PCYV');
-  </script>
+  </div>
+</section>
+
+<!-- PODCAST -->
+<section class="section">
+  <div class="section-inner">
+    <div class="podcast-grid">
+      <div>
+        <div class="eyebrow">Podcast</div>
+        <h2 class="sec-title">用耳朵<em>學投資</em></h2>
+        <div class="rule"></div>
+        <p class="podcast-body">
+          不是每個人都有時間坐下來看文章，所以我們開了這個節目。在《史塔克實驗室》Podcast 裡，我們聊 AI 怎麼看股票、量化策略怎麼跑、市場發生了什麼事——用輕鬆的方式，聊嚴肅的事。歡迎在你習慣的平台上收聽。
+        </p>
+        <div class="podcast-links">
+          <a href="https://reurl.cc/D63Dz6" target="_blank" rel="noopener" class="plink">
+            <div class="plink-icon apple">🎵</div>
+            <div class="plink-info"><strong>Apple Podcasts</strong><span>點擊前往收聽</span></div>
+          </a>
+          <a href="https://reurl.cc/n0OXad" target="_blank" rel="noopener" class="plink">
+            <div class="plink-icon soundon">🎧</div>
+            <div class="plink-info"><strong>SoundOn</strong><span>點擊前往收聽</span></div>
+          </a>
+          <a href="https://reurl.cc/Z71LrA" target="_blank" rel="noopener" class="plink">
+            <div class="plink-icon spotify">▶</div>
+            <div class="plink-info"><strong>Spotify</strong><span>點擊前往收聽</span></div>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="podcast-visual">
+          <div class="pv-tag">Now Playing</div>
+          <div class="waveform">
+            <div class="wb" style="height:18%; animation-delay:0s"></div>
+            <div class="wb" style="height:55%; animation-delay:0.1s"></div>
+            <div class="wb" style="height:38%; animation-delay:0.2s"></div>
+            <div class="wb" style="height:75%; animation-delay:0.3s"></div>
+            <div class="wb" style="height:48%; animation-delay:0.4s"></div>
+            <div class="wb" style="height:88%; animation-delay:0.5s"></div>
+            <div class="wb" style="height:30%; animation-delay:0.6s"></div>
+            <div class="wb" style="height:65%; animation-delay:0.7s"></div>
+            <div class="wb" style="height:50%; animation-delay:0.8s"></div>
+            <div class="wb" style="height:82%; animation-delay:0.9s"></div>
+            <div class="wb" style="height:40%; animation-delay:1.0s"></div>
+            <div class="wb" style="height:70%; animation-delay:0.15s"></div>
+            <div class="wb" style="height:25%; animation-delay:0.25s"></div>
+            <div class="wb" style="height:60%; animation-delay:0.35s"></div>
+          </div>
+          <div class="pv-title">史塔克實驗室 Podcast</div>
+          <div class="pv-sub">AI 真的能預測股市嗎？</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section cta-bg">
+  <div class="section-inner cta-inner">
+    <div class="eyebrow">一起研究</div>
+    <h2 class="sec-title">想看看 AI <em>怎麼選股</em>嗎？</h2>
+    <p class="cta-desc">認識我們用機器學習打造的選股機器人，或閱讀最新的台股週報與研究文章。</p>
+    <div class="cta-actions">
+      <a href="/bot.html" class="btn-blue">認識選股機器人 →</a>
+      <a href="/botBlog.html" class="btn-outline">閱讀精彩文章</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">S</div>
+      <div class="footer-brand-text">StarkLab<small>史塔克實驗室 版權所有</small></div>
+    </div>
+    <nav class="footer-nav">
+      <a href="/bot.html">選股機器人</a>
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank" rel="noopener">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank" rel="noopener">Facebook</a>
+    </nav>
+    <div class="footer-copy">© 2020 – 2025 StarkLab</div>
+  </div>
+</footer>
+
+<script>
+  var opener = document.getElementById('mobileOpener');
+  var navbar = document.getElementById('navbar');
+  if (opener && navbar) opener.addEventListener('click', function () { navbar.classList.toggle('js-active'); });
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; io.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.acard, .plink, .about-body p, .quote-box').forEach(function (el) {
+    el.style.opacity = '0'; el.style.transform = 'translateY(14px)';
+    el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+    io.observe(el);
+  });
+</script>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LX8V41PCYV');
+</script>
+</body>
 </html>

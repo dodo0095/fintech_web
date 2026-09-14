@@ -1,116 +1,523 @@
-<!DOCTYPE html><!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
-    <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,股票分析">
-    <meta name="description" content="2020 年夏天，StarkLab開張了！由幾個志同道合的朋友湊在一起，共同研究股票市場並用機器學習來做量化投資，希望透過分享自己長時間的研究成果，創造對程式交易有興趣的投資朋友一起討論成長的園地。股票的英文是stock，音近「史塔克」，因此我們就取名為「史塔克研究室StarkLab」我們深信在這個資訊爆炸的時代，大數據或機器學習這些名詞不該只是個名詞，而是能真正運用在生活中。因此，在這個平台我們不僅推廣機器學習的科普知識，同時也運用Python創造屬於StarkLab自己的投資策略，並且不定時撰寫金融投資相關文章、分析使用AI人工智慧跑出來的個股優劣勢。 如同華爾街最資深也最成功的經驗老手之一威廉‧歐尼爾（William J.O’Neil）說過：「不要懵懵懂懂的隨意買股票，要在投資前紮實的做一些功課。」投資市場博大精深，若能透過科學方法驗證、不盲目操作，一定會有不同的收穫。 不管您是投資新手或投資老手，都歡迎追蹤我們、與我們一起討論或給我們建議回饋喲：） 非常歡迎大家來看我們的資訊 也歡迎大家收聽我們Podcast">
-    <link href="images/favicon.ico" rel="shortcut icon">
-    <title>StarkLab | 選股機器人</title>
-  <link href="/static/css/bot.css" rel="stylesheet"></head>
-  <body>
-    <div class="wrapper">
-      <div class="topper">
-        <div class="topper-content">
-          <div class="topper-mobile-opener"></div><a class="topper-logo" href="#">StartLab</a>
-          <div class="topper-navbar"><a href="botBlog.html" target="_self">
-              <div><i class="icons icons-blog"></i></div><span class="font-regular">精彩文章</span></a><a class="js-selected" href="bot.html" target="_self">
-              <div><i class="icons icons-robot"></i></div><span class="font-regular">選股機器人</span></a><a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank">
-              <div><i class="icons icons-feedback"></i></div><span class="font-regular">Podcast</span></a><a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank">
-              <div><i class="icons icons-fb"></i></div><span class="font-regular">FACEBOOK</span></a><a href="botAbout.html" target="_self">
-              <div><i class="icons icons-brain"></i></div><span class="font-regular">關於我</span></a><a href="watchCenter.html" target="_self">
-              <div><i class="icons icons-brain"></i></div><span class="font-regular">風向觀測站</span></a>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
+  <meta name="keywords" content="StarkLab,史塔克實驗室,AI選股機器人,機器學習,量化投資,台股,ETF">
+  <meta name="description" content="StarkLab AI 選股機器人：結合多因子特徵選擇、機器學習與每月滾動再訓練的台股量化選股策略。2020.09–2025.05 累積報酬 50.2%，月勝率 69.5%，績效優於 0050、0056。">
+  <link href="images/favicon.ico" rel="shortcut icon">
+  <title>StarkLab | AI 選股機器人</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #0D6FB8;
+      --blue-light: #1a85d6;
+      --blue-pale: #e8f3fc;
+      --blue-border: #bdd9f2;
+      --text: #1a1a2e;
+      --text-muted: #5a6a80;
+      --bg: #ffffff;
+      --bg-soft: #f7fafd;
+      --border: #e4ecf5;
+      --up: #d13438;    /* 台股：紅漲 */
+      --down: #128a3e;  /* 台股：綠跌 */
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; list-style: none; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    .topper {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 999;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topper-content { max-width: 1100px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    .topper-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-mark { width: 34px; height: 34px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+    .logo-text { font-size: 17px; font-weight: 700; color: var(--text); }
+    .logo-text span { font-size: 12px; font-weight: 400; color: var(--text-muted); display: block; }
+    .topper-navbar { display: flex; align-items: center; gap: 2px; }
+    .topper-navbar a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; padding: 7px 14px; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+    .topper-navbar a:hover { color: var(--blue); background: var(--blue-pale); }
+    .topper-navbar a.js-selected { color: var(--blue); background: var(--blue-pale); font-weight: 600; }
+    .topper-mobile-opener { display: none; cursor: pointer; width: 36px; height: 36px; flex-direction: column; justify-content: center; align-items: center; gap: 5px; border-radius: 6px; border: 1px solid var(--border); }
+    .topper-mobile-opener span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; }
+
+    /* ── HERO ── */
+    .hero { padding: 120px 24px 88px; background: var(--bg); position: relative; overflow: hidden; }
+    .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--border); }
+    .hero-blob { position: absolute; top: -80px; right: -140px; width: 580px; height: 580px; background: radial-gradient(ellipse at 60% 40%, #d6eeff 0%, #edf6ff 55%, transparent 75%); border-radius: 50%; pointer-events: none; animation: drift 10s ease-in-out infinite; }
+    @keyframes drift { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-18px) scale(1.03); } }
+    .hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 72px; align-items: center; position: relative; }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; opacity: 0; animation: fadeUp 0.7s 0.1s forwards; }
+    .hero-eyebrow::before { content: ''; width: 28px; height: 2px; background: var(--blue); border-radius: 1px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .hero-title { font-family: 'DM Serif Display', serif; font-size: clamp(40px, 5.5vw, 66px); line-height: 1.12; color: var(--text); margin-bottom: 24px; opacity: 0; animation: fadeUp 0.7s 0.2s forwards; }
+    .hero-title .blue { color: var(--blue); }
+    .hero-desc { font-size: 16px; line-height: 1.85; color: var(--text-muted); max-width: 480px; margin-bottom: 40px; opacity: 0; animation: fadeUp 0.7s 0.3s forwards; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.7s 0.4s forwards; }
+    .btn-blue { display: inline-flex; align-items: center; gap: 8px; background: var(--blue); color: white; text-decoration: none; padding: 13px 26px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+    .btn-blue:hover { background: var(--blue-light); box-shadow: 0 6px 20px rgba(13,111,184,0.3); transform: translateY(-1px); }
+    .btn-outline { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--text); text-decoration: none; padding: 13px 26px; border-radius: 8px; font-size: 14px; font-weight: 500; border: 1.5px solid var(--border); transition: all 0.2s; }
+    .btn-outline:hover { border-color: var(--blue-border); color: var(--blue); background: var(--blue-pale); }
+
+    .hero-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 16px; padding: 32px; opacity: 0; animation: fadeUp 0.7s 0.5s forwards; }
+    .hero-card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .kpi { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 18px 16px; }
+    .kpi:first-child { grid-column: 1 / -1; }
+    .kpi-val { font-family: 'Space Grotesk', 'DM Serif Display', sans-serif; font-size: 34px; font-weight: 700; color: var(--blue); line-height: 1; margin-bottom: 6px; }
+    .kpi-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 88px 24px; }
+    .section.tight { padding: 64px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+    .eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--blue); border-radius: 1px; }
+    .sec-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 4vw, 40px); line-height: 1.2; color: var(--text); margin-bottom: 14px; }
+    .sec-title em { color: var(--blue); font-style: normal; }
+    .rule { width: 40px; height: 3px; background: var(--blue); border-radius: 2px; margin: 18px 0 44px; }
+    .lead { font-size: 16px; line-height: 1.9; color: var(--text-muted); max-width: 820px; }
+    .lead strong { color: var(--text); font-weight: 600; }
+
+    .about-bg { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    /* ── 特色卡 ── */
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+    .fcard { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 26px 24px; transition: all 0.25s; }
+    .fcard:hover { border-color: var(--blue-border); box-shadow: 0 8px 24px rgba(13,111,184,0.1); transform: translateY(-3px); }
+    .fcard-icon { width: 44px; height: 44px; background: var(--blue-pale); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 21px; margin-bottom: 14px; }
+    .fcard-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .fcard-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.75; }
+
+    /* ── 指標卡 ── */
+    .metric-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 40px; }
+    .metric-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 28px 24px; text-align: center; }
+    .metric-card.highlight { background: var(--blue); border-color: var(--blue); }
+    .mc-label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; }
+    .metric-card.highlight .mc-label { color: rgba(255,255,255,0.85); }
+    .mc-value { font-family: 'Space Grotesk', sans-serif; font-size: 44px; font-weight: 700; line-height: 1; color: var(--blue); }
+    .metric-card.highlight .mc-value { color: #fff; }
+    .mc-value.up { color: var(--up); }
+    .mc-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; }
+    .metric-card.highlight .mc-sub { color: rgba(255,255,255,0.75); }
+
+    /* ── 長條比較 ── */
+    .bar-compare { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px; }
+    .bar-compare-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 26px; }
+    .bar-row { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-row-label { font-size: 14px; font-weight: 600; color: var(--text); width: 160px; flex-shrink: 0; }
+    .bar-track { flex: 1; background: #e8eef5; border-radius: 99px; height: 34px; position: relative; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 99px; display: flex; align-items: center; padding-left: 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; width: 0; transition: width 1s cubic-bezier(.2,.7,.3,1); }
+    .bar-fill.ai { background: var(--blue); }
+    .bar-fill.etf50 { background: #52b0f5; }
+    .bar-fill.etf56 { background: #9dd0f9; color: var(--text); }
+
+    /* ── 年度績效表 ── */
+    .table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--border); }
+    .yearly-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+    .yearly-table th { background: var(--blue); color: #fff; padding: 15px 20px; text-align: center; font-size: 14px; font-weight: 600; }
+    .yearly-table td { padding: 14px 20px; text-align: center; font-size: 15px; border-bottom: 1px solid var(--border); font-family: 'Space Grotesk', sans-serif; }
+    .yearly-table td:first-child { font-family: 'Noto Sans TC', sans-serif; font-weight: 600; }
+    .yearly-table tr:last-child td { border-bottom: none; }
+    .yearly-table tr:nth-child(even) td { background: var(--bg-soft); }
+    .yearly-table td.up { color: var(--up); font-weight: 700; }
+    .yearly-table td.down { color: var(--down); font-weight: 700; }
+    .yearly-table td.sharpe { color: var(--blue); font-weight: 700; }
+
+    /* ── 流程圖 ── */
+    .flow-steps { display: flex; align-items: stretch; justify-content: center; flex-wrap: wrap; gap: 10px; }
+    .flow-step { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px 14px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text); min-width: 108px; flex: 1; }
+    .flow-step .step-icon { font-size: 22px; display: block; margin-bottom: 8px; }
+    .flow-step .step-idx { display: inline-block; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; color: var(--blue); background: var(--blue-pale); border-radius: 99px; padding: 2px 9px; margin-bottom: 8px; }
+    .flow-arrow { color: var(--blue-border); font-size: 22px; font-weight: 900; align-self: center; }
+
+    /* ── 架構圖 ── */
+    .arch { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 18px; padding: 34px; margin-bottom: 24px; }
+    .arch-layer { margin-bottom: 22px; }
+    .arch-layer:last-child { margin-bottom: 0; }
+    .arch-layer-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; }
+    .arch-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; }
+    .arch-node { background: white; border: 1px solid var(--blue-border); border-radius: 12px; padding: 13px 18px; text-align: center; font-size: 13px; font-weight: 600; color: var(--blue); min-width: 120px; flex: 1; }
+    .arch-node.dark { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .arch-node .an-icon { font-size: 18px; display: block; margin-bottom: 5px; }
+    .arch-arrow { color: var(--blue-border); font-size: 18px; font-weight: 900; }
+    .arch-desc { font-size: 14.5px; color: var(--text-muted); line-height: 1.85; }
+
+    /* ── 相關連結 ── */
+    .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .lcard { display: block; background: white; border: 1px solid var(--border); border-radius: 14px; padding: 28px 26px; text-decoration: none; color: inherit; transition: all 0.25s; }
+    .lcard:hover { border-color: var(--blue); box-shadow: 0 8px 24px rgba(13,111,184,0.12); transform: translateY(-3px); }
+    .lcard-tag { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--blue); margin-bottom: 12px; }
+    .lcard-title { font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.55; margin-bottom: 18px; }
+    .lcard-go { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--blue); }
+
+    /* ── CTA ── */
+    .cta-bg { background: var(--blue-pale); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .cta-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+    .cta-inner .eyebrow { justify-content: center; }
+    .cta-desc { font-size: 15px; color: var(--text-muted); line-height: 1.75; margin: 8px 0 28px; }
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    .disclaimer { font-size: 12.5px; color: var(--text-muted); line-height: 1.8; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-top: 40px; }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--text); padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-mark { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; }
+    .footer-brand-text { font-weight: 700; font-size: 15px; color: white; }
+    .footer-brand-text small { display: block; font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .footer-nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-nav a { font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; }
+    .footer-nav a:hover { color: white; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 860px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .metric-cards { grid-template-columns: 1fr; }
+      .link-grid { grid-template-columns: 1fr; }
+      .flow-arrow { transform: rotate(90deg); }
+    }
+    @media (max-width: 600px) {
+      .topper-navbar { display: none; }
+      .topper-navbar.js-active { display: flex; flex-direction: column; position: fixed; top: 68px; left: 0; right: 0; bottom: 0; background: white; padding: 16px; gap: 4px; overflow-y: auto; border-top: 1px solid var(--border); }
+      .topper-navbar.js-active a { width: 100%; padding: 14px 16px; font-size: 15px; border-bottom: 1px solid var(--border); border-radius: 0; }
+      .topper-mobile-opener { display: flex; }
+      .section { padding: 60px 20px; }
+      .bar-row-label { width: 110px; font-size: 13px; }
+      .bar-compare { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="topper">
+  <div class="topper-content">
+    <a class="topper-logo" href="/">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">StarkLab<span>史塔克實驗室</span></div>
+    </a>
+    <div class="topper-mobile-opener" id="mobileOpener"><span></span><span></span><span></span></div>
+    <nav class="topper-navbar" id="navbar">
+      <a href="/bot.html" class="js-selected">選股機器人</a>
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank" rel="noopener">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank" rel="noopener">Facebook</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">AI 選股機器人 · Rolling ML × ETF</div>
+      <h1 class="hero-title">讓 <span class="blue">機器學習</span><br>替你篩選台股</h1>
+      <p class="hero-desc">
+        我們結合多因子特徵選擇、機器學習模型與每月滾動再訓練，打造一套可回測、可驗證的台股 AI 選股流程——用數據做決策，讓策略隨市場一起進化。
+      </p>
+      <div class="hero-actions">
+        <a href="#performance" class="btn-blue">看策略績效</a>
+        <a href="/botBasicCurrent.html" class="btn-outline">查看當前觀察清單</a>
+      </div>
+    </div>
+    <div>
+      <div class="hero-card">
+        <div class="hero-card-label">策略績效速覽 · 2020.09 – 2025.05</div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-val">50.2%</div>
+            <div class="kpi-desc">累積報酬（優於 0050 的 26.4%、0056 的 11.2%）</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val">69.5%</div>
+            <div class="kpi-desc">月勝率</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val" style="color:var(--up);">-25.7%</div>
+            <div class="kpi-desc">最大回撤</div>
           </div>
         </div>
       </div>
-      <main class="container">
-        <div class="bot-content">
-          <section class="s1">
-            <div class="s1-block">
-              <figure></figure>
-            </div>
-          </section>
-          <div class="preloader"><i class="svg-icon svg-icon-loading">
-              <svg width="30px" height="30px" viewBox="0 0 50 50">
-                <path fill="#333" d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z" transform="rotate(239.292 25 25)">
-                  <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.7s" repeatCount="indefinite"></animateTransform>
-                </path>
-              </svg><span class="preload-text">資料讀取中..</span></i></div>
-          <section class="s2">
-            <div class="s2-block">
-              <div class="score box-shadow score-month">
-                <div class="score-title font-bold">月績效</div>
-                <div class="score-value score-value-1"><span class="font-bold score-value-title">Starklab策略績效</span><span class="font-bold score-value-data">NaN</span></div>
-                <div class="score-value score-value-2"><span class="font-bold score-value-title">0050策略績效</span><span class="font-bold score-value-data">NaN</span></div>
-              </div>
-              <div class="score box-shadow score-season">
-                <div class="score-title font-bold">季績效</div>
-                <div class="score-value score-value-1"><span class="font-bold score-value-title">Starklab策略績效</span><span class="font-bold score-value-data">NaN</span></div>
-                <div class="score-value score-value-2"><span class="font-bold score-value-title">0050策略績效</span><span class="font-bold score-value-data">NaN</span></div>
-              </div>
-              <div class="score box-shadow score-year">
-                <div class="score-title font-bold">年績效</div>
-                <div class="score-value score-value-1"><span class="font-bold score-value-title">Starklab策略績效</span><span class="font-bold score-value-data">NaN</span></div>
-                <div class="score-value score-value-2"><span class="font-bold score-value-title">0050策略績效</span><span class="font-bold score-value-data">NaN</span></div>
-              </div>
-            </div>
-          </section>
-          <section class="s3">
-            <div class="s3-block">
-              <div class="s3-content content-basic">
-                <div class="s3-content-title font-bold">Stark月營收選股策略<span></span></div>
-                <div class="s3-content-score box-shadow">
-                  <div class="score-content score-year">
-                    <div class="s3-content-score-title font-medium">近期月績效</div>
-                    <div class="s3-content-score-value font-bold">NaN</div>
-                  </div>
-                  <div class="score-content score-max">
-                    <div class="s3-content-score-title font-medium">最大個股振幅</div>
-                    <div class="s3-content-score-value font-bold">NaN</div>
-                  </div>
-                  <div class="s3-content-control"><a href="botBasicHistory.html" target=""><i class="icons-direct"></i><span class="font-regular">查看歷史觀察清單</span></a><a href="botBasicCurrent.html" target=""><i class="icons-direct"></i><span class="font-regular">查看當前觀察清單</span></a>
-                  </div>
-                </div>
-              </div>
-              <div class="s3-content content-technic">
-                <div class="s3-content-title font-bold">Stark月營收選股策略II<span></span></div>
-                <div class="s3-content-score box-shadow">
-                  <div class="score-content score-year">
-                    <div class="s3-content-score-title font-medium">近期月績效</div>
-                    <div class="s3-content-score-value font-bold">NaN</div>
-                  </div>
-                  <div class="score-content score-max">
-                    <div class="s3-content-score-title font-medium">最大個股振幅</div>
-                    <div class="s3-content-score-value font-bold">NaN</div>
-                  </div>
-                  <div class="s3-content-control"><a href="botTechnicHistory.html" target=""><i class="icons-direct"></i><span class="font-regular">查看歷史觀察清單</span></a><a href="botTechnicCurrent.html" target=""><i class="icons-direct"></i><span class="font-regular">查看當前觀察清單</span></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
-      <footer class="footer">
-        <div class="footer-content"><a class="footer-logo" href="#"></a>
-          <div class="footer-main">
-            <ul class="footer-sitemap">
-              <li><a href="#">理念</a></li>
-              <li><a href="#">指標紅綠燈</a></li>
-              <li><a href="#">選股機器人</a></li>
-              <li><a href="#">風險評估機器</a></li>
-              <li><a href="#">意見回饋</a></li>
-            </ul><span class="footer-copyright">Copyright © 2020 史塔克實驗室 版權所有.</span>
-          </div>
-        </div>
-      </footer>
     </div>
-  <script type="text/javascript" src="/static/js/bot.js"></script></body>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-LX8V41PCYV');
-  </script>
+  </div>
+</section>
+
+<!-- 專案介紹 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="eyebrow">專案介紹</div>
+    <h2 class="sec-title">不靠單一指標，<em>用資料驅動</em>投資決策</h2>
+    <div class="rule"></div>
+    <p class="lead">
+      傳統選股常仰賴單一財務指標、技術指標或人為經驗，但市場會隨景氣循環、資金流向與產業趨勢快速改變。
+      StarkLab 的 AI 選股機器人以台灣股市為研究場域，整合<strong>基本面、技術面與動能</strong>等多類型特徵，
+      透過 PCA、GA、CART 等方法進行特徵篩選，再結合多個機器學習模型建立選股預測架構。
+      系統採<strong>每月滾動訓練與定期再平衡</strong>，讓模型持續回應市場變化，兼顧報酬與風險控管。
+    </p>
+    <div class="feature-grid">
+      <div class="fcard">
+        <div class="fcard-icon">📊</div>
+        <div class="fcard-title">多因子資料整合</div>
+        <div class="fcard-desc">整合基本面、技術面、動能與市場結構等資料，建立更完整的股票特徵資料庫，避免只依賴單一指標判斷。</div>
+      </div>
+      <div class="fcard">
+        <div class="fcard-icon">🔬</div>
+        <div class="fcard-title">多方法特徵選擇</div>
+        <div class="fcard-desc">以 PCA、GA、CART 篩選具預測力的關鍵特徵，降低雜訊與冗餘變數，提升模型穩定性與解釋能力。</div>
+      </div>
+      <div class="fcard">
+        <div class="fcard-icon">🤖</div>
+        <div class="fcard-title">滾動式機器學習模型</div>
+        <div class="fcard-desc">每月滾動訓練、定期再平衡，使模型隨市場環境調整，改善固定模型在長期投資中失效的問題。</div>
+      </div>
+      <div class="fcard">
+        <div class="fcard-icon">📈</div>
+        <div class="fcard-title">績效與風險評估</div>
+        <div class="fcard-desc">以累積報酬、年度報酬、Sharpe Ratio、最大回撤與勝率等指標，對照 0050、0056 檢視策略表現。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 績效數據 -->
+<section class="section about-bg" id="performance">
+  <div class="section-inner">
+    <div class="eyebrow">績效數據</div>
+    <h2 class="sec-title">與 ETF 基準<em>正面對決</em></h2>
+    <div class="rule"></div>
+    <div class="metric-cards">
+      <div class="metric-card highlight">
+        <div class="mc-label">AI 選股機器人 累積報酬</div>
+        <div class="mc-value">50.2%</div>
+        <div class="mc-sub">2020.09 — 2025.05</div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-label">月勝率</div>
+        <div class="mc-value">69.5%</div>
+        <div class="mc-sub">vs 0050：67.0%</div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-label">最大回撤</div>
+        <div class="mc-value up">-25.7%</div>
+        <div class="mc-sub">0050：-29.1% ／ 0056：-25.4%</div>
+      </div>
+    </div>
+
+    <div class="bar-compare">
+      <div class="bar-compare-title">累積報酬比較（2020.09 — 2025.05）</div>
+      <div class="bar-row">
+        <div class="bar-row-label">AI 選股機器人</div>
+        <div class="bar-track"><div class="bar-fill ai" data-w="85%">50.2%</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">0050 元大台灣50</div>
+        <div class="bar-track"><div class="bar-fill etf50" data-w="45%">26.4%</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">0056 元大高股息</div>
+        <div class="bar-track"><div class="bar-fill etf56" data-w="20%">11.2%</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 年度績效 -->
+<section class="section tight">
+  <div class="section-inner">
+    <div class="eyebrow">年度績效</div>
+    <h2 class="sec-title">逐年<em>回測結果</em></h2>
+    <div class="rule"></div>
+    <div class="table-wrap">
+      <table class="yearly-table">
+        <thead>
+          <tr><th>年度</th><th>策略年度報酬</th><th>策略 Sharpe Ratio</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2021</td><td class="up">＋27%</td><td class="sharpe">2.43</td></tr>
+          <tr><td>2022</td><td class="down">－13%</td><td class="sharpe">-0.40</td></tr>
+          <tr><td>2023</td><td class="up">＋20%</td><td class="sharpe">1.23</td></tr>
+          <tr><td>2024</td><td class="up">＋84%</td><td class="sharpe">4.90</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 研究流程 -->
+<section class="section about-bg">
+  <div class="section-inner">
+    <div class="eyebrow">研究流程</div>
+    <h2 class="sec-title">從<em>資料</em>到<em>選股</em>的七個步驟</h2>
+    <div class="rule"></div>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-idx">01</span><span class="step-icon">🗄️</span>市場資料蒐集</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-idx">02</span><span class="step-icon">⚙️</span>特徵工程</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-idx">03</span><span class="step-icon">🔬</span>特徵選擇</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-idx">04</span><span class="step-icon">🤖</span>模型訓練</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-idx">05</span><span class="step-icon">🏆</span>Top 20 選股</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-idx">06</span><span class="step-icon">🔄</span>投組再平衡</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-idx">07</span><span class="step-icon">📊</span>績效評估</div>
+    </div>
+  </div>
+</section>
+
+<!-- 技術架構 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="eyebrow">技術架構</div>
+    <h2 class="sec-title">系統<em>怎麼運作</em></h2>
+    <div class="rule"></div>
+    <div class="arch">
+      <div class="arch-layer">
+        <div class="arch-layer-label">資料層</div>
+        <div class="arch-row">
+          <div class="arch-node dark"><span class="an-icon">🗄️</span>台股市場資料</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node"><span class="an-icon">🧹</span>資料清理 · 特徵工程</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node"><span class="an-icon">📋</span>基本面 · 技術面 · 動能特徵</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node dark"><span class="an-icon">🔬</span>PCA · GA · CART 特徵選擇</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">模型層</div>
+        <div class="arch-row">
+          <div class="arch-node dark"><span class="an-icon">🤖</span>多模型 ML 訓練</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node"><span class="an-icon">🗳️</span>自適應加權投票</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node dark"><span class="an-icon">🏆</span>Top 20 股票清單</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">輸出層</div>
+        <div class="arch-row">
+          <div class="arch-node"><span class="an-icon">🔄</span>每月再平衡</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node dark"><span class="an-icon">📊</span>績效與風險評估</div>
+        </div>
+      </div>
+    </div>
+    <p class="arch-desc">
+      系統以台股市場資料為基礎，透過特徵工程與多方法特徵選擇找出具預測力的訊號，再結合多個機器學習模型產生選股結果。
+      每月滾動更新與再平衡機制，使策略能持續回應市場變化，並透過績效與風險指標進行驗證。
+    </p>
+  </div>
+</section>
+
+<!-- 相關連結 -->
+<section class="section about-bg">
+  <div class="section-inner">
+    <div class="eyebrow">相關連結</div>
+    <h2 class="sec-title">媒體報導與<em>學術研究</em></h2>
+    <div class="rule"></div>
+    <div class="link-grid">
+      <a class="lcard" href="https://news.cnyes.com/news/id/5529010" target="_blank" rel="noopener">
+        <div class="lcard-tag">新聞報導</div>
+        <div class="lcard-title">AI 機器人選股，解決投資 ETF 的痛點</div>
+        <div class="lcard-go">點我前往 →</div>
+      </a>
+      <a class="lcard" href="https://iopscience.iop.org/article/10.1088/1755-1315/704/1/012014" target="_blank" rel="noopener">
+        <div class="lcard-tag">研討會論文</div>
+        <div class="lcard-title">Predicting period stock spread ranking using revenue indicators and machine learning techniques</div>
+        <div class="lcard-go">點我前往 →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section cta-bg">
+  <div class="section-inner cta-inner">
+    <div class="eyebrow">觀察清單</div>
+    <h2 class="sec-title">看看機器人<em>這個月選了什麼</em></h2>
+    <p class="cta-desc">每月更新的選股觀察清單，公開透明地記錄策略實際選出的個股與歷史軌跡。</p>
+    <div class="cta-actions">
+      <a href="/botBasicCurrent.html" class="btn-blue">查看當前觀察清單</a>
+      <a href="/botBasicHistory.html" class="btn-outline">查看歷史觀察清單</a>
+    </div>
+    <div class="disclaimer">
+      ⚠️ <strong>投資風險提醒</strong>：本頁績效數據來自歷史回測與策略實際選股紀錄（2020.09–2025.05），僅供研究與教育參考，不構成任何投資建議或獲利保證。過去績效不代表未來表現，投資前請審慎評估自身風險承受能力。
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">S</div>
+      <div class="footer-brand-text">StarkLab<small>史塔克實驗室 版權所有</small></div>
+    </div>
+    <nav class="footer-nav">
+      <a href="/bot.html">選股機器人</a>
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank" rel="noopener">Podcast</a>
+      <a href="//www.facebook.com/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4-StarkLab-114430583727685/" target="_blank" rel="noopener">Facebook</a>
+    </nav>
+    <div class="footer-copy">© 2020 – 2025 StarkLab</div>
+  </div>
+</footer>
+
+<script>
+  // 行動選單
+  var opener = document.getElementById('mobileOpener');
+  var navbar = document.getElementById('navbar');
+  if (opener && navbar) opener.addEventListener('click', function () { navbar.classList.toggle('js-active'); });
+
+  // 進場動畫
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fcard, .metric-card, .lcard, .flow-step, .arch-layer').forEach(function (el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(14px)';
+    el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+    io.observe(el);
+  });
+
+  // 長條圖動畫（進入視窗才展開）
+  var barIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.bar-fill').forEach(function (b) { b.style.width = b.getAttribute('data-w'); });
+        barIo.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.bar-compare').forEach(function (el) { barIo.observe(el); });
+</script>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LX8V41PCYV');
+</script>
+</body>
 </html>
