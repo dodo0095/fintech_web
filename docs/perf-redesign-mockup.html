@@ -1,0 +1,195 @@
+<title>StarkLab 績效速覽改版 Mockup</title>
+<style>
+  :root{
+    --blue:#0D6FB8; --blue-light:#1a85d6; --blue-pale:#e8f3fc; --blue-border:#bdd9f2;
+    --bg:#ffffff; --bg-soft:#f7fafd; --border:#e6edf3;
+    --text:#0f1c26; --muted:#5a6b78;
+    --up:#d13438;   /* 台股紅漲 */
+    --down:#128a3e; /* 台股綠跌 */
+    --card:#ffffff;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0c141b; --bg-soft:#111c26; --border:#22323f; --text:#eef4f8; --muted:#9fb2bf; --card:#101a22; --blue-pale:#122735; }
+  }
+  :root[data-theme="dark"]{ --bg:#0c141b; --bg-soft:#111c26; --border:#22323f; --text:#eef4f8; --muted:#9fb2bf; --card:#101a22; --blue-pale:#122735; }
+  :root[data-theme="light"]{ --bg:#ffffff; --bg-soft:#f7fafd; --border:#e6edf3; --text:#0f1c26; --muted:#5a6b78; --card:#ffffff; --blue-pale:#e8f3fc; }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--text);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif; line-height:1.6; }
+  .num{ font-family:"Space Grotesk","SF Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .serif{ font-family:"DM Serif Display",Georgia,"Songti TC",serif; }
+
+  .wrap{ max-width:940px; margin:0 auto; padding:48px 24px 72px; }
+  .note-banner{ background:var(--blue-pale); border:1px solid var(--blue-border); color:var(--text);
+    border-radius:12px; padding:14px 18px; font-size:13px; margin-bottom:40px; }
+  .note-banner b{ color:var(--blue); }
+
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700;
+    color:var(--blue); letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; }
+  .eyebrow::before{ content:""; width:22px; height:2px; background:var(--blue); border-radius:1px; }
+  .sec-title{ font-size:clamp(24px,3.6vw,36px); line-height:1.2; margin:0 0 8px; text-wrap:balance; }
+  .sec-title em{ color:var(--blue); font-style:normal; }
+  .rule{ width:40px; height:3px; background:var(--blue); border-radius:2px; margin:16px 0 32px; }
+  .block{ margin-bottom:64px; }
+
+  /* KPI hero card */
+  .hero-card{ background:var(--bg-soft); border:1px solid var(--border); border-radius:16px; padding:28px 30px; }
+  .hero-card-label{ font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--blue); margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .hero-card-label .tag{ background:var(--blue); color:#fff; padding:3px 10px; border-radius:99px; font-size:10px; letter-spacing:.08em; }
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:22px; }
+  .kpi-val{ font-size:34px; font-weight:700; color:var(--blue); line-height:1; margin-bottom:6px; }
+  .kpi-val.risk{ color:var(--down); }
+  .kpi-desc{ font-size:12.5px; color:var(--muted); }
+  @media (max-width:640px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
+
+  /* annual battle record — the hero visual */
+  .bars{ background:var(--bg-soft); border:1px solid var(--border); border-radius:16px; padding:30px 34px; }
+  .bars-cap{ font-size:13px; color:var(--muted); margin:-6px 0 26px; }
+  .brow{ display:grid; grid-template-columns:96px 1fr; align-items:center; gap:16px; margin-bottom:20px; }
+  .brow:last-child{ margin-bottom:0; }
+  .byear{ font-size:15px; font-weight:700; }
+  .byear span{ display:block; font-size:11px; font-weight:400; color:var(--muted); }
+  .btrack{ background:var(--border); border-radius:99px; height:40px; overflow:hidden; }
+  .bfill{ height:100%; border-radius:99px; display:flex; align-items:center; justify-content:flex-end;
+    padding-right:16px; color:#fff; font-size:16px; font-weight:700; white-space:nowrap;
+    background:linear-gradient(90deg,var(--blue),var(--blue-light)); min-width:64px;
+    animation:grow 1.1s cubic-bezier(.2,.7,.3,1) both; }
+  .bfill.peak{ background:linear-gradient(90deg,#b3282c,var(--up)); }
+  @keyframes grow{ from{ transform:scaleX(0); transform-origin:left; } to{ transform:scaleX(1); } }
+  @media (prefers-reduced-motion:reduce){ .bfill{ animation:none; } }
+
+  /* highlight row */
+  .cards3{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  @media (max-width:640px){ .cards3{ grid-template-columns:1fr; } }
+  .mcard{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; }
+  .mcard.hl{ background:var(--blue); border-color:var(--blue); }
+  .mc-label{ font-size:12.5px; color:var(--muted); margin-bottom:10px; }
+  .mcard.hl .mc-label{ color:#cfe6f8; }
+  .mc-value{ font-size:40px; font-weight:700; color:var(--blue); line-height:1; }
+  .mcard.hl .mc-value{ color:#fff; }
+  .mc-sub{ font-size:12px; color:var(--muted); margin-top:8px; }
+  .mcard.hl .mc-sub{ color:#bfe0f6; }
+
+  /* optional 2026 vs 0050 */
+  .opt{ border:1px dashed var(--blue-border); border-radius:16px; padding:26px 30px; background:var(--bg-soft); }
+  .opt-tag{ display:inline-block; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--blue); background:var(--blue-pale); border:1px solid var(--blue-border); padding:3px 10px; border-radius:99px; margin-bottom:14px; }
+  .vs-row{ display:grid; grid-template-columns:110px 1fr 72px; align-items:center; gap:14px; margin-bottom:14px; font-size:14px; }
+  .vs-track{ background:var(--border); border-radius:99px; height:26px; overflow:hidden; }
+  .vs-fill{ height:100%; border-radius:99px; }
+  .vs-fill.bot{ background:var(--blue); width:100%; }
+  .vs-fill.etf{ background:#8aa2b3; width:62.4%; }
+  .vs-val{ text-align:right; font-weight:700; }
+  .footnote{ font-size:11.5px; color:var(--muted); margin-top:18px; line-height:1.7; }
+</style>
+
+<div class="wrap">
+
+  <div class="note-banner">
+    <b>內部審閱用 Mockup</b>　·　資料來源：實際每月選股組合月報酬複利（2023.01–2026.08，兩份 Excel 合併）。
+    此頁供老闆確認「怎麼 show」，核准後交前端工程師改 <b>bot.html</b>。字體為系統替代字，正式站沿用品牌字（DM Serif／Noto Sans TC／Space Grotesk）。
+  </div>
+
+  <!-- 1. HERO KPI -->
+  <div class="block">
+    <div class="eyebrow">Hero 卡片</div>
+    <h2 class="sec-title">策略績效速覽 <em>改版</em></h2>
+    <div class="rule"></div>
+    <div class="hero-card">
+      <div class="hero-card-label">
+        <span>策略績效速覽 · 2023.01 – 2026.08</span>
+        <span class="tag">近三年實績</span>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-val num">94.9%</div><div class="kpi-desc">年化報酬（CAGR）</div></div>
+        <div class="kpi"><div class="kpi-val num">81.8%</div><div class="kpi-desc">月勝率（36 / 44 個月）</div></div>
+        <div class="kpi"><div class="kpi-val risk num">−8.7%</div><div class="kpi-desc">最大回撤（月頻）</div></div>
+        <div class="kpi"><div class="kpi-val num">+24.3%</div><div class="kpi-desc">最佳單月（2026.04）</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ANNUAL BATTLE RECORD (star) -->
+  <div class="block">
+    <div class="eyebrow">主視覺 · 年度戰績</div>
+    <h2 class="sec-title">連續三年<em>繳出破百戰績</em></h2>
+    <div class="rule"></div>
+    <div class="bars">
+      <div class="bars-cap">各年度策略年度報酬（實際每月選股組合，月報酬複利）</div>
+
+      <div class="brow">
+        <div class="byear">2023<span>全年</span></div>
+        <div class="btrack"><div class="bfill" style="width:22%">+26.9%</div></div>
+      </div>
+      <div class="brow">
+        <div class="byear">2024<span>全年</span></div>
+        <div class="btrack"><div class="bfill peak" style="width:94%">+118.5%</div></div>
+      </div>
+      <div class="brow">
+        <div class="byear">2025<span>全年</span></div>
+        <div class="btrack"><div class="bfill peak" style="width:100%">+126.2%</div></div>
+      </div>
+      <div class="brow">
+        <div class="byear">2026<span>1–8 月</span></div>
+        <div class="btrack"><div class="bfill" style="width:67%">+84.2%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MOMENTUM ROW -->
+  <div class="block">
+    <div class="eyebrow">近況動能</div>
+    <h2 class="sec-title">最新<em>滾動表現</em></h2>
+    <div class="rule"></div>
+    <div class="cards3">
+      <div class="mcard hl">
+        <div class="mc-label">近 12 個月累積報酬</div>
+        <div class="mc-value num">+158.2%</div>
+        <div class="mc-sub">2025.09 – 2026.08 · 勝率 10/12</div>
+      </div>
+      <div class="mcard">
+        <div class="mc-label">近三年累積報酬</div>
+        <div class="mc-value num">約 10 倍</div>
+        <div class="mc-sub">2023.01 起 +1,054.7%（複利）</div>
+      </div>
+      <div class="mcard">
+        <div class="mc-label">單月最大回撤</div>
+        <div class="mc-value num" style="color:var(--down)">−8.7%</div>
+        <div class="mc-sub">高報酬同時控制波動</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. OPTIONAL 2026 vs 0050 -->
+  <div class="block">
+    <div class="eyebrow">可選延伸模組</div>
+    <h2 class="sec-title">2026 <em>對決 0050</em>（資料已補齊，可加可不加）</h2>
+    <div class="rule"></div>
+    <div class="opt">
+      <span class="opt-tag">Optional · 這版可先不放</span>
+      <div class="vs-row">
+        <div>AI 選股機器人</div>
+        <div class="vs-track"><div class="vs-fill bot"></div></div>
+        <div class="vs-val" style="color:var(--up)">+84.2%</div>
+      </div>
+      <div class="vs-row">
+        <div>0050 元大台灣50</div>
+        <div class="vs-track"><div class="vs-fill etf"></div></div>
+        <div class="vs-val">+52.6%</div>
+      </div>
+      <div class="vs-row" style="grid-template-columns:110px 1fr 72px;">
+        <div style="color:var(--blue);font-weight:700">超額報酬</div>
+        <div style="font-size:13px;color:var(--muted)">2026 1–8 月，同期同方法比較</div>
+        <div class="vs-val" style="color:var(--up)">+31.6pp</div>
+      </div>
+      <div class="footnote">
+        此模組用你新給的《2026_累積績效_vs_0050》檔，0050 以「對齊機器人持有起訖日的實際收盤價」重算，方法一致、可查證，
+        已修正舊檔 0050 欄位不完整的問題。故 2026 這段對決站得住腳；2023–2025 的 0050 對照待補齊可查證的含息基準後再上。
+      </div>
+    </div>
+  </div>
+
+</div>

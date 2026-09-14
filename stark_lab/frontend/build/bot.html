@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.0, user-scalable=no">
   <meta name="keywords" content="StarkLab,史塔克實驗室,AI選股機器人,機器學習,量化投資,台股,ETF">
-  <meta name="description" content="StarkLab AI 選股機器人：結合多因子特徵選擇、機器學習與每月滾動再訓練的台股量化選股策略。2020.09–2025.05 累積報酬 50.2%，月勝率 69.5%，績效優於 0050、0056。">
+  <meta name="description" content="StarkLab AI 選股機器人：結合多因子特徵選擇、機器學習與每月滾動再訓練的台股量化選股策略。2023–2026 連續三年繳出破百年報酬，年化 94.9%、月勝率 81.8%、最大回撤僅 −8.7%。">
   <link href="images/favicon.ico" rel="shortcut icon">
   <title>StarkLab | AI 選股機器人</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -69,6 +69,7 @@
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .kpi { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 18px 16px; }
     .kpi:first-child { grid-column: 1 / -1; }
+    .kpi-grid.kpi-grid-4 .kpi:first-child { grid-column: auto; }
     .kpi-val { font-family: 'Space Grotesk', 'DM Serif Display', sans-serif; font-size: 34px; font-weight: 700; color: var(--blue); line-height: 1; margin-bottom: 6px; }
     .kpi-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
 
@@ -115,6 +116,7 @@
     .bar-track { flex: 1; background: #e8eef5; border-radius: 99px; height: 34px; position: relative; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 99px; display: flex; align-items: center; padding-left: 16px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; width: 0; transition: width 1s cubic-bezier(.2,.7,.3,1); }
     .bar-fill.ai { background: var(--blue); }
+    .bar-fill.peak { background: var(--up); }
     .bar-fill.etf50 { background: #52b0f5; }
     .bar-fill.etf56 { background: #9dd0f9; color: var(--text); }
 
@@ -233,19 +235,23 @@
     </div>
     <div>
       <div class="hero-card">
-        <div class="hero-card-label">策略績效速覽 · 2020.09 – 2025.05</div>
-        <div class="kpi-grid">
+        <div class="hero-card-label">策略績效速覽 · 2023.01 – 2026.08</div>
+        <div class="kpi-grid kpi-grid-4">
           <div class="kpi">
-            <div class="kpi-val">50.2%</div>
-            <div class="kpi-desc">累積報酬（優於 0050 的 26.4%、0056 的 11.2%）</div>
+            <div class="kpi-val">94.9%</div>
+            <div class="kpi-desc">年化報酬（CAGR）</div>
           </div>
           <div class="kpi">
-            <div class="kpi-val">69.5%</div>
-            <div class="kpi-desc">月勝率</div>
+            <div class="kpi-val">81.8%</div>
+            <div class="kpi-desc">月勝率（36 / 44 個月）</div>
           </div>
           <div class="kpi">
-            <div class="kpi-val" style="color:var(--up);">-25.7%</div>
-            <div class="kpi-desc">最大回撤</div>
+            <div class="kpi-val" style="color:var(--down);">−8.7%</div>
+            <div class="kpi-desc">最大回撤（月頻）</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val">+24.3%</div>
+            <div class="kpi-desc">最佳單月（2026.04）</div>
           </div>
         </div>
       </div>
@@ -293,41 +299,58 @@
 <!-- 績效數據 -->
 <section class="section about-bg" id="performance">
   <div class="section-inner">
-    <div class="eyebrow">績效數據</div>
-    <h2 class="sec-title">與 ETF 基準<em>正面對決</em></h2>
+    <div class="eyebrow">年度戰績</div>
+    <h2 class="sec-title">連續三年<em>繳出破百戰績</em></h2>
     <div class="rule"></div>
     <div class="metric-cards">
       <div class="metric-card highlight">
-        <div class="mc-label">AI 選股機器人 累積報酬</div>
-        <div class="mc-value">50.2%</div>
-        <div class="mc-sub">2020.09 — 2025.05</div>
+        <div class="mc-label">近 12 個月累積報酬</div>
+        <div class="mc-value">+158.2%</div>
+        <div class="mc-sub">2025.09 — 2026.08 · 勝率 10/12</div>
       </div>
       <div class="metric-card">
-        <div class="mc-label">月勝率</div>
-        <div class="mc-value">69.5%</div>
-        <div class="mc-sub">vs 0050：67.0%</div>
+        <div class="mc-label">近三年累積報酬</div>
+        <div class="mc-value">約 10 倍</div>
+        <div class="mc-sub">2023.01 起 +1,054.7%（複利）</div>
       </div>
       <div class="metric-card">
-        <div class="mc-label">最大回撤</div>
-        <div class="mc-value up">-25.7%</div>
-        <div class="mc-sub">0050：-29.1% ／ 0056：-25.4%</div>
+        <div class="mc-label">最大回撤（月頻）</div>
+        <div class="mc-value" style="color:var(--down);">-8.7%</div>
+        <div class="mc-sub">高報酬同時控制波動</div>
       </div>
     </div>
 
     <div class="bar-compare">
-      <div class="bar-compare-title">累積報酬比較（2020.09 — 2025.05）</div>
+      <div class="bar-compare-title">各年度策略年度報酬（實際每月選股組合，月報酬複利）</div>
+      <div class="bar-row">
+        <div class="bar-row-label">2023 全年</div>
+        <div class="bar-track"><div class="bar-fill ai" data-w="21%">+26.9%</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">2024 全年</div>
+        <div class="bar-track"><div class="bar-fill peak" data-w="90%">+118.5%</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">2025 全年</div>
+        <div class="bar-track"><div class="bar-fill peak" data-w="96%">+126.2%</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label">2026 1–8 月</div>
+        <div class="bar-track"><div class="bar-fill ai" data-w="64%">+84.2%</div></div>
+      </div>
+    </div>
+
+    <div class="bar-compare" style="margin-top:28px;">
+      <div class="bar-compare-title">2026 對決 0050（1–8 月累積報酬，同期同方法）</div>
       <div class="bar-row">
         <div class="bar-row-label">AI 選股機器人</div>
-        <div class="bar-track"><div class="bar-fill ai" data-w="85%">50.2%</div></div>
+        <div class="bar-track"><div class="bar-fill ai" data-w="90%">+84.2%</div></div>
       </div>
       <div class="bar-row">
         <div class="bar-row-label">0050 元大台灣50</div>
-        <div class="bar-track"><div class="bar-fill etf50" data-w="45%">26.4%</div></div>
+        <div class="bar-track"><div class="bar-fill etf50" data-w="56%">+52.6%</div></div>
       </div>
-      <div class="bar-row">
-        <div class="bar-row-label">0056 元大高股息</div>
-        <div class="bar-track"><div class="bar-fill etf56" data-w="20%">11.2%</div></div>
-      </div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:18px 0 0;">超額報酬 <strong style="color:var(--up);">+31.6 個百分點</strong>。0050 以「對齊機器人持有起訖日的實際收盤價」重算，方法一致、可查證。</p>
     </div>
   </div>
 </section>
@@ -336,7 +359,7 @@
 <section class="section tight">
   <div class="section-inner">
     <div class="eyebrow">年度績效</div>
-    <h2 class="sec-title">逐年<em>回測結果</em></h2>
+    <h2 class="sec-title">逐年<em>實際績效</em></h2>
     <div class="rule"></div>
     <div class="table-wrap">
       <table class="yearly-table">
@@ -344,13 +367,14 @@
           <tr><th>年度</th><th>策略年度報酬</th><th>策略 Sharpe Ratio</th></tr>
         </thead>
         <tbody>
-          <tr><td>2021</td><td class="up">＋27%</td><td class="sharpe">2.43</td></tr>
-          <tr><td>2022</td><td class="down">－13%</td><td class="sharpe">-0.40</td></tr>
-          <tr><td>2023</td><td class="up">＋20%</td><td class="sharpe">1.23</td></tr>
-          <tr><td>2024</td><td class="up">＋84%</td><td class="sharpe">4.90</td></tr>
+          <tr><td>2023</td><td class="up">＋26.9%</td><td class="sharpe">2.11</td></tr>
+          <tr><td>2024</td><td class="up">＋118.5%</td><td class="sharpe">5.66</td></tr>
+          <tr><td>2025</td><td class="up">＋126.2%</td><td class="sharpe">3.41</td></tr>
+          <tr><td>2026*</td><td class="up">＋84.2%</td><td class="sharpe">2.58</td></tr>
         </tbody>
       </table>
     </div>
+    <p style="font-size:12.5px;color:var(--text-muted);margin-top:14px;">* 2026 為 1–8 月累積報酬；Sharpe Ratio 為年化（rf=0），依實際每月選股組合月報酬計算。</p>
   </div>
 </section>
 
@@ -455,7 +479,7 @@
       <a href="/botBasicHistory.html" class="btn-outline">查看歷史觀察清單</a>
     </div>
     <div class="disclaimer">
-      ⚠️ <strong>投資風險提醒</strong>：本頁績效數據來自歷史回測與策略實際選股紀錄（2020.09–2025.05），僅供研究與教育參考，不構成任何投資建議或獲利保證。過去績效不代表未來表現，投資前請審慎評估自身風險承受能力。
+      ⚠️ <strong>投資風險提醒</strong>：本頁績效數據來自策略實際每月選股組合紀錄（2023.01–2026.08），<strong>純屬學術研究與教育用途，不是報明牌、不是薦股、也不是叫任何人買進或賣出任何標的</strong>。所有內容不構成投資建議或獲利保證；過去績效不代表未來表現，投資決策與盈虧由投資人自行負責，投資前請審慎評估自身風險承受能力。
     </div>
   </div>
 </section>
