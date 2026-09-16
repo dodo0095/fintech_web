@@ -393,7 +393,7 @@ function drawValuation() {
   zoneEl.className = `zone-badge ${zoneCls}`;
 
   let staleMsg = "";
-  if (blk.approx) staleMsg = "（近似估值帶：此標的季度 EPS 不可得，改用常數 EPS 計算）";
+  if (blk.approx) staleMsg = "（此標的近年獲利不穩／曾虧損，本益比河流圖不適用，已預設改看淨值比；如需查看本益比請點上方分頁）";
   if (isStale(data.updated_at)) setStatus(status, "stale", `資料可能過期（更新於 ${formatDateTime(data.updated_at)}）。${staleMsg}`);
   else if (staleMsg) setStatus(status, "note", staleMsg);
   else status.hidden = true;
@@ -521,7 +521,7 @@ function setFocusInputs(code, name) {
 
 function resetMetricUI() {
   const seg = $("#val-metric");
-  if (seg) seg.querySelectorAll("span").forEach((x) => x.classList.toggle("on", x.dataset.metric === "PE"));
+  if (seg) seg.querySelectorAll("span").forEach((x) => x.classList.toggle("on", x.dataset.metric === valMetric));
 }
 
 async function applyFocus(code) {
@@ -565,7 +565,9 @@ async function applyFocus(code) {
   if (heat.ok) renderHeat(heat);
 
   if (val.ok && val.data) {
-    valMetric = "PE";
+    // 本益比不可靠（approximate）且有淨值比資料時，預設改看 PB；否則維持 PE。
+    // 依當前個股重新判定，使用者仍可手動點回本益比分頁。
+    valMetric = (val.data.approximate && val.data.pb) ? "PB" : "PE";
     resetMetricUI();
     renderValuation(val);
   } else if (chartStatus) {
