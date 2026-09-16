@@ -22,6 +22,8 @@ WATCHLIST = [
 ]
 
 N_LINES = 6
+# 疊 TTM 至少需這麼多個「相鄰約一季」的連續季，否則缺季會讓 rolling(4) 跨季亂加。
+MIN_CONSEC_QUARTERS = 4
 
 
 def _hist_to_series(hist):
@@ -76,7 +78,13 @@ def _get_price(t):
     return [], []
 
 
-def _interp_to_dates(points, dates):
+def _interp_to_dates(points, dates, no_cross_zero: bool = False):
+    """線性內插 points 到 dates。
+
+    no_cross_zero=True 時，若某日期落在「相鄰兩錨點正負號相反」的區間內
+    （由虧轉盈 / 由盈轉虧的跨零段），該日回傳 None，避免內插穿過零製造出
+    貼零的假分母。錨點本身（frac==0）維持原值，不受影響。
+    """
     try:
         import bisect
         import pandas as pd
@@ -97,10 +105,50 @@ def _interp_to_dates(points, dates):
                 j = bisect.bisect_right(xs, tt)
                 x0, x1, y0, y1 = xs[j - 1], xs[j], ys[j - 1], ys[j]
                 frac = (tt - x0) / (x1 - x0) if x1 > x0 else 0.0
-                out.append(y0 + (y1 - y0) * frac)
+                if no_cross_zero and frac > 0.0 and y0 * y1 < 0:
+                    out.append(None)
+                else:
+                    out.append(y0 + (y1 - y0) * frac)
         return out
     except Exception:
         return None
+
+
+def _percentile(sorted_vals: list[float], q: float) -> float | None:
+    """線性內插分位數（等同 numpy.percentile 預設法）。sorted_vals 須已排序。"""
+    if not sorted_vals:
+        return None
+    if len(sorted_vals) == 1:
+        return sorted_vals[0]
+    pos = (len(sorted_vals) - 1) * (q / 100.0)
+    lo = int(pos)
+    hi = min(lo + 1, len(sorted_vals) - 1)
+    frac = pos - lo
+    return sorted_vals[lo] + (sorted_vals[hi] - sorted_vals[lo]) * frac
+
+
+def _max_consecutive_quarters(eps_q) -> int:
+    """回傳季 EPS 序列中最長「相鄰約一季（~3 個月）」的連續季數。
+
+    相鄰兩季間隔落在 60~120 天視為連續；出現跳季即中斷計數。
+    """
+    try:
+        import pandas as pd
+
+        idx = [pd.Timestamp(str(x)[:10]) for x in eps_q.sort_index().index]
+        if not idx:
+            return 0
+        best = run = 1
+        for prev, cur in zip(idx, idx[1:]):
+            gap_days = (cur - prev).days
+            if 60 <= gap_days <= 120:
+                run += 1
+                best = max(best, run)
+            else:
+                run = 1
+        return best
+    except Exception:
+        return 0
 
 
 def _quarterly_eps(t):
@@ -189,7 +237,7 @@ def _ttm_eps_for_dates(eps_q, dates):
         if ttm.empty:
             return None
         pts = [(pd.Timestamp(str(x)[:10]).value, float(v)) for x, v in zip(ttm.index, ttm.values)]
-        return _interp_to_dates(pts, dates)
+        return _interp_to_dates(pts, dates, no_cross_zero=True)
     except Exception:
         return None
 
@@ -256,7 +304,8 @@ def build_bands(closes, per_share, unit):
     if len(ratio) < 30:
         return None
     rs = sorted(ratio)
-    r_min, r_max = rs[0], rs[-1]
+    # 用 P5/P95 分位數定上下界，排除跨零/離群爆表值，避免 r_max 撐爆帶線。
+    r_min, r_max = _percentile(rs, 5), _percentile(rs, 95)
     rng = r_max - r_min if r_max > r_min else max(r_max, 1.0)
     pad = rng * 0.05
     lo = max(r_min - pad, r_min * 0.85, 0.01)
@@ -264,8 +313,14 @@ def build_bands(closes, per_share, unit):
     lines = [round(lo + (hi - lo) * k / (N_LINES - 1), 2) for k in range(N_LINES)]
     band_prices = [[round(L * p, 2) if (p and p > 0) else None for p in per_share] for L in lines]
 
-    last_c, last_p = closes[-1], per_share[-1]
-    current = round(last_c / last_p, 4) if last_p and last_p > 0 else None
+    # current 取「最後一個有效正值」而非直接 last，避免最後一天落在跨零段（per_share
+    # 為 None 或 <=0）時 current 變 None。
+    current = None
+    for i in range(len(per_share) - 1, -1, -1):
+        p = per_share[i]
+        if p and p > 0:
+            current = round(closes[i] / p, 4)
+            break
     band_idx = None
     zone = "區間內"
     if current is not None:
@@ -292,6 +347,37 @@ def build_bands(closes, per_share, unit):
     return {"lines": lines, "band_prices": band_prices, "current": current, "current_band_index": band_idx, "zone_label": zone}
 
 
+def _ttm_unusable(ttm) -> bool:
+    """TTM 序列無可用正值（全 None / 全 <=0 / 空）時回傳 True。"""
+    return not ttm or all(v is None or v <= 0 for v in ttm)
+
+
+def _quarterly_series_usable(eps_q) -> bool:
+    """季 EPS 是否適合疊 TTM 河流圖。
+
+    兩個條件：
+    1. 連續季 >= MIN_CONSEC_QUARTERS（否則缺季讓 rolling(4) 跨季亂加）。
+    2. 序列內無負季——近期有虧損代表「由虧轉盈」，僅 2~3 個 TTM 錨點會把由虧轉盈
+       初期的微幅正 EPS clamp 到整段歷史製造離群高 PE；此類個股改走 trailingEps 近似。
+    """
+    if eps_q is None:
+        return False
+    if _max_consecutive_quarters(eps_q) < MIN_CONSEC_QUARTERS:
+        return False
+    try:
+        return not any(float(x) < 0 for x in eps_q.dropna().values)
+    except Exception:
+        return False
+
+
+def _trailing_eps_const(t) -> float | None:
+    try:
+        info = t.get_info() if hasattr(t, "get_info") else t.info
+        return safe_float(info.get("trailingEps"))
+    except Exception:
+        return None
+
+
 def build_symbol(symbol, name):
     import yfinance as yf
 
@@ -304,26 +390,25 @@ def build_symbol(symbol, name):
 
     pe_approx = False
     ttm_eps = None
+    # 只有「連續季足夠且無負季」才用季 EPS 疊 TTM（見 _quarterly_series_usable）。
     eps_q = _quarterly_eps(t)
-    if eps_q is not None:
+    if _quarterly_series_usable(eps_q):
         ttm_eps = _ttm_eps_for_dates(eps_q, dates)
-    if not ttm_eps or all(v is None or v <= 0 for v in ttm_eps):
+    if _ttm_unusable(ttm_eps):
         d_eps = _derive_quarterly_eps(t)
-        if d_eps is not None:
+        if _quarterly_series_usable(d_eps):
             ttm_eps = _ttm_eps_for_dates(d_eps, dates)
-    if not ttm_eps or all(v is None or v <= 0 for v in ttm_eps):
-        eps_const = None
-        try:
-            info = t.get_info() if hasattr(t, "get_info") else t.info
-            eps_const = safe_float(info.get("trailingEps"))
-        except Exception:
-            eps_const = None
+
+    pe_block = None
+    if not _ttm_unusable(ttm_eps):
+        pe_block = build_bands(closes, ttm_eps, "本益比")
+    # 降級：季 EPS 缺季/由虧轉盈導致 TTM 不可用或帶線算不出時，改用 trailingEps 近似。
+    if pe_block is None:
+        eps_const = _trailing_eps_const(t)
         if eps_const and eps_const > 0:
             ttm_eps = [eps_const] * len(dates)
             pe_approx = True
-        else:
-            ttm_eps = None
-    pe_block = build_bands(closes, ttm_eps, "本益比") if ttm_eps else None
+            pe_block = build_bands(closes, ttm_eps, "本益比")
     if pe_block is None:
         print("  [warn] {} 無法計算本益比，略過".format(symbol))
         return None
@@ -331,7 +416,10 @@ def build_symbol(symbol, name):
     bvps = _bvps_for_dates(t, dates)
     pb_block = build_bands(closes, bvps, "淨值比") if bvps else None
 
-    last_close, last_eps = closes[-1], ttm_eps[-1]
+    last_close = closes[-1]
+    # last_eps 取最後一個有效正值，與 current_pe（build_bands 的 current）一致，
+    # 避免最後一天落在跨零段時 current_eps 變 None 或負值。
+    last_eps = next((e for e in reversed(ttm_eps) if e and e > 0), None)
     payload = {
         "symbol": symbol,
         "name": name,
