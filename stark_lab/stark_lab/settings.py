@@ -75,6 +75,7 @@ CORS_ORIGIN_WHITELIST = ( # product : 註解
 # Application definition
 
 INSTALLED_APPS = [
+    'twbacktest',
     'django_filters',
     'corsheaders',
     'django.contrib.admin',
@@ -238,3 +239,6 @@ TEMPLATES = [
         },
     },
 ]
+# twbacktest: local snr_backtest only (no live orders)
+BACKTEST_ROOT = r'C:\Users\AUSER\Desktop\trade\snr_backtest'
+BACKTEST_TIMEOUT = 300

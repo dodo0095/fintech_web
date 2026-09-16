@@ -55,3 +55,7 @@ urlpatterns = [
 
     path('api/performances/', views.monthly_performance_api, name='performance_api'),
 ]
+
+# --- twbacktest (local paper backtest UI) ---
+from django.urls import include as _tw_include, path as _tw_path
+urlpatterns += [_tw_path('backtest/', _tw_include('twbacktest.urls'))]

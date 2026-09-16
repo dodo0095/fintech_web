@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>台股回測 · SNR 策略</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: #182233;
+      --line: #2a3a52;
+      --text: #e8eef7;
+      --muted: #9aa8bd;
+      --accent: #3db8a8;
+      --warn: #e0b15a;
+      --bad: #e07a6a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #1b2c44 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    a { color: var(--accent); }
+    header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding: 22px 28px 8px; max-width: 1080px; margin: 0 auto;
+    }
+    header h1 { font-size: 1.35rem; font-weight: 700; margin: 0; }
+    header p { margin: 6px 0 0; color: var(--muted); font-size: .9rem; }
+    header nav a { margin-left: 14px; text-decoration: none; }
+    main { max-width: 1080px; margin: 0 auto; padding: 8px 28px 48px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+    form.stack { display: flex; flex-direction: column; gap: 16px; }
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+    label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 6px; }
+    select, input[type="date"], input[type="number"], textarea {
+      width: 100%;
+      background: #101926;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+      font-size: .86rem;
+      line-height: 1.45;
+    }
+    button {
+      border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer;
+      font-size: .95rem; font-weight: 600;
+    }
+    button.primary { background: var(--accent); color: #06221f; }
+    button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    button.linkish {
+      background: transparent; color: var(--accent); padding: 0;
+      font-size: .8rem; font-weight: 600;
+    }
+    .note { color: var(--muted); font-size: .85rem; margin: 0; }
+    .error { color: var(--bad); margin: 0; }
+    .row-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+      margin-bottom: 8px;
+    }
+    .row-head h2 { margin: 0; font-size: .95rem; color: var(--text); font-weight: 700; }
+    .split {
+      display: grid; grid-template-columns: 280px 1fr; gap: 16px;
+    }
+    .param-groups { display: flex; flex-direction: column; gap: 12px; }
+    .param-group {
+      background: #101926;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .param-group h3 {
+      margin: 0 0 10px; font-size: .82rem; color: var(--muted); font-weight: 600;
+    }
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px 12px;
+    }
+    .chk {
+      display: flex; align-items: center; gap: 8px; color: var(--text);
+      font-size: .88rem; margin: 0; padding-top: 22px;
+    }
+    .chk input { width: auto; accent-color: var(--accent); }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .metric {
+      background: #101926;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .metric span { display: block; color: var(--muted); font-size: .78rem; }
+    .metric strong { display: block; font-size: 1.15rem; margin-top: 4px; }
+    img.chart {
+      width: 100%; max-width: 100%; height: auto;
+      border-radius: 10px; background: #0b1220; margin-top: 8px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; }
+    details { margin-top: 12px; color: var(--muted); }
+    pre {
+      white-space: pre-wrap; word-break: break-all; font-size: .75rem;
+      background: #0b1220; padding: 10px; border-radius: 8px; color: #c5d0e0;
+    }
+    .warn { color: var(--warn); }
+    @media (max-width: 860px) {
+      .top-grid { grid-template-columns: 1fr 1fr; }
+      .split { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>台股 SNR 回測</h1>
+      <p>紙上報告 · 不會下單、不會改紙上帳戶</p>
+    </div>
+    <nav>
+      <a href="{{ home_url }}">回首頁</a>
+    </nav>
+  </header>
+  <main>
+    <section class="card">
+      <form method="post" class="stack" id="bt-form">
+        {% csrf_token %}
+        <input type="hidden" name="params_json" id="params_json" value="">
+        <div class="top-grid">
+          <div>
+            <label for="strategy">策略</label>
+            <select id="strategy" name="strategy">
+              {% for c in choices %}
+                <option value="{{ c.id }}" data-kind="{{ c.kind }}" {% if c.id == strategy %}selected{% endif %}>{{ c.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="start">起始日（可留空＝預設）</label>
+            <input id="start" type="date" name="start" value="{{ start }}">
+          </div>
+          <div>
+            <label for="end">結束日（可留空＝今天）</label>
+            <input id="end" type="date" name="end" value="{{ end }}">
+          </div>
+          <button class="primary" type="submit" name="action" value="run">執行回測</button>
+          <button class="ghost" type="submit" name="action" value="load">只看既有報告</button>
+        </div>
+
+        <label class="chk" style="padding-top:8px;">
+          <input type="hidden" name="refresh_data" value="0">
+          <input type="checkbox" name="refresh_data" value="1" id="refresh_data"
+            {% if refresh_data %}checked{% endif %}>
+          自動更新行情（Yahoo；快取不足才抓，結束日留空＝今天）</label>
+
+
+        <div class="split">
+          <div>
+            <div class="row-head">
+              <h2>股票清單</h2>
+              <button class="linkish" type="button" id="btn-reset-tickers">還原預設</button>
+            </div>
+            <label for="tickers_text">一行一檔：代號，或「代號 名稱」</label>
+            <textarea id="tickers_text" name="tickers_text" spellcheck="false">{{ tickers_text }}</textarea>
+            <p class="note" style="margin-top:8px;">只影響本次回測，不會改 <code>config.py</code>。</p>
+          </div>
+          <div>
+            <div class="row-head">
+              <h2>策略參數</h2>
+              <button class="linkish" type="button" id="btn-reset-params">套用此策略預設</button>
+            </div>
+            <div class="param-groups" id="param-groups">
+              {% for g in param_groups %}
+              <section class="param-group" data-group="{{ g.id }}">
+                <h3>{{ g.label }}</h3>
+                <div class="param-grid">
+                  {% for f in g.fields %}
+                    {% if f.type == "bool" %}
+                      <label class="chk">
+                        <input type="hidden" name="param_{{ f.name }}" value="false">
+                        <input type="checkbox" name="param_{{ f.name }}" value="true" id="p-{{ f.name }}" data-param="{{ f.name }}" data-type="bool">
+                        {{ f.label }}
+                      </label>
+                    {% else %}
+                      <div>
+                        <label for="p-{{ f.name }}">{{ f.label }}</label>
+                        <input id="p-{{ f.name }}" name="param_{{ f.name }}" type="number" step="any" data-param="{{ f.name }}" data-type="{{ f.type }}">
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </section>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          換策略只顯示該策略用得到的參數，並帶入預設值；可再改。本次回測才生效。
+        </p>
+      </form>
+    </section>
+
+    {% if error %}
+      <section class="card"><p class="error">{{ error }}</p></section>
+    {% endif %}
+
+    {% if result %}
+      <section class="card">
+        <h2 style="margin:0 0 12px;font-size:1.1rem;">{{ result.label }} 摘要（等權合計）</h2>
+        {% if result.metrics %}
+          <div class="metrics">
+            {% for m in result.metrics %}
+              <div class="metric"><span>{{ m.label }}</span><strong>{{ m.value }}</strong></div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="warn">摘要 CSV 尚未產生。</p>
+        {% endif %}
+        {% if result.has_chart %}
+          <p class="note">權益曲線（百萬 TWD／單檔 100 萬帳戶）</p>
+          <img class="chart" alt="權益曲線" src="{% url 'twbacktest:chart' result.strategy %}?t={{ result.last_run.finished_at|default:'' }}">
+        {% endif %}
+      </section>
+
+      {% if result.per_ticker %}
+        <section class="card">
+          <h2 style="margin:0 0 12px;font-size:1.1rem;">分檔成績</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>代號</th><th>名稱</th><th>筆數</th><th>勝率</th><th>總報酬</th><th>最大回撤</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in result.per_ticker %}
+                <tr>
+                  <td>{{ r.ticker }}</td>
+                  <td>{{ r.name }}</td>
+                  <td>{{ r.trades }}</td>
+                  <td>{{ r.win_rate }}</td>
+                  <td>{{ r.total_return }}</td>
+                  <td>{{ r.max_drawdown }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <p class="note">表內勝率／報酬為原始小數（例如 0.70＝70%）。世紀（5314.TWO）可能大幅拉高合計報酬。</p>
+        </section>
+      {% endif %}
+    {% endif %}
+
+    {% if log %}
+      <section class="card">
+        <details {% if ran %}open{% endif %}>
+          <summary>本次執行紀錄</summary>
+          <pre>{{ log }}</pre>
+        </details>
+      </section>
+    {% endif %}
+  </main>
+  {{ defaults_payload|json_script:"bt-defaults" }}
+  {{ posted_params|json_script:"bt-posted" }}
+  {{ default_tickers_text|json_script:"bt-default-tickers" }}
+  <script>
+    (function () {
+      const defaults = JSON.parse(document.getElementById("bt-defaults").textContent || "{}");
+      const postedEl = document.getElementById("bt-posted");
+      const posted = postedEl ? JSON.parse(postedEl.textContent || "{}") : {};
+      const form = document.getElementById("bt-form");
+      const strategySel = document.getElementById("strategy");
+      const tickerTa = document.getElementById("tickers_text");
+      const defaultTickersEl = document.getElementById("bt-default-tickers");
+      const defaultTickers = defaultTickersEl ? JSON.parse(defaultTickersEl.textContent || '""') : tickerTa.value;
+
+      function currentDefaults() {
+        return defaults[strategySel.value] || {};
+      }
+
+      function fillParams(src) {
+        const spec = src || {};
+        const useSnr = !!spec.use_snr;
+        document.querySelectorAll("[data-param]").forEach(function (el) {
+          const key = el.getAttribute("data-param");
+          const has = Object.prototype.hasOwnProperty.call(spec, key);
+          // snr_min/max only when this strategy exposes use_snr AND it is on
+          let show = has;
+          if (key === "snr_min" || key === "snr_max") {
+            show = has && useSnr;
+          }
+          if (el.type === "checkbox") {
+            el.checked = has ? !!spec[key] : false;
+          } else if (has && spec[key] !== null && spec[key] !== undefined) {
+            el.value = spec[key];
+          } else if (has) {
+            el.value = "";
+          } else {
+            el.value = "";
+          }
+          el.disabled = !show;
+          // companion hidden "false" for checkboxes
+          if (el.type === "checkbox") {
+            const hid = el.parentElement && el.parentElement.querySelector('input[type="hidden"][name="' + el.name + '"]');
+            if (hid) hid.disabled = !show;
+          }
+          const wrap = el.closest(".param-grid > div, .chk") || el.parentElement;
+          if (wrap) wrap.style.display = show ? "" : "none";
+        });
+        document.querySelectorAll(".param-group").forEach(function (group) {
+          const inputs = group.querySelectorAll("[data-param]");
+          let visible = 0;
+          inputs.forEach(function (el) {
+            if (!el.disabled) visible += 1;
+          });
+          group.style.display = visible ? "" : "none";
+        });
+      }
+
+      function onUseSnrToggle() {
+        const spec = collectParams();
+        // keep other values, just re-apply visibility against defaults keys + current use_snr
+        const base = Object.assign({}, currentDefaults(), spec);
+        fillParams(base);
+      }
+
+      function collectParams() {
+        const spec = currentDefaults();
+        const out = {};
+        let useSnr = Object.prototype.hasOwnProperty.call(spec, "use_snr")
+          ? !!spec.use_snr : true;
+        const snrBox = document.getElementById("p-use_snr");
+        if (snrBox && !snrBox.disabled) useSnr = !!snrBox.checked;
+        document.querySelectorAll("[data-param]").forEach(function (el) {
+          if (el.disabled) return;
+          const key = el.getAttribute("data-param");
+          if (!Object.prototype.hasOwnProperty.call(spec, key)) return;
+          if ((key === "snr_min" || key === "snr_max") && !useSnr) return;
+          const typ = el.getAttribute("data-type") || "str";
+          if (el.type === "checkbox") {
+            out[key] = !!el.checked;
+            return;
+          }
+          const raw = (el.value || "").trim();
+          if (raw === "") {
+            out[key] = null;
+            return;
+          }
+          if (typ === "int") out[key] = parseInt(raw, 10);
+          else if (typ === "float") out[key] = Number(raw);
+          else out[key] = raw;
+        });
+        return out;
+      }
+
+      strategySel.addEventListener("change", function () {
+        fillParams(currentDefaults());
+      });
+      const useSnrEl = document.getElementById("p-use_snr");
+      if (useSnrEl) {
+        useSnrEl.addEventListener("change", function () {
+          const base = Object.assign({}, currentDefaults(), collectParams());
+          fillParams(base);
+        });
+      }
+      document.getElementById("btn-reset-params").addEventListener("click", function () {
+        fillParams(currentDefaults());
+      });
+      document.getElementById("btn-reset-tickers").addEventListener("click", function () {
+        tickerTa.value = defaultTickers || "";
+      });
+      form.addEventListener("submit", function () {
+        document.getElementById("params_json").value = JSON.stringify(collectParams());
+      });
+
+      const initial = (posted && Object.keys(posted).length) ? Object.assign({}, currentDefaults(), posted) : currentDefaults();
+      fillParams(initial);
+    })();
+  </script>
+</body>
+</html>

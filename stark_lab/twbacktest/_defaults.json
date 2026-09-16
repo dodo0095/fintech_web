@@ -1,0 +1,71 @@
+{
+  "tickers": {
+    "2330.TW": "台積電",
+    "3035.TW": "致新",
+    "5314.TWO": "世紀",
+    "6197.TW": "佳必琪",
+    "6217.TWO": "中探針",
+    "2360.TW": "致茂電子",
+    "2404.TW": "漢唐",
+    "3037.TW": "欣興電子",
+    "2449.TW": "京元電子",
+    "3044.TW": "健鼎科技"
+  },
+  "strategies": {
+    "breakout_v1": {
+      "tp": 0.25,
+      "sl": 0.2,
+      "time_stop_days": 3,
+      "lookback": 20,
+      "use_snr": true,
+      "snr_min": 0.4,
+      "kind": "breakout"
+    },
+    "pullback_v1": {
+      "tp": 0.08,
+      "sl": 0.04,
+      "time_stop_days": 0,
+      "lookback": 20,
+      "use_snr": true,
+      "sma_fast": 20,
+      "sma_trend": 60,
+      "snr_max": 0.25,
+      "kind": "pullback"
+    },
+    "breakout_raw": {
+      "tp": 0.25,
+      "sl": 0.2,
+      "time_stop_days": 3,
+      "lookback": 20,
+      "use_snr": false,
+      "kind": "breakout"
+    },
+    "pullback_raw": {
+      "tp": 0.08,
+      "sl": 0.04,
+      "time_stop_days": 0,
+      "lookback": 20,
+      "use_snr": false,
+      "sma_fast": 20,
+      "sma_trend": 60,
+      "kind": "pullback"
+    },
+    "breakout_v2": {
+      "tp": 0.25,
+      "sl": 0.2,
+      "time_stop_days": 3,
+      "lookback": 20,
+      "use_snr": true,
+      "snr_min": 0.4,
+      "snr_rising": false,
+      "vol_mult": 0.0,
+      "twii_filter": true,
+      "no_chase": false,
+      "chase_mult": 1.08,
+      "trail": true,
+      "trail_arm": 0.12,
+      "trail_lookback": 15,
+      "kind": "breakout"
+    }
+  }
+}
