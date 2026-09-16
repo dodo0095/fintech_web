@@ -352,18 +352,45 @@ function renderValuation(result) {
     return null;
   }
   valState = result.data;
+  valMetric = pickDefaultMetric(); // 依當前個股各分頁可靠性重新判定預設分頁
+  resetMetricUI();
   drawValuation();
   return result.data.updated_at;
 }
 
-function valBlock() {
+// 目前倍數超出歷史帶緣 OUT_OF_BAND_RATIO 倍（25%）即視為歷史極端，河流圖參考性低。
+const OUT_OF_BAND_RATIO = 1.25;
+
+// valBlock：可傳入 metric（"PE"/"PB"）當純函式用來分別評估兩個分頁；省略時沿用全域 valMetric。
+function valBlock(metric) {
   const data = valState;
   if (!data) return null;
-  if (valMetric === "PB") {
+  const m = metric || valMetric;
+  if (m === "PB") {
     if (!data.pb) return null;
     return { lines: data.pb.lines, band_prices: data.pb.band_prices, current: data.pb.current, band_idx: data.pb.current_band_index, zone: data.pb.zone_label, unit: "淨值比", prefix: "PB", approx: false };
   }
   return { lines: data.pe_lines, band_prices: data.band_prices, current: data.current_pe, band_idx: data.current_band_index, zone: data.zone_label, unit: "本益比", prefix: "PE", approx: !!data.approximate };
+}
+
+// 分頁可靠性判定。不可靠（不適用）條件（任一成立）：
+//   (a) approx：近年虧損→常數 EPS，本益比河流圖退化成平帶；
+//   (b) 目前倍數爆出歷史區間：current > 最高倍數線 * RATIO，或 current < 最低倍數線 / RATIO。
+// 回傳 { reliable, reason }，reason: "" | "approx" | "high" | "low" | "nodata"。
+function blockReliability(blk) {
+  if (!blk || !blk.lines || blk.lines.length < 2 || blk.current == null) return { reliable: false, reason: "nodata" };
+  if (blk.approx) return { reliable: false, reason: "approx" };
+  const lo = blk.lines[0], hi = blk.lines[blk.lines.length - 1];
+  if (hi != null && blk.current > hi * OUT_OF_BAND_RATIO) return { reliable: false, reason: "high" };
+  if (lo != null && blk.current < lo / OUT_OF_BAND_RATIO) return { reliable: false, reason: "low" };
+  return { reliable: true, reason: "" };
+}
+
+// 載入時選預設分頁：優先顯示「可靠」的分頁——PE 可靠→PE；否則 PB 可靠→PB；兩者皆不可靠→PE（落到說明分支）。
+function pickDefaultMetric() {
+  if (blockReliability(valBlock("PE")).reliable) return "PE";
+  if (blockReliability(valBlock("PB")).reliable) return "PB";
+  return "PE";
 }
 
 function drawValuation() {
@@ -392,10 +419,25 @@ function drawValuation() {
   const zoneCls = bi == null ? "" : bi >= nBand - 1 ? "expensive" : bi <= 0 ? "cheap" : "fair";
   zoneEl.className = `zone-badge ${zoneCls}`;
 
-  let staleMsg = "";
-  if (blk.approx) staleMsg = "（此標的近年獲利不穩／曾虧損，本益比河流圖不適用，已預設改看淨值比；如需查看本益比請點上方分頁）";
-  if (isStale(data.updated_at)) setStatus(status, "stale", `資料可能過期（更新於 ${formatDateTime(data.updated_at)}）。${staleMsg}`);
-  else if (staleMsg) setStatus(status, "note", staleMsg);
+  // 估值爆表／不適用：不畫河流圖（避免平帶或爆出帶外），改顯示白話說明。
+  const rel = blockReliability(blk);
+  if (!rel.reliable) {
+    chartEl.style.display = "none";
+    let msg;
+    if (rel.reason === "approx") {
+      msg = "⚠️ 此標的近年獲利為負（曾虧損），本益比不適用，故不顯示本益比河流圖。可點上方切換「淨值比」。";
+    } else if (rel.reason === "high" || rel.reason === "low") {
+      const lo = blk.lines[0], hi = blk.lines[blk.lines.length - 1];
+      const dir = rel.reason === "high" ? "高於" : "低於";
+      msg = `⚠️ 目前${blk.unit} ${formatNumber(blk.current, 1)}倍，已${dir}歷史區間（約 ${formatNumber(lo, 1)}~${formatNumber(hi, 1)}倍），估值處於歷史極端，河流圖參考性低，暫不顯示。`;
+    } else {
+      msg = valMetric === "PB" ? "此標的暫無淨值比（PB）資料，可切回本益比。" : "資料更新中 — 尚無本益比資料。";
+    }
+    setStatus(status, "note", msg);
+    return;
+  }
+
+  if (isStale(data.updated_at)) setStatus(status, "stale", `資料可能過期（更新於 ${formatDateTime(data.updated_at)}）。`);
   else status.hidden = true;
   // 防呆：示範資料一律標紅，絕不讓假股價冒充真實股價
   if (data.demo) setStatus(status, "error", "⚠ 這是示範資料，不是真實股價。請執行 python scripts\\fetch_valuation.py 後按 Ctrl+F5 更新。");
@@ -565,10 +607,7 @@ async function applyFocus(code) {
   if (heat.ok) renderHeat(heat);
 
   if (val.ok && val.data) {
-    // 本益比不可靠（approximate）且有淨值比資料時，預設改看 PB；否則維持 PE。
-    // 依當前個股重新判定，使用者仍可手動點回本益比分頁。
-    valMetric = (val.data.approximate && val.data.pb) ? "PB" : "PE";
-    resetMetricUI();
+    // 預設分頁與 UI 同步由 renderValuation → pickDefaultMetric 依該股各分頁可靠性判定。
     renderValuation(val);
   } else if (chartStatus) {
     setStatus(chartStatus, "note", val.error || `「${code}」暫時畫不出河流圖。`);
