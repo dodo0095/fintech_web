@@ -1,7 +1,0 @@
-2026-09-10 10:35:55 WARNING waitress.queue:114 Task queue depth is 1
-2026-09-10 10:35:56 WARNING waitress.queue:114 Task queue depth is 1
-2026-09-10 10:35:56 WARNING waitress.queue:114 Task queue depth is 1
-2026-09-10 21:55:51 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-09-10 22:07:04 WARNING waitress.queue:114 Task queue depth is 1
-2026-09-10 22:07:04 WARNING waitress.queue:114 Task queue depth is 1
-2026-09-10 23:57:08 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /

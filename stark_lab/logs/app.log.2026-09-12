@@ -1,9 +1,0 @@
-2026-09-12 03:15:28 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /
-2026-09-12 03:15:28 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /
-2026-09-12 03:15:28 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /
-2026-09-12 15:12:21 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-09-12 21:44:37 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /
-2026-09-12 21:55:09 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /
-2026-09-12 23:04:55 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-09-12 23:06:43 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-09-12 23:18:35 INFO waitress:485 Serving on http://127.0.0.1:8000

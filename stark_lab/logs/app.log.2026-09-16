@@ -1,4 +1,0 @@
-2026-09-16 09:23:20 WARNING django.security.csrf:224 Forbidden (Referer checking failed - no Referer.): /
-2026-09-16 21:35:56 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-09-16 21:40:15 INFO waitress:485 Serving on http://127.0.0.1:8000
-2026-09-16 22:15:43 INFO waitress:485 Serving on http://127.0.0.1:8000

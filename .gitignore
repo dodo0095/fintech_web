@@ -1,3 +1,9 @@
+.env
+stark_lab/.env
+stark_lab/logs/
+**/logs/
+
+
 # Executables & Binaries #
 caddy.exe
 
