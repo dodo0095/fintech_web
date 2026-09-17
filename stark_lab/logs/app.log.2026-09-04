@@ -1,0 +1,37 @@
+2026-09-04 02:44:47 WARNING django.security.csrf:224 Forbidden (Referer checking failed - Referer is insecure while host is secure.): /
+2026-09-04 02:44:49 WARNING django.security.csrf:224 Forbidden (Referer checking failed - Referer is insecure while host is secure.): /
+2026-09-04 02:45:01 WARNING django.security.csrf:224 Forbidden (Referer checking failed - Referer is insecure while host is secure.): /
+2026-09-04 06:13:54 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:55 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:56 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:56 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:57 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:57 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:58 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:58 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:59 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 06:13:59 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:08 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:10 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:11 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:11 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:12 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:12 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:13 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:14 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:16 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 10:47:16 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 15:46:00 INFO django.utils.autoreload:636 Watching for file changes with StatReloader
+2026-09-04 15:47:48 INFO waitress:485 Serving on http://127.0.0.1:8000
+2026-09-04 15:48:16 INFO waitress:485 Serving on http://127.0.0.1:8000
+2026-09-04 16:12:00 INFO waitress:485 Serving on http://127.0.0.1:8000
+2026-09-04 18:45:18 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:20 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:20 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:21 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:21 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:21 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:22 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:22 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:23 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /
+2026-09-04 18:45:24 WARNING django.security.csrf:224 Forbidden (CSRF cookie not set.): /

@@ -1,18 +1,36 @@
-# 日誌檔（執行時自動產生，不進版控）
-stark_lab/logs/
-*.log
+# Executables & Binaries #
+caddy.exe
 
-# Python
-__pycache__/
+# Django #
 *.pyc
-.venv/
-**/.venv/
-
-# 環境設定（含機密，不進版控）
-.env
-**/.env
-
-# OS
-.DS_Store
+__pycache__
+!**/__pycache__/
+!**/migrations/
 *.sqlite3
 db.sqlite3
+*.sqlite3-journal
+
+# FrontEnd #
+dist
+merge
+node_modules
+npm-debug.log
+package-lock.json
+.*DS_Store
+vic.code-workspace
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+
+# media（使用者/上稿產生的圖片；正式站由 backfill/publish_docx 自行生成，不進版控）
+media/
+**/media/
+
+# log
+stark_lab/logs/         # 你的圖片路徑看起來在這裡
+**/logs/                # 任何子資料夾叫 logs 的都忽略
+*.log                   # 所有 .log
+*.log.*                 # 旋轉後的 log
+*.gz                    # 若有壓縮的 log
