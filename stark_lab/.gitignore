@@ -1,3 +1,6 @@
+# Executables & Binaries #
+caddy.exe
+
 # Django #
 *.pyc
 __pycache__
