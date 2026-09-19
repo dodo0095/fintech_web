@@ -14,6 +14,9 @@ import os
 
 from django.core.exceptions import ImproperlyConfigured
 
+# 指標全集（供 ENABLED_INDICATORS 預設用）；constants 為純資料模組、無 Django 相依，import 安全。
+from notify.constants import INDICATORS as _ALL_INDICATORS
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
@@ -87,6 +90,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'apiserver',
     'news.apps.NewsConfig',
+    'notify',
 
 ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -161,7 +165,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# 全站時區台北：USE_TZ=True 下 DB 仍以 UTC 儲存，此設定只影響顯示層與
+# notify 排程器（APScheduler 依 settings.TIME_ZONE），故 SCHEDULE_TW/US 為台灣時間。
+# news app 使用自身顯式 TW 時區，不受此設定影響。
+TIME_ZONE = 'Asia/Taipei'
 
 USE_I18N = True
 
@@ -184,6 +191,28 @@ STATICFILES_DIRS = [
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)  # 確保 logs 目錄存在
+
+# --- notify app 設定（自 env 讀取，沿用來源命名）---
+# 抓取回溯天數（日曆天）
+DATA_LOOKBACK_DAYS = int(os.environ.get("DATA_LOOKBACK_DAYS", "90"))
+# 全域指標開關（L0）：只推播清單內的指標；留空＝全部啟用。逗號分隔，值須為 constants.INDICATORS 內代碼
+_enabled_raw = os.environ.get("ENABLED_INDICATORS", "").strip()
+ENABLED_INDICATORS = (
+    [i.strip() for i in _enabled_raw.split(",") if i.strip()]
+    if _enabled_raw
+    else list(_ALL_INDICATORS)
+)
+# true=只寫 log 不實送（驗證用）
+DRY_RUN = _env_bool("DRY_RUN", default=False)
+# Discord 推播（唯一通報線）：頻道開關＋Webhook 網址（機密，勿硬編碼）
+DISCORD_ENABLED = _env_bool("DISCORD_ENABLED", default=False)
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
+# 自動排程（常駐 run_scheduler 時生效）
+SCHEDULER_ENABLED = _env_bool("SCHEDULER_ENABLED", default=False)
+# 每市場可設多個時段（逗號分隔 HH:MM，台灣時間），排程時區依 TIME_ZONE。
+SCHEDULE_TW = os.environ.get("SCHEDULE_TW", "08:00")
+SCHEDULE_US = os.environ.get("SCHEDULE_US", "20:00")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -207,11 +236,21 @@ LOGGING = {
             "formatter": "verbose",
             "delay": True,  # 檔案在第一次寫入時才開啟
         },
+        "notify_file": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": str(LOG_DIR / "notify.log"),
+            "when": "midnight",
+            "backupCount": 14,
+            "encoding": "utf-8",
+            "formatter": "verbose",
+            "delay": True,
+        },
     },
     "loggers": {
         "django": {"handlers": ["console", "app_file"], "level": "INFO", "propagate": False},
         "django.request": {"handlers": ["console", "app_file"], "level": "ERROR", "propagate": False},
         "waitress": {"handlers": ["console", "app_file"], "level": "INFO", "propagate": False},
+        "notify": {"handlers": ["console", "notify_file"], "level": "INFO", "propagate": False},
     },
 }
 

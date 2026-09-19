@@ -32,3 +32,8 @@ beautifulsoup4>=4.12.3
 # --- 自建部落格：Word(.docx) → HTML 上稿管線（publish_docx / backfill_weekly）---
 mammoth>=1.6.0
 PyYAML>=6.0
+
+# --- notify app：盤勢通報排程（run_scheduler）與時區處理 ---
+# requests / pandas / numpy / yfinance 已於上方列出，不重複
+APScheduler>=3.10,<4.0
+pytz

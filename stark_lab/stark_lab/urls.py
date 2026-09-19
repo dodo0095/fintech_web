@@ -1,7 +1,15 @@
 from django.urls import path, include
+from django.http import HttpResponse
 from rest_framework import routers
 from apiserver import views
+from notify import views as notify_views
 from django.views.generic import TemplateView
+
+
+def robots_txt(request):
+    """對外爬蟲規則：擋掉維運路徑（含 notify 監控頁）。"""
+    lines = ["User-agent: *", "Disallow: /_ops/"]
+    return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
 
 router = routers.DefaultRouter()
 router.register(r'chose_robot', views.chose_robot, basename='chose_robot')
@@ -54,6 +62,12 @@ urlpatterns = [
     path('data_to_chart_2/', views.data_to_chart_2),
 
     path('api/performances/', views.monthly_performance_api, name='performance_api'),
+
+    # 對外爬蟲規則
+    path('robots.txt', robots_txt, name='robots_txt'),
+
+    # notify 盤勢通報：非顯眼的維運監控頁（不對外連結、robots 已 Disallow /_ops/）
+    path('_ops/notify-monitor/', notify_views.dashboard, name='notify_dashboard'),
 ]
 
 # --- twbacktest (local paper backtest UI) ---
