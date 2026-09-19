@@ -82,7 +82,12 @@ def run_market(market: str) -> str:
             logger.warning("%s 今日未開盤/資料過舊，僅列價格不判定訊號", t.symbol)
             continue
 
-        sigs = indicators.evaluate(df)
+        # 盤整過濾（A）：開關與閾值自 settings 讀取後傳入，indicators.py 保持無 Django 相依。
+        sigs = indicators.evaluate(
+            df,
+            ranging_filter=settings.RANGING_FILTER_ENABLED,
+            adx_threshold=settings.ADX_RANGING_THRESHOLD,
+        )
         # L0 全域指標開關：只保留啟用清單內的指標
         sigs = [s for s in sigs if s.indicator in settings.ENABLED_INDICATORS]
         new_sigs = [s for s in sigs if not _recently_pushed(t, s)]

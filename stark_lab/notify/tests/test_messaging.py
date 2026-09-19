@@ -105,3 +105,25 @@ def test_message_groups_buy_and_sell_separately():
     assert "🔴 賣出訊號（1）" in msg
     # 買進區塊在賣出區塊之前
     assert msg.index("買進訊號") < msg.index("賣出訊號")
+
+
+# --- D. 衝突明示：同時多空 → 加註提醒，但仍保留買/賣分組 ---
+def test_message_adds_conflict_note_when_both_directions():
+    sigs = [
+        Signal("rsi", "bullish", "RSI=28"),
+        Signal("bollinger", "bearish", "觸及上軌"),
+    ]
+    msg = build_message("0050", dt.date(2026, 7, 26), sigs)
+    assert C.CONFLICT_NOTE in msg
+    # 加註不取代原本的買/賣分組顯示
+    assert "🟢 買進訊號（1）" in msg
+    assert "🔴 賣出訊號（1）" in msg
+
+
+def test_message_no_conflict_note_when_single_direction():
+    sigs = [
+        Signal("ma", "bullish", "金叉"),
+        Signal("macd", "bullish", "柱狀圖轉正"),
+    ]
+    msg = build_message("0050", dt.date(2026, 7, 26), sigs)
+    assert C.CONFLICT_NOTE not in msg

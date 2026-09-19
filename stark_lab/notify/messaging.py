@@ -100,4 +100,11 @@ def build_message(display_name: str, trigger_date: dt.date, signals: list[Signal
                 lines.append(f"・{label}｜{s.detail}")
             if guide.get("advice"):
                 lines.append(f"　建議：{guide['advice']}")
+
+    # D. 衝突明示：同一標的本次同時有多、空新訊號時加註提醒（不取代上方買/賣分組顯示）。
+    has_bull = any(s.direction == C.BULLISH for s in signals)
+    has_bear = any(s.direction == C.BEARISH for s in signals)
+    if has_bull and has_bear:
+        lines.append("")
+        lines.append(C.CONFLICT_NOTE)
     return "\n".join(lines)

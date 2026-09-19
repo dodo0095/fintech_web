@@ -29,6 +29,14 @@ BIAS_OVERBOUGHT = 5.0
 # 寶塔線 TOWER：僅收盤價、翻紅/翻黑，參考前 N 根收盤
 TOWER_REF = 2
 
+# --- ADX 盤整過濾（whipsaw 假訊號抑制）---
+# ADX(14) Wilder 標準算法；ADX < ADX_RANGING_THRESHOLD 視為盤整（無趨勢）。
+ADX_PERIOD = 14
+ADX_RANGING_THRESHOLD = 25
+# 交叉/趨勢型指標：盤整時易來回假訊號（前日買、隔日賣），盤整期間壓制之。
+TREND_INDICATORS = {"ma", "ema", "macd", "kd", "tower"}
+# 其餘為均值回歸型（rsi, bias, bollinger），盤整時仍具參考價值、不壓制。
+
 # 抓取後至少需要的資料筆數（暖機期，feature-spec §3.1）
 MIN_ROWS = 60
 
@@ -74,6 +82,8 @@ SUMMARY_HAS = "🔔 有訊號"
 SUMMARY_NONE = "😴 無訊號"
 # 摘要中每檔的方向標註（依該檔觸發的買進/賣出組合判定）
 SUMMARY_DIR = {"bull": "偏多", "bear": "偏空", "mixed": "多空並存"}
+# 同一標的同時出現多、空新訊號時的加註提醒（D 衝突明示；不取代買/賣分組顯示）
+CONFLICT_NOTE = "⚠️ 盤整訊號分歧，建議觀望"
 
 # 每條訊號的「白話總結」——保留專業名詞，另加一句人話讓長輩看得懂方向
 PLAIN_EMOJI = {BULLISH: "📈", BEARISH: "📉"}

@@ -202,6 +202,10 @@ ENABLED_INDICATORS = (
     if _enabled_raw
     else list(_ALL_INDICATORS)
 )
+# 盤整過濾（A）：ADX < 閾值（盤整）時壓制交叉型指標（ma/ema/macd/kd/tower），
+# 保留均值回歸型（rsi/bias/bollinger）；ADX 無法計算時自動安全降級（不過濾）。
+RANGING_FILTER_ENABLED = _env_bool("RANGING_FILTER_ENABLED", default=True)
+ADX_RANGING_THRESHOLD = float(os.environ.get("ADX_RANGING_THRESHOLD", "25"))
 # true=只寫 log 不實送（驗證用）
 DRY_RUN = _env_bool("DRY_RUN", default=False)
 # Discord 推播（唯一通報線）：頻道開關＋Webhook 網址（機密，勿硬編碼）

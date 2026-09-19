@@ -40,8 +40,61 @@ def _crossed_below(a: pd.Series, b: pd.Series) -> bool:
     return bool(a.iloc[-2] >= b.iloc[-2] and a.iloc[-1] < b.iloc[-1])
 
 
-def evaluate(df: pd.DataFrame) -> list[Signal]:
-    """回傳本次觸發的訊號列表。"""
+def compute_adx(df: pd.DataFrame, period: int = C.ADX_PERIOD) -> float | None:
+    """Wilder 標準 ADX，回傳最後一根值；資料不足或無法計算回 None（安全降級）。
+
+    - TR = max(high-low, |high-prev_close|, |low-prev_close|)
+    - +DM/-DM 標準定義；以 Wilder 平滑（EMA alpha=1/period, adjust=False）得 ATR、+DI、-DI
+    - DX = 100 * |(+DI)-(-DI)| / ((+DI)+(-DI))；ADX = Wilder 平滑(DX)
+    盤整（無趨勢）時 ADX 低、單邊趨勢時 ADX 高。
+    """
+    high = df["high"]
+    low = df["low"]
+    close = df["close"]
+    # 至少要能算出一根 TR（需前一根收盤）；過短直接安全降級。
+    if len(df) < period + 1:
+        return None
+
+    prev_close = close.shift(1)
+    tr = pd.concat(
+        [(high - low), (high - prev_close).abs(), (low - prev_close).abs()],
+        axis=1,
+    ).max(axis=1)
+
+    up_move = high.diff()
+    down_move = -low.diff()
+    plus_dm = up_move.where((up_move > down_move) & (up_move > 0), 0.0)
+    minus_dm = down_move.where((down_move > up_move) & (down_move > 0), 0.0)
+
+    alpha = 1.0 / period
+    atr = tr.ewm(alpha=alpha, adjust=False).mean()
+    atr_safe = atr.replace(0, np.nan)  # ATR=0（完全無波動）→ 除零保護
+    plus_di = 100 * plus_dm.ewm(alpha=alpha, adjust=False).mean() / atr_safe
+    minus_di = 100 * minus_dm.ewm(alpha=alpha, adjust=False).mean() / atr_safe
+
+    di_sum = (plus_di + minus_di).replace(0, np.nan)  # +DI 與 -DI 皆 0 → 除零保護
+    dx = 100 * (plus_di - minus_di).abs() / di_sum
+    adx = dx.ewm(alpha=alpha, adjust=False).mean()
+
+    val = adx.iloc[-1]
+    if pd.isna(val):
+        return None
+    return float(val)
+
+
+def evaluate(
+    df: pd.DataFrame,
+    ranging_filter: bool = True,
+    adx_threshold: float = C.ADX_RANGING_THRESHOLD,
+) -> list[Signal]:
+    """回傳本次觸發的訊號列表。
+
+    盤整過濾（A）：當 `ranging_filter=True` 且可算出 ADX 且 ADX < `adx_threshold`（盤整、
+    無趨勢）時，壓制交叉/趨勢型指標（C.TREND_INDICATORS：ma/ema/macd/kd/tower），
+    保留均值回歸型（rsi/bias/bollinger）。ADX 無法計算（資料不足）時不啟用過濾、回傳全部。
+
+    本函式不依賴 Django settings，可獨立測試；開關/閾值由呼叫端（runner）自 settings 傳入。
+    """
     close = df["close"]
     high = df["high"]
     low = df["low"]
@@ -144,5 +197,12 @@ def evaluate(df: pd.DataFrame) -> list[Signal]:
                 signals.append(Signal("tower", C.BULLISH, f"翻紅 收盤 {closes[-1]:.2f}"))
             elif states[-1] == "black":
                 signals.append(Signal("tower", C.BEARISH, f"翻黑 收盤 {closes[-1]:.2f}"))
+
+    # --- A. 盤整過濾（ADX trend filter）：盤整時壓制交叉型、保留均值回歸型 ---
+    if ranging_filter:
+        adx = compute_adx(df, C.ADX_PERIOD)
+        # ADX 可算出且低於閾值 → 盤整；ADX 為 None（資料不足）則安全降級、不過濾。
+        if adx is not None and adx < adx_threshold:
+            signals = [s for s in signals if s.indicator not in C.TREND_INDICATORS]
 
     return signals
