@@ -4,6 +4,8 @@
 - `build_price_block`：價格區塊，**每個時點必推全部標的**（到點就推）。
 - `build_message`：訊號區塊，只列有觸發的指標。
 """
+from __future__ import annotations
+
 import datetime as dt
 from dataclasses import dataclass
 

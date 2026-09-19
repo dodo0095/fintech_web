@@ -3,6 +3,8 @@
 ⚠️ 新版 yfinance 對單一 symbol 也可能回傳 MultiIndex 欄位，
    必須統一攤平；禁止憑空假設回傳結構（company-rules 禁止憑空想像）。
 """
+from __future__ import annotations
+
 import datetime as dt
 
 import pandas as pd

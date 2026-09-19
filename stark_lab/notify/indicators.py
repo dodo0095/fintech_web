@@ -3,6 +3,8 @@
 各指標獨立判定、不做綜合。交叉類以最近兩根 K 線判定（前根未成立、當根成立），
 避免持續狀態重複觸發。防抖動（24h 去重）由呼叫端依 signal_log 處理。
 """
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 import numpy as np

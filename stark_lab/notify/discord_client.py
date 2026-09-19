@@ -3,6 +3,8 @@
 推播介面：push(text) -> PushResult。
 Discord Webhook 免申請 Bot、免額度，POST content 即送到指定頻道。
 """
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
 

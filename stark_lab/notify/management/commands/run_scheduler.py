@@ -8,6 +8,8 @@
 台股與美股盤前（21:00）為週一至五；美股盤後清晨槽（如 04:00）為週二至六
 （對應美股週一至週五收盤，含台灣週六）。
 """
+from __future__ import annotations
+
 import logging
 
 import pytz
