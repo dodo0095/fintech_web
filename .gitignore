@@ -5,7 +5,9 @@ stark_lab/logs/
 
 
 # Executables & Binaries #
+# caddy.exe 只放在伺服器本機、不進版控；伺服器 pull 請用 safe-pull.bat，避免被刪
 caddy.exe
+**/caddy.exe
 
 # Django #
 *.pyc
@@ -34,9 +36,10 @@ vic.code-workspace
 media/
 **/media/
 
-# log
-stark_lab/logs/         # 你的圖片路徑看起來在這裡
-**/logs/                # 任何子資料夾叫 logs 的都忽略
-*.log                   # 所有 .log
-*.log.*                 # 旋轉後的 log
-*.gz                    # 若有壓縮的 log
+# log（注意：gitignore 不支援行內註解，註解必須獨立成行）
+stark_lab/logs/
+**/logs/
+# 所有 .log、旋轉後的 log、壓縮的 log
+*.log
+*.log.*
+*.gz
