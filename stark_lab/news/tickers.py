@@ -14,6 +14,9 @@ _FILES = (
     ("上市.csv", "TW"),
     ("上櫃.csv", "TWO"),
     ("興櫃.csv", "TWO"),
+    # ETF 名單由 `python manage.py refresh_etf_list` 從證交所 ISIN 清單產生
+    ("ETF上市.csv", "TW"),
+    ("ETF上櫃.csv", "TWO"),
 )
 
 _CODE_RE = re.compile(r"([0-9]{3,6}[A-Za-z]?)", re.I)
@@ -106,6 +109,26 @@ def default_focus() -> dict:
         "yahoo": "2330.TW",
         "market": "上市",
     }
+
+
+def search(query: str, limit: int = 10) -> List[dict]:
+    """自動完成用：代號前綴優先，其次名稱包含關鍵字。"""
+    _load()
+    q = _normalize_query(query).upper()
+    if not q:
+        return []
+    qn = _norm_name(q)
+    exact, prefix, name_hit = [], [], []
+    for code, info in _by_code.items():
+        if code == q:
+            exact.append(info)
+        elif code.startswith(q):
+            prefix.append(info)
+        elif qn and qn in _norm_name(info["name"]):
+            name_hit.append(info)
+    prefix.sort(key=lambda i: (len(i["code"]), i["code"]))
+    name_hit.sort(key=lambda i: (not _norm_name(i["name"]).startswith(qn), len(i["name"]), i["code"]))
+    return [dict(i) for i in (exact + prefix + name_hit)[:limit]]
 
 
 def all_codes() -> List[str]:

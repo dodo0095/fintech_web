@@ -1,0 +1,227 @@
+{% load static %}<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="自己選台股、自己設計進出場規則，免寫程式就能回測歷史績效：均線、RSI、KD、MACD、布林通道，含手續費、證交稅與漲跌停。">
+  <link href="/images/favicon.ico" rel="shortcut icon">
+  <title>策略回測實驗室｜StarkLab 史塔克實驗室</title>
+  <meta property="og:title" content="策略回測實驗室｜StarkLab 史塔克實驗室">
+  <meta property="og:description" content="免寫程式，自己設計台股交易策略並回測歷史績效。">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'backtest/style.css' %}">
+</head>
+<body>
+
+<header class="topper">
+  <div class="topper-content">
+    <a class="topper-logo" href="/index.html">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">StarkLab <span>史塔克實驗室</span></div>
+    </a>
+    <nav class="topper-navbar">
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="/bot.html">選股機器人</a>
+      <a href="https://podcasts.apple.com/tw/podcast/%E5%8F%B2%E5%A1%94%E5%85%8B%E5%AF%A6%E9%A9%97%E5%AE%A4/id1530686481" target="_blank" rel="noopener">Podcast</a>
+      <a href="/index.html">關於我們</a>
+      <a href="/backtest/" class="active">回測</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow">策略回測實驗室</p>
+    <h1>你的交易想法，過去 10 年賺錢嗎？</h1>
+    <p class="lead">選一檔台股、用積木組出進出場規則，一鍵看歷史績效。<br class="hide-sm">不用寫程式；已計入手續費、證交稅與漲跌停限制。</p>
+  </section>
+
+  <form id="bt-form" autocomplete="off" novalidate>
+    <!-- ① 標的與期間 -->
+    <section class="card">
+      <h2 class="step"><span>1</span>選擇股票與期間</h2>
+      <div class="grid-3">
+        <div class="field stock-field">
+          <label for="stock-input">股票代號或名稱</label>
+          <input id="stock-input" type="text" placeholder="例如 2330、台積電、0050" maxlength="20"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stock-list">
+          <ul id="stock-list" class="suggest" role="listbox" hidden></ul>
+          <p class="hint" id="stock-picked"></p>
+        </div>
+        <div class="field">
+          <label for="start">起始日</label>
+          <input id="start" type="date">
+        </div>
+        <div class="field">
+          <label for="end">結束日</label>
+          <input id="end" type="date">
+        </div>
+      </div>
+      <div class="chips" id="range-chips">
+        <button type="button" data-years="1">近 1 年</button>
+        <button type="button" data-years="3">近 3 年</button>
+        <button type="button" data-years="5" class="on">近 5 年</button>
+        <button type="button" data-years="10">近 10 年</button>
+        <button type="button" data-years="all">全部</button>
+      </div>
+    </section>
+
+    <!-- ② 策略 -->
+    <section class="card">
+      <h2 class="step"><span>2</span>設計策略</h2>
+      <p class="sub">從範本開始，或直接修改下面的條件。</p>
+      <div class="presets" id="presets"></div>
+
+      <div class="rule-block" id="entry-block">
+        <div class="rule-head">
+          <h3>買進條件</h3>
+          <label class="logic">符合
+            <select data-logic>
+              <option value="all">全部條件</option>
+              <option value="any">任一條件</option>
+            </select>時，隔天開盤買進
+          </label>
+        </div>
+        <div class="conds" data-conds></div>
+        <button type="button" class="add" data-add>＋ 新增條件</button>
+      </div>
+
+      <div class="rule-block" id="exit-block">
+        <div class="rule-head">
+          <h3>賣出條件</h3>
+          <label class="logic">符合
+            <select data-logic>
+              <option value="any">任一條件</option>
+              <option value="all">全部條件</option>
+            </select>時，隔天開盤賣出
+          </label>
+        </div>
+        <div class="conds" data-conds></div>
+        <button type="button" class="add" data-add>＋ 新增條件</button>
+      </div>
+
+      <div class="rule-block">
+        <div class="rule-head"><h3>風險控制</h3><span class="hint">留空＝不使用；盤中觸價即出場</span></div>
+        <div class="grid-4" id="risk-fields"></div>
+      </div>
+    </section>
+
+    <!-- ③ 交易設定 -->
+    <details class="card settings">
+      <summary><h2 class="step"><span>3</span>交易設定<small>資金、手續費、滑價（可略過）</small></h2></summary>
+      <div class="grid-4">
+        <div class="field">
+          <label for="capital">初始資金（元）</label>
+          <input id="capital" type="number" min="10000" max="100000000" step="10000" value="1000000">
+        </div>
+        <div class="field">
+          <label for="fee_discount">手續費折扣</label>
+          <select id="fee_discount">
+            <option value="1">無折扣（0.1425%）</option>
+            <option value="0.6" selected>6 折</option>
+            <option value="0.5">5 折</option>
+            <option value="0.28">2.8 折</option>
+            <option value="0">不計手續費</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="slippage_pct">滑價（單邊 %）</label>
+          <input id="slippage_pct" type="number" min="0" max="3" step="0.05" value="0.1">
+        </div>
+        <div class="field">
+          <label for="board_lot">交易單位</label>
+          <select id="board_lot">
+            <option value="0" selected>零股（1 股）</option>
+            <option value="1">整張（1000 股）</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint">證交稅自動計算：股票 0.3%、ETF 0.1%（賣出時）。最低手續費 20 元。</p>
+    </details>
+
+    <div class="run-row">
+      <button type="submit" class="run" id="run-btn">開始回測</button>
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+    </div>
+  </form>
+
+  <!-- 結果 -->
+  <section id="result" class="result" hidden aria-live="polite">
+    <div class="result-head">
+      <div>
+        <p class="eyebrow" id="r-period"></p>
+        <h2 id="r-title"></h2>
+        <ul class="desc" id="r-desc"></ul>
+      </div>
+      <button type="button" class="ghost" id="share-btn">複製分享連結</button>
+    </div>
+    <ul class="notes" id="r-notes"></ul>
+
+    <div class="kpis" id="r-kpis"></div>
+
+    <div class="card chart-card">
+      <div class="chart-head">
+        <h3>資產變化</h3>
+        <span class="hint">相同本金：策略 vs 買進持有 vs 大盤（0050）</span>
+      </div>
+      <div id="equity-chart" class="chart"></div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-head">
+        <h3>買賣點</h3>
+        <span class="hint">▲ 買進　▼ 賣出（價格為還原權息）</span>
+      </div>
+      <div id="price-chart" class="chart"></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>績效比較</h3>
+        <div class="table-wrap"><table class="tbl" id="r-compare"></table></div>
+      </div>
+      <div class="card">
+        <h3>逐年報酬</h3>
+        <div class="table-wrap"><table class="tbl" id="r-yearly"></table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>交易明細 <small id="r-trade-count"></small></h3>
+      <div class="table-wrap"><table class="tbl" id="r-trades"></table></div>
+    </div>
+
+    <p class="disclaimer">
+      回測結果僅供研究參考，不代表未來績效，亦非投資建議。股價資料來源為 Yahoo Finance（還原權息），可能有延遲或誤差；
+      訊號以收盤價判斷、隔日開盤成交，未考慮流動性不足與處置股等情況。
+    </p>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">S</div>
+      <div class="footer-brand-text">StarkLab <small>史塔克實驗室 版權所有</small></div>
+    </div>
+    <nav class="footer-nav">
+      <a href="/botBlog.html">精彩文章</a>
+      <a href="/bot.html">選股機器人</a>
+      <a href="/index.html">關於我們</a>
+    </nav>
+    <div class="footer-copy">© 2020 – 2026 StarkLab</div>
+  </div>
+</footer>
+
+{{ meta_json|json_script:"bt-meta" }}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="{% static 'backtest/app.js' %}"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LX8V41PCYV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LX8V41PCYV');
+</script>
+</body>
+</html>

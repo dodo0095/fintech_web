@@ -70,6 +70,5 @@ urlpatterns = [
     path('_ops/notify-monitor/', notify_views.dashboard, name='notify_dashboard'),
 ]
 
-# --- twbacktest (local paper backtest UI) ---
-from django.urls import include as _tw_include, path as _tw_path
-urlpatterns += [_tw_path('backtest/', _tw_include('twbacktest.urls'))]
+# 使用者自訂策略回測（backtest app）
+urlpatterns += [path('backtest/', include('backtest.urls'))]

@@ -78,7 +78,6 @@ CORS_ORIGIN_WHITELIST = ( # product : 註解
 # Application definition
 
 INSTALLED_APPS = [
-    'twbacktest',
     'django_filters',
     'corsheaders',
     'django.contrib.admin',
@@ -91,6 +90,7 @@ INSTALLED_APPS = [
     'apiserver',
     'news.apps.NewsConfig',
     'notify',
+    'backtest',
 
 ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -282,6 +282,3 @@ TEMPLATES = [
         },
     },
 ]
-# twbacktest: local snr_backtest only (no live orders)
-BACKTEST_ROOT = r'C:\Users\AUSER\Desktop\trade\snr_backtest'
-BACKTEST_TIMEOUT = 300

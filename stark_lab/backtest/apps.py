@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class TwBacktestConfig(AppConfig):
+class BacktestConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "twbacktest"
-    verbose_name = "台股回測"
+    name = "backtest"
+    verbose_name = "策略回測"
