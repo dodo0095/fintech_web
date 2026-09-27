@@ -4,11 +4,17 @@ from rest_framework import routers
 from apiserver import views
 from notify import views as notify_views
 from django.views.generic import TemplateView
+from django.contrib.sitemaps.views import sitemap
+from apiserver.sitemaps import SITEMAPS
 
 
 def robots_txt(request):
-    """對外爬蟲規則：擋掉維運路徑（含 notify 監控頁）。"""
-    lines = ["User-agent: *", "Disallow: /_ops/"]
+    """對外爬蟲規則：擋掉維運路徑（含 notify 監控頁），並告知 sitemap 位置。"""
+    lines = [
+        "User-agent: *",
+        "Disallow: /_ops/",
+        "Sitemap: https://starklab.tw/sitemap.xml",
+    ]
     return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
 
 router = routers.DefaultRouter()
@@ -65,6 +71,7 @@ urlpatterns = [
 
     # 對外爬蟲規則
     path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap, {'sitemaps': SITEMAPS}, name='sitemap'),
 
     # notify 盤勢通報：非顯眼的維運監控頁（不對外連結、robots 已 Disallow /_ops/）
     path('_ops/notify-monitor/', notify_views.dashboard, name='notify_dashboard'),

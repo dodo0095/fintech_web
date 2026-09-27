@@ -57,10 +57,15 @@ handle @dotProbes {
     }
     respond @blocked 403
 
-    # ✅ robots.txt（維持）
+    # ✅ robots.txt（含 sitemap 位置；/sitemap.xml 本身交由後端 Django 產生）
+    # Caddyfile 雙引號字串不會把 \n 轉成換行（線上曾輸出成單行），
+    # 故用反引號多行字串；內容需頂格，否則縮排空白會被一起輸出。
     handle_path /robots.txt {
-        respond "User-agent: *\nDisallow:" 200
-        header Content-Type "text/plain"
+        header Content-Type "text/plain; charset=utf-8"
+        respond `User-agent: *
+Disallow:
+Sitemap: https://starklab.tw/sitemap.xml
+` 200
     }
 
     # 先處理靜態檔（維持順序：在 proxy 之前）

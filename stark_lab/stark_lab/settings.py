@@ -58,6 +58,9 @@ ALLOWED_HOSTS = [
 ]
 CSRF_TRUSTED_ORIGINS = ["https://starklab.tw", "https://www.starklab.tw"]
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# 對外正式網址：sitemap.xml 的 <loc>、文章頁 og:image 等需要絕對網址處使用，
+# 不依賴請求 Host（本機 127.0.0.1 測試也輸出正式網址）。
+SITE_BASE_URL = os.environ.get('SITE_BASE_URL', 'https://starklab.tw')
 #SECURE_SSL_REDIRECT = True
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = True
@@ -86,6 +89,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'rest_framework',
     'apiserver',
     'news.apps.NewsConfig',

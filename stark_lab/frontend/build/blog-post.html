@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="keywords" content="StarkLab,史塔克實驗室,機器學習,人工智慧,股票分析,量化投資,台股">
   <meta name="description" content="{{ art.abstract|striptags }}">
-  <link href="images/favicon.ico" rel="shortcut icon">
+  <link href="/static/images/favicon.ico" rel="shortcut icon">
   <title>{{ art.title }}｜StarkLab 史塔克實驗室</title>
 
   <!-- SEO：正本永遠指回主站，方格子/FB 轉貼都算主站的分數 -->
@@ -15,7 +15,7 @@
   <meta property="og:title" content="{{ art.title }}">
   <meta property="og:description" content="{{ art.abstract|striptags }}">
   <meta property="og:url" content="{{ canonical }}">
-  {% if art.title_picture %}<meta property="og:image" content="{{ art.title_picture }}">{% endif %}
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
   <meta name="twitter:card" content="summary_large_image">
 
   <script type="application/ld+json">
@@ -24,8 +24,9 @@
     "@type": "Article",
     "headline": "{{ art.title|escapejs }}",
     "description": "{{ art.abstract|striptags|escapejs }}",
-    {% if art.title_picture %}"image": "{{ art.title_picture }}",{% endif %}
-    "datePublished": "{{ art.date }}",
+    {% if og_image %}"image": "{{ og_image|escapejs }}",{% endif %}
+    {% if date_published_iso %}"datePublished": "{{ date_published_iso|escapejs }}",{% endif %}
+    {% if date_modified_iso %}"dateModified": "{{ date_modified_iso|escapejs }}",{% endif %}
     "author": { "@type": "Organization", "name": "{{ art.author_name|default:'史塔克實驗室'|escapejs }}" },
     "publisher": { "@type": "Organization", "name": "StarkLab 史塔克實驗室" },
     "mainEntityOfPage": { "@type": "WebPage", "@id": "{{ canonical }}" }

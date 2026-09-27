@@ -556,6 +556,7 @@ def monthly_performance_api(request):
 # 舊文章（content 空、只有 link）→ 302 導回原文（方格子），平滑過渡。
 # ─────────────────────────────────────────────────────────────
 from django.shortcuts import render, redirect
+from apiserver.seo import absolute_site_url, article_modified_at, article_published_at
 
 # ─────────────────────────────────────────────────────────────
 # 電子報訂閱：公開 POST /api/subscribe/  {"email": "..."}
@@ -618,6 +619,8 @@ def article_detail(request, pk, cat=1):
     is_tech = int(cat) == 2
     label = "科技分享" if is_tech else "產業時事分析"
     canonical = request.build_absolute_uri(request.path)
+    published_at = article_published_at(art)
+    modified_at = article_modified_at(art)
 
     ctx = {
         "art": art,
@@ -625,6 +628,9 @@ def article_detail(request, pk, cat=1):
         "is_tech": is_tech,
         "canonical": canonical,
         "list_url": "/botBlog.html",
+        "og_image": absolute_site_url(art.title_picture),
+        "date_published_iso": published_at.isoformat() if published_at else "",
+        "date_modified_iso": modified_at.isoformat() if modified_at else "",
     }
     return render(request, "blog-post.html", ctx)
 
