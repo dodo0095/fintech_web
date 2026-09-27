@@ -12,6 +12,7 @@ import threading
 from datetime import timedelta
 
 import pandas as pd
+from django.core.cache import cache
 from django.utils import timezone
 
 from .models import PriceCache
@@ -19,6 +20,8 @@ from .models import PriceCache
 log = logging.getLogger(__name__)
 
 CACHE_HOURS = 6
+MISS_HOURS = 6  # 查無資料的代號，這段時間內不再打 Yahoo
+MARKET_CLOSE = (14, 30)  # 台北時間；此前抓到的當日 K 棒尚未收盤
 MIN_ROWS = 30
 REQUIRED = ["open", "high", "low", "close", "volume"]
 
@@ -65,6 +68,16 @@ def _download(symbol: str) -> pd.DataFrame:
     df = df.dropna(subset=["open", "high", "low", "close"])
     df = df[(df["close"] > 0) & (df["open"] > 0)]
     df = df[~df.index.duplicated(keep="last")].sort_index()
+    return _drop_unfinished_bar(df)
+
+
+def _drop_unfinished_bar(df: pd.DataFrame, now=None) -> pd.DataFrame:
+    """盤中抓到的今日 K 棒還沒收盤，不能當成收盤價用（也不能被快取 6 小時）。"""
+    if not len(df):
+        return df
+    now = timezone.localtime(now)  # settings.TIME_ZONE = Asia/Taipei
+    if df.index[-1].date() == now.date() and (now.hour, now.minute) < MARKET_CLOSE:
+        return df.iloc[:-1]
     return df
 
 
@@ -91,8 +104,11 @@ def _from_payload(text: str) -> pd.DataFrame:
 def get_prices(symbol: str, downloader=None) -> tuple[pd.DataFrame, dict]:
     """回傳 (日線 DataFrame, 資訊 {symbol, updated_at, stale})。抓不到丟 PriceError。"""
     downloader = downloader or _download
+    miss_key = "bt:miss:" + symbol
     with _lock_for(symbol):
         row = PriceCache.objects.filter(symbol=symbol).first()
+        if row is None and cache.get(miss_key):
+            raise PriceError(f"抓不到 {symbol} 的歷史股價（Yahoo 無資料）")
         now = timezone.now()
         if row and now - row.updated_at < timedelta(hours=CACHE_HOURS):
             return _from_payload(row.payload), {"symbol": symbol, "updated_at": row.updated_at, "stale": False}
@@ -118,6 +134,7 @@ def get_prices(symbol: str, downloader=None) -> tuple[pd.DataFrame, dict]:
 
         if row:  # 重抓失敗 → 退回舊快取
             return _from_payload(row.payload), {"symbol": symbol, "updated_at": row.updated_at, "stale": True}
+        cache.set(miss_key, 1, MISS_HOURS * 3600)
         raise PriceError(f"抓不到 {symbol} 的歷史股價（Yahoo 無資料或暫時無法連線）")
 
 

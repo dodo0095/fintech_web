@@ -200,3 +200,74 @@ def test_run_backtest_too_short_range():
                                "risk": {"stop_loss": 5}})
     with pytest.raises(StrategyError):
         run_backtest(df, strat, Settings(), df.index[45], df.index[-1])
+
+
+# ---------------------------------------------------------------- 回歸：獨立審查發現的問題
+
+def test_exit_postponed_on_locked_limit_down():
+    # 第 2 天收盤觸發出場；第 3 天一字跌停賣不掉 → 第 4 天開盤必須賣（不能把訊號丟掉）
+    closes = [100, 100, 100, 90, 90, 90]
+    opens = [100, 100, 100, 90, 89, 90]
+    highs = [100, 100, 100, 90, 91, 90]
+    lows = [100, 100, 100, 90, 88, 90]
+    df = make_df(closes, opens, highs, lows)
+    e = pd.Series([True, False, False, False, False, False], index=df.index)
+    x = pd.Series([False, False, True, False, False, False], index=df.index)
+    t = simulate(df, e, x, {}, NO_COST)["trades"][0]
+    assert t["reason"] == "出場條件"
+    assert t["exit_date"] == df.index[4].strftime("%Y-%m-%d")
+    assert t["exit_price"] == 89
+
+
+def test_max_hold_days_exact():
+    df = make_df([100] * 20)
+    for n in (1, 3, 5):
+        strat = validate_strategy({"entry": {"conditions": [gt_num("close", 50)]},
+                                   "risk": {"max_hold_days": n}})
+        e, x = build_signals(df, strat)
+        t = simulate(df, e, x, strat["risk"], NO_COST)["trades"][0]
+        assert t["hold_days"] == n and t["reason"] == "持有天數到期"
+
+
+def test_forced_close_applies_slippage():
+    df = make_df([100, 100, 100, 110])
+    e = pd.Series([True, False, False, False], index=df.index)
+    x = pd.Series(False, index=df.index)
+    s = Settings(capital=100_000, fee_discount=0, slippage_pct=1)
+    t = simulate(df, e, x, {}, s)["trades"][-1]
+    assert t["reason"].startswith("未平倉")
+    assert t["exit_price"] == pytest.approx(110 * 0.99)
+
+
+def test_benchmark_not_backfilled_before_listing():
+    rng = np.random.default_rng(3)
+    df = make_df(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 800))), start="2000-01-03")
+    bench = df["close"].iloc[400:] * 0.3  # 基準從第 400 天才「上市」
+    strat = validate_strategy({"entry": {"conditions": [gt_num("close", 1)]},
+                               "risk": {"max_hold_days": 10}})
+    res = run_backtest(df, strat, Settings(), df.index[0], df.index[-1], benchmark=bench)
+    curve = res["curve"]["benchmark"]
+    assert curve[0] is None and curve[-1] is not None
+    assert res["benchmark_start"] == df.index[400].strftime("%Y-%m-%d")
+    assert res["yearly"][0]["benchmark"] is None
+    json_safe = __import__("json").dumps(res)  # 不可含 NaN
+    assert "NaN" not in json_safe
+
+
+def test_buy_hold_measured_from_capital():
+    df = make_df([100, 110, 120] * 20, opens=[95, 110, 120] * 20)
+    strat = validate_strategy({"entry": {"conditions": [gt_num("close", 1000)]},
+                               "risk": {"stop_loss": 5}})
+    res = run_backtest(df, strat, Settings(), df.index[0], df.index[-1])
+    # 首日開盤 95 買、最後收盤 120 → +26.32%
+    assert res["stats"]["buy_hold"]["total_return"] == pytest.approx((120 / 95 - 1) * 100, abs=0.01)
+    assert res["stats"]["strategy"]["total_return"] == 0
+
+
+def test_no_cash_counted_for_board_lot():
+    df = make_df([500] * 30)
+    strat = validate_strategy({"entry": {"conditions": [gt_num("close", 1)]},
+                               "risk": {"max_hold_days": 3}})
+    e, x = build_signals(df, strat)
+    res = simulate(df, e, x, strat["risk"], Settings(capital=100_000, board_lot=True))
+    assert res["trades"] == [] and res["no_cash"] > 0

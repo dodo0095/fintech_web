@@ -56,25 +56,33 @@ def run_backtest(
     dates = df.index[start_idx:]
     equity = sim["equity"]
 
-    # 買進持有（同一檔、同樣成本假設的簡化版：首日開盤買、不計後續成本）
+    cap = settings.capital
+    # 買進持有（簡化版：首日開盤買、不計成本）；以本金為共同起點
     close = df["close"].to_numpy(float)[start_idx:]
     first_open = float(df["open"].iloc[start_idx]) or close[0]
-    bh = settings.capital * close / first_open
+    bh = cap * close / first_open
 
     series = {"strategy": equity, "buy_hold": bh}
     bench_curve = None
+    bench_start = None
     if benchmark is not None and len(benchmark):
-        b = benchmark.sort_index().reindex(dates).ffill().bfill()
-        if b.notna().all() and float(b.iloc[0]) > 0:
-            bench_curve = settings.capital * b.to_numpy(float) / float(b.iloc[0])
+        # 只往後補值（ffill）；基準尚未上市的期間保持 NaN，不捏造資料
+        b = benchmark.sort_index().reindex(dates).ffill().to_numpy(float)
+        valid = np.flatnonzero(np.isfinite(b) & (b > 0))
+        if len(valid) >= MIN_BARS:
+            k0 = int(valid[0])
+            bench_curve = np.full(len(b), np.nan)
+            bench_curve[k0:] = cap * b[k0:] / b[k0]
+            bench_start = dates[k0]
             series["benchmark"] = bench_curve
 
     stats = {
-        "strategy": curve_stats(equity, dates),
-        "buy_hold": curve_stats(bh, dates),
+        "strategy": curve_stats(equity, dates, base=cap),
+        "buy_hold": curve_stats(bh, dates, base=cap),
     }
     if bench_curve is not None:
-        stats["benchmark"] = curve_stats(bench_curve, dates)
+        k0 = int(np.flatnonzero(np.isfinite(bench_curve))[0])
+        stats["benchmark"] = curve_stats(bench_curve[k0:], dates[k0:])
     stats["strategy"].update(trade_stats(sim["trades"], sim["position"]))
 
     # 曲線（抽樣）＋回撤
@@ -83,7 +91,8 @@ def run_backtest(
     drawdown = (equity / peak - 1) * 100
 
     def pts(arr, nd=0):
-        return [round(float(v), nd) for v in np.asarray(arr)[idx]]
+        # NaN → None（JSON 不接受 NaN；前端圖表視為空白）
+        return [round(float(v), nd) if np.isfinite(v) else None for v in np.asarray(arr, float)[idx]]
 
     curve = {
         "dates": [d.strftime("%Y-%m-%d") for d in dates[idx]],
@@ -113,6 +122,8 @@ def run_backtest(
         "trades": sim["trades"],
         "open_position": sim["open_position"],
         "missed_limit_up": sim["missed_limit_up"],
-        "yearly": yearly_returns(series, dates),
+        "no_cash": sim["no_cash"],
+        "benchmark_start": bench_start.strftime("%Y-%m-%d") if bench_start is not None and bench_start > dates[0] else None,
+        "yearly": yearly_returns(series, dates, base=cap),
         "description": describe_strategy(strategy),
     }

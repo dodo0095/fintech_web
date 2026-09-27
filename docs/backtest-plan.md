@@ -17,7 +17,7 @@
 | 策略範本 6 組 | `stark_lab/backtest/presets.py` |
 | 前端（主站色票、echarts） | `backtest/templates/backtest/index.html`、`frontend/build/static/backtest/` |
 | ETF 名單（原公司清單沒有 ETF） | `公司/ETF上市.csv`、`公司/ETF上櫃.csv`，`python manage.py refresh_etf_list` 更新 |
-| 測試 | `backtest/tests/test_engine.py`（pytest 14 項）、`test_api.py`（Django 15 項） |
+| 測試 | `backtest/tests/test_engine.py`（pytest 20 項）、`test_api.py`（Django 18 項） |
 
 ### 設計決策
 

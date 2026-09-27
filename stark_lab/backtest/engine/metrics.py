@@ -19,9 +19,15 @@ def _r(v, nd=2):
     return round(f, nd) if math.isfinite(f) else None
 
 
-def curve_stats(equity: np.ndarray, dates: pd.DatetimeIndex) -> dict:
-    """權益曲線的報酬／風險指標（百分比數字，例如 12.3 代表 12.3%）。"""
+def curve_stats(equity: np.ndarray, dates: pd.DatetimeIndex, base: float | None = None) -> dict:
+    """權益曲線的報酬／風險指標（百分比數字，例如 12.3 代表 12.3%）。
+
+    base：起始本金。給定時以它當第 0 點（與首日同日期），讓不同曲線的起點一致。
+    """
     eq = np.asarray(equity, dtype=float)
+    if base:
+        eq = np.concatenate([[float(base)], eq])
+        dates = dates[:1].append(dates)
     if len(eq) < 2 or not eq[0]:
         return {}
     total = eq[-1] / eq[0] - 1
@@ -79,17 +85,25 @@ def trade_stats(trades: list[dict], position: np.ndarray) -> dict:
     }
 
 
-def yearly_returns(series: dict[str, np.ndarray], dates: pd.DatetimeIndex) -> list[dict]:
-    """各年度報酬（%），series 為 {名稱: 權益或價格序列}。"""
+def yearly_returns(series: dict[str, np.ndarray], dates: pd.DatetimeIndex,
+                   base: float | None = None) -> list[dict]:
+    """各年度報酬（%），series 為 {名稱: 權益序列}；base 為起始本金（第一年的比較基準）。
+
+    序列開頭可以是 NaN（例如基準 ETF 尚未上市），該序列會從第一個有效值起算。
+    """
     df = pd.DataFrame({k: np.asarray(v, float) for k, v in series.items()}, index=dates)
     out = []
-    prev_end = df.iloc[0]
+    first_valid = df.bfill().iloc[0]
+    prev_end = pd.Series({k: (float(base) if base else first_valid[k]) for k in series})
     for year, g in df.groupby(df.index.year):
         end = g.iloc[-1]
         row = {"year": int(year)}
         for k in series:
-            base = prev_end[k]
-            row[k] = _r((end[k] / base - 1) * 100) if base and math.isfinite(base) else None
+            b0 = prev_end[k]
+            e = end[k]
+            ok = b0 and math.isfinite(b0) and math.isfinite(e)
+            row[k] = _r((e / b0 - 1) * 100) if ok else None
         out.append(row)
-        prev_end = end
+        # 尚未有值的序列維持原基準，等它出現後才開始算
+        prev_end = end.where(end.notna(), prev_end)
     return out

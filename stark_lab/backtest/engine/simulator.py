@@ -78,6 +78,8 @@ def simulate(
     peak_close = 0.0
     trades: list[dict] = []
     missed_limit = 0
+    no_cash = 0
+    pending_exit = None  # 已成立、尚未成交的出場理由
 
     equity = np.empty(n - start_idx)
     position = np.zeros(n - start_idx, dtype=np.int8)
@@ -89,7 +91,8 @@ def simulate(
         return i > 0 and h[i] == lo[i] and o[i] <= c[i - 1] * (1 - LIMIT_MOVE)
 
     def sell(i, raw_price, reason):
-        nonlocal cash, shares
+        nonlocal cash, shares, pending_exit
+        pending_exit = None
         price = raw_price * (1 - slip)
         amount = price * shares
         proceeds = amount - _fee(amount, settings) - amount * tax
@@ -119,13 +122,15 @@ def simulate(
         # ---- 1) 開盤：處理前一日收盤確認的訊號
         if i > start_idx:
             if shares:
-                reason = None
-                if ext[i - 1]:
-                    reason = "出場條件"
-                elif max_hold and (i - 1 - entry_i) >= max_hold:
-                    reason = "持有天數到期"
-                if reason and not locked_down(i):
-                    sell(i, o[i], reason)
+                # 出場理由一旦成立就保留到真的賣出為止（一字跌停賣不掉 → 順延，不是作廢）
+                if pending_exit is None:
+                    if ext[i - 1]:
+                        pending_exit = "出場條件"
+                    elif max_hold and (i - entry_i) >= max_hold:
+                        # 持有滿 N 個交易日：第 entry+N 天開盤賣出，hold_days = N
+                        pending_exit = "持有天數到期"
+                if pending_exit and not locked_down(i):
+                    sell(i, o[i], pending_exit)
             elif ent[i - 1]:
                 if locked_up(i):
                     missed_limit += 1
@@ -134,6 +139,8 @@ def simulate(
                     # 先扣手續費預留後計算可買股數
                     budget = cash - _fee(cash, settings)
                     qty = int(budget // price) // lot * lot if price > 0 else 0
+                    if qty <= 0:
+                        no_cash += 1  # 資金不足一個交易單位（整張模式常見）
                     if qty > 0:
                         amount = price * qty
                         cost = amount + _fee(amount, settings)
@@ -178,8 +185,8 @@ def simulate(
     open_position = None
     if shares:
         last = n - 1
-        # 以最後收盤計算（含假設賣出成本），標示未平倉
-        sell(last, c[last] / (1 - slip) if slip < 1 else c[last], "未平倉（以最後收盤計）")
+        # 以最後收盤價假設賣出（與其他出場一致：含滑價、手續費、證交稅），標示未平倉
+        sell(last, c[last], "未平倉（以最後收盤計）")
         open_position = trades[-1]
         equity[-1] = cash
 
@@ -189,4 +196,5 @@ def simulate(
         "trades": trades,
         "open_position": open_position,
         "missed_limit_up": missed_limit,
+        "no_cash": no_cash,
     }

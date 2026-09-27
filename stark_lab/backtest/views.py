@@ -49,9 +49,18 @@ def _err(msg: str, status: int = 400) -> JsonResponse:
 
 
 def _client_ip(request: HttpRequest) -> str:
-    # Caddy 會把真實來源 IP 放進 X-Forwarded-For（不信任外部傳入的值）
+    """真實來源 IP。
+
+    waitress 只聽 127.0.0.1，前面是 Caddy：只有來源是本機代理時才看 X-Forwarded-For，
+    且取「最後一個」值（由 Caddy 加上的那個，使用者無法偽造）。
+    """
+    remote = request.META.get("REMOTE_ADDR", "") or "unknown"
     xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-    return (xff.split(",")[0].strip() if xff else "") or request.META.get("REMOTE_ADDR", "") or "unknown"
+    if xff and remote in ("127.0.0.1", "::1"):
+        last = xff.split(",")[-1].strip()
+        if last:
+            return last
+    return remote
 
 
 def _rate_limited(request: HttpRequest) -> bool:
@@ -156,7 +165,8 @@ def api_run(request: HttpRequest):
 
     if _rate_limited(request):
         return _err("回測次數太頻繁，請稍後再試", 429)
-    if not _slots.acquire(timeout=20):
+    # 不要讓請求排隊佔住 waitress thread（全站只有 12 條），滿了就立刻回 503
+    if not _slots.acquire(timeout=1):
         return _err("目前使用人數較多，請稍後再試", 503)
     try:
         try:
@@ -195,6 +205,12 @@ def api_run(request: HttpRequest):
         notes.append("行情暫時無法更新，本次使用較舊的快取資料")
     if result.get("missed_limit_up"):
         notes.append(f"有 {result['missed_limit_up']} 次訊號因一字漲停買不到而略過")
+    if result.get("no_cash") and not result["trades"]:
+        notes.append("資金不足以買進一個交易單位（整張 = 1000 股），請提高初始資金或改用零股")
+    elif result.get("no_cash"):
+        notes.append(f"有 {result['no_cash']} 次訊號因資金不足一個交易單位而略過")
+    if result.get("benchmark_start"):
+        notes.append(f"0050 於 {result['benchmark_start']} 才有資料，大盤比較從該日開始")
 
     result.update({
         "ok": True,

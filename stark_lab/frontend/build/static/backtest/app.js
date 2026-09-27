@@ -250,6 +250,7 @@
     }
     input.addEventListener("input", () => {
       state.symbol = input.value.trim();
+      state.stockLabel = state.symbol;  // 沒從清單選時，分享連結的標籤要跟著變
       picked.textContent = "";
       picked.className = "hint";
       clearTimeout(timer);
@@ -302,7 +303,7 @@
       settings: {
         capital: Number($("#capital").value) || 1000000,
         fee_discount: Number($("#fee_discount").value),
-        slippage_pct: Number($("#slippage_pct").value),
+        slippage_pct: $("#slippage_pct").value === "" ? 0.1 : Number($("#slippage_pct").value),
         board_lot: $("#board_lot").value === "1",
       },
     };
@@ -485,7 +486,7 @@
     eq.setOption({
       animation: false,
       textStyle: { fontFamily: "Noto Sans TC, sans-serif" },
-      legend: { top: 0, data: series.map((x) => x.name) },
+      legend: { top: 0, type: "scroll", data: series.map((x) => x.name) },
       tooltip: {
         trigger: "axis",
         valueFormatter: (v) => (v === null || v === undefined ? "—" : Math.abs(v) < 101 && v <= 0 ? v.toFixed(2) + "%" : money(v)),
@@ -511,7 +512,7 @@
     pc.setOption({
       animation: false,
       textStyle: { fontFamily: "Noto Sans TC, sans-serif" },
-      legend: { top: 0, data: ["收盤價", "買進", "賣出"] },
+      legend: { top: 0, type: "scroll", data: ["收盤價", "買進", "賣出"] },
       tooltip: {
         trigger: "item",
         formatter: (p) => {

@@ -34,26 +34,29 @@ foreach ($f in $protect) {
 
 # 2) Pull. If git cannot delete a running/locked exe, answer "no" to the
 #    retry prompt instead of hanging (Git for Windows honours GIT_ASK_YESNO).
+#    git writes normal progress to stderr; with EAP=Stop, PowerShell 5.1 can turn
+#    that into a terminating error, so relax it for the git call only.
 $env:GIT_ASK_YESNO = "false"
+$code = 1
+$missing = @()
 Push-Location $repo
 try {
+    $ErrorActionPreference = "Continue"
     git pull $Remote $Branch
     $code = $LASTEXITCODE
 } finally {
     Pop-Location
-}
-
-# 3) Restore anything that disappeared
-$missing = @()
-foreach ($f in $protect) {
-    $dst = Join-Path $repo $f
-    $bak = Join-Path $backupDir $f
-    if (-not (Test-Path $dst)) {
-        if (Test-Path $bak) {
-            Copy-Item $bak $dst -Force
-            Write-Host "[restore] $f restored from backup"
-        } else {
-            $missing += $f
+    # 3) Restore anything that disappeared - in finally so it ALWAYS runs
+    foreach ($f in $protect) {
+        $dst = Join-Path $repo $f
+        $bak = Join-Path $backupDir $f
+        if (-not (Test-Path $dst)) {
+            if (Test-Path $bak) {
+                Copy-Item $bak $dst -Force
+                Write-Host "[restore] $f restored from backup"
+            } else {
+                $missing += $f
+            }
         }
     }
 }

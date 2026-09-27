@@ -146,6 +146,34 @@ class BacktestApiTests(TestCase):
         self.assertEqual(r.status_code, 502)
         self.assertIn("抓不到", r.json()["error"])
 
+    def test_unknown_code_negative_cached(self, dl):
+        dl.side_effect = lambda s: pd.DataFrame()
+        self.post({"symbol": "9999", "strategy": MA_CROSS})
+        n = dl.call_count
+        r = self.post({"symbol": "9999", "strategy": MA_CROSS})
+        self.assertEqual(r.status_code, 502)
+        self.assertEqual(dl.call_count, n)  # 第二次不再打 Yahoo
+
+    def test_client_ip_uses_proxy_appended_value(self, _dl):
+        from django.test import RequestFactory
+        rf = RequestFactory()
+        req = rf.get("/", HTTP_X_FORWARDED_FOR="6.6.6.6, 1.2.3.4", REMOTE_ADDR="127.0.0.1")
+        self.assertEqual(views._client_ip(req), "1.2.3.4")
+        # 不是從本機代理來的請求，不信任 XFF
+        req = rf.get("/", HTTP_X_FORWARDED_FOR="6.6.6.6", REMOTE_ADDR="8.8.8.8")
+        self.assertEqual(views._client_ip(req), "8.8.8.8")
+
+    def test_unfinished_intraday_bar_dropped(self, _dl):
+        import datetime as dt
+        from zoneinfo import ZoneInfo
+        df = fake_df(n=50)
+        tw = ZoneInfo("Asia/Taipei")
+        last = df.index[-1]
+        during = dt.datetime(last.year, last.month, last.day, 10, 0, tzinfo=tw)
+        after = dt.datetime(last.year, last.month, last.day, 15, 0, tzinfo=tw)
+        self.assertEqual(len(prices._drop_unfinished_bar(df, during)), 49)
+        self.assertEqual(len(prices._drop_unfinished_bar(df, after)), 50)
+
     def test_etf_detected(self, _dl):
         d = self.post({"symbol": "0050", "strategy": MA_CROSS}).json()
         self.assertTrue(d["stock"]["is_etf"])
