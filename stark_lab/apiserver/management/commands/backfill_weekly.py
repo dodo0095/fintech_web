@@ -10,6 +10,7 @@
     python manage.py backfill_weekly --dir "C:\\...\\finanical_Column\\articles"
     python manage.py backfill_weekly --dry-run          # 只列出不寫入
     python manage.py backfill_weekly --force            # 已存在也重新建立
+    python manage.py backfill_weekly --update           # 新文章上站 + 已存在但 Word/config 有改過的就地更新
 """
 import os
 import re
@@ -41,6 +42,21 @@ def _md_h1(folder):
     return ''
 
 
+def _source_mtime(docx_path):
+    """週報來源最後修改時間（docx 與同資料夾 config.yaml 取較新者），截到分鐘以對齊 updated 欄位精度。"""
+    paths = [docx_path, os.path.join(os.path.dirname(docx_path), 'config.yaml')]
+    mtimes = [os.path.getmtime(p) for p in paths if os.path.isfile(p)]
+    return datetime.datetime.fromtimestamp(max(mtimes)).replace(second=0, microsecond=0)
+
+
+def _parse_updated(text):
+    """article.updated 欄位（'%Y-%m-%d %H:%M'）轉 datetime；空值或格式錯回 None。"""
+    try:
+        return datetime.datetime.strptime((text or '').strip(), '%Y-%m-%d %H:%M')
+    except ValueError:
+        return None
+
+
 def _week_from_folder(folder):
     """從資料夾名 2026-W14 取 (year, week)。"""
     m = re.search(r'(\d{4})-W(\d{1,2})', os.path.basename(folder))
@@ -65,6 +81,8 @@ class Command(BaseCommand):
                             help='週報 articles 根目錄；預設推導 ../../finanical_Column/articles')
         parser.add_argument('--dry-run', action='store_true', help='只列出，不寫入')
         parser.add_argument('--force', action='store_true', help='已存在同檔名也重新建立')
+        parser.add_argument('--update', action='store_true',
+                            help='已存在的文章若 Word/config.yaml 在上次上站後有修改，就地更新（不重複建立）')
 
     def _default_dir(self):
         from django.conf import settings
@@ -96,16 +114,23 @@ class Command(BaseCommand):
 
         self.stdout.write("找到 %d 篇週報 Word\n" % len(docx_paths))
 
-        created, skipped, failed = 0, 0, 0
+        created, updated, skipped, failed = 0, 0, 0, 0
         for path in docx_paths:
             fname = os.path.basename(path)
             folder = os.path.dirname(path)
 
-            # 冪等：同檔名已上過就跳過
-            if not opts['force'] and article_1.objects.filter(source_docx=fname).exists():
-                self.stdout.write("  [skip] 已存在：%s" % fname)
-                skipped += 1
-                continue
+            # 冪等：同檔名已上過就跳過；--update 時若來源較新則就地更新
+            update_id = 0
+            if not opts['force']:
+                existing = article_1.objects.filter(source_docx=fname).order_by('-id').first()
+                if existing:
+                    last = _parse_updated(existing.updated)
+                    if opts['update'] and (last is None or _source_mtime(path) > last):
+                        update_id = existing.id
+                    else:
+                        self.stdout.write("  [skip] 已存在且未修改：%s" % fname)
+                        skipped += 1
+                        continue
 
             # 標題/日期來源鏈：config.yaml → weekly-report*.md 的 H1 → 由週次生成
             title = date = abstract = ''
@@ -129,7 +154,8 @@ class Command(BaseCommand):
                 date = _iso_friday(year, week)
 
             if opts['dry_run']:
-                self.stdout.write("  [dry] %s  →  標題「%s」 日期 %s" % (fname, title or '(自動)', date or '(今天)'))
+                self.stdout.write("  [dry] %s %s →  標題「%s」 日期 %s" % (
+                    '更新' if update_id else '新增', fname, title or '(自動)', date or '(今天)'))
                 continue
 
             try:
@@ -137,16 +163,20 @@ class Command(BaseCommand):
                     path, title=title, date=date, abstract=abstract,
                     author='史塔克實驗室',
                 )
-                obj, _action = save_article(1, fields)
-                created += 1
+                obj, action = save_article(1, fields, update_id=update_id)
+                if update_id:
+                    updated += 1
+                else:
+                    created += 1
                 self.stdout.write(self.style.SUCCESS(
-                    "  [OK] %s → https://starklab.tw%s（%d 圖）「%s」"
-                    % (fname, blog_path(1, obj.id), n_img, fields['title'])
+                    "  [OK-%s] %s → https://starklab.tw%s（%d 圖）「%s」"
+                    % (action, fname, blog_path(1, obj.id), n_img, fields['title'])
                 ))
             except Exception as e:
                 failed += 1
                 self.stdout.write(self.style.ERROR("  [FAIL] %s：%s" % (fname, e)))
 
         self.stdout.write(self.style.SUCCESS(
-            "\n完成：新增 %d，跳過 %d，失敗 %d（共 %d）" % (created, skipped, failed, len(docx_paths))
+            "\n完成：新增 %d，更新 %d，跳過 %d，失敗 %d（共 %d）"
+            % (created, updated, skipped, failed, len(docx_paths))
         ))
