@@ -4,13 +4,16 @@
 會讀每週資料夾的 config.yaml 取 title / subtitle / publish_date：
   - 文章標題 = subtitle（較有吸引力的那句）> title > docx 第一標題
   - 日期     = publish_date
+  - 摘要     = docx 正文第一個有意義段落（截 150 字），即 meta description 來源
 以檔名（source_docx）做冪等，重複執行不會建立重複文章（除非 --force）。
 
 用法：
     python manage.py backfill_weekly --dir "C:\\...\\finanical_Column\\articles"
     python manage.py backfill_weekly --dry-run          # 只列出不寫入
-    python manage.py backfill_weekly --force            # 已存在也重新建立
+    python manage.py backfill_weekly --force            # 已存在也重新建立（會產生重複文章！）
     python manage.py backfill_weekly --update           # 新文章上站 + 已存在但 Word/config 有改過的就地更新
+    python manage.py backfill_weekly --rebuild          # 新文章上站 + 已存在的一律就地重轉（套用新轉檔格式）
+    python manage.py backfill_weekly --rebuild --dry-run
 """
 import os
 import re
@@ -80,9 +83,15 @@ class Command(BaseCommand):
         parser.add_argument('--dir', dest='base_dir', default='',
                             help='週報 articles 根目錄；預設推導 ../../finanical_Column/articles')
         parser.add_argument('--dry-run', action='store_true', help='只列出，不寫入')
-        parser.add_argument('--force', action='store_true', help='已存在同檔名也重新建立')
         parser.add_argument('--update', action='store_true',
                             help='已存在的文章若 Word/config.yaml 在上次上站後有修改，就地更新（不重複建立）')
+        rebuild_or_force = parser.add_mutually_exclusive_group()
+        rebuild_or_force.add_argument(
+            '--rebuild', action='store_true',
+            help='已存在的文章一律就地重新轉檔更新（不看修改時間、不重複建立）；不存在的照常新增')
+        rebuild_or_force.add_argument(
+            '--force', action='store_true',
+            help='不檢查是否已存在，一律新增（注意：會建立重複文章；要更新舊文請用 --rebuild）')
 
     def _default_dir(self):
         from django.conf import settings
@@ -119,13 +128,15 @@ class Command(BaseCommand):
             fname = os.path.basename(path)
             folder = os.path.dirname(path)
 
-            # 冪等：同檔名已上過就跳過；--update 時若來源較新則就地更新
+            # 冪等：同檔名已上過就跳過；--rebuild 一律就地更新；--update 時若來源較新則就地更新
             update_id = 0
             if not opts['force']:
                 existing = article_1.objects.filter(source_docx=fname).order_by('-id').first()
                 if existing:
                     last = _parse_updated(existing.updated)
-                    if opts['update'] and (last is None or _source_mtime(path) > last):
+                    if opts['rebuild']:
+                        update_id = existing.id
+                    elif opts['update'] and (last is None or _source_mtime(path) > last):
                         update_id = existing.id
                     else:
                         self.stdout.write("  [skip] 已存在且未修改：%s" % fname)
@@ -133,7 +144,7 @@ class Command(BaseCommand):
                         continue
 
             # 標題/日期來源鏈：config.yaml → weekly-report*.md 的 H1 → 由週次生成
-            title = date = abstract = ''
+            title = date = ''
             cfg_path = os.path.join(folder, 'config.yaml')
             if yaml and os.path.isfile(cfg_path):
                 try:
@@ -141,7 +152,6 @@ class Command(BaseCommand):
                         cfg = yaml.safe_load(f) or {}
                     title = (cfg.get('subtitle') or cfg.get('title') or '').strip()
                     date = str(cfg.get('publish_date') or '').strip()
-                    abstract = (cfg.get('subtitle') or '').strip()
                 except Exception as e:
                     self.stdout.write(self.style.WARNING("  config.yaml 解析失敗(%s)：%s" % (fname, e)))
 
@@ -160,7 +170,7 @@ class Command(BaseCommand):
 
             try:
                 fields, n_img, _ = docx_to_fields(
-                    path, title=title, date=date, abstract=abstract,
+                    path, title=title, date=date,
                     author='史塔克實驗室',
                 )
                 obj, action = save_article(1, fields, update_id=update_id)

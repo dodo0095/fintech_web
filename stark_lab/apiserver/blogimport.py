@@ -15,12 +15,58 @@ from django.conf import settings
 from apiserver.models import article_1, article_2
 
 
+# 自動摘要（同時是 meta description 來源）：取正文第一個「有意義」段落。
+# 週報開頭常有副標（約 20 字）、「台股週報 2026 W14｜日期」「平台｜發布日期｜作者」
+# 等 30~40 字的資訊行，門檻設 50 字才能略過它們、落到真正的導言段。
+ABSTRACT_MIN_PARAGRAPH_CHARS = 50
+ABSTRACT_MAX_CHARS = 150
+ELLIPSIS = '…'
+HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+
+
+def truncate_text(text, max_chars=ABSTRACT_MAX_CHARS):
+    """超過 max_chars 就截斷並補「…」。"""
+    text = (text or '').strip()
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars].rstrip() + ELLIPSIS
+
+
+def extract_abstract(soup, min_chars=ABSTRACT_MIN_PARAGRAPH_CHARS, max_chars=ABSTRACT_MAX_CHARS):
+    """取第一個字數 >= min_chars 的段落純文字當摘要；都太短則退回第一個非空段落。"""
+    fallback = ''
+    for p in soup.find_all('p'):
+        text = ' '.join(p.get_text().split())
+        if not text:
+            continue
+        if len(text) >= min_chars:
+            return truncate_text(text, max_chars)
+        fallback = fallback or text
+    return truncate_text(fallback, max_chars)
+
+
+def demote_headings(soup):
+    """正文標題整體降一級（h1→h2 … h5→h6，h6 維持），頁面 h1 只留給樣板大標題。"""
+    for heading in soup.find_all(HEADING_TAGS):
+        level = int(heading.name[1])
+        heading.name = 'h%d' % min(level + 1, 6)
+
+
+def fill_missing_alts(soup, title):
+    """img 缺 alt 或 alt 空白時補「{標題} 圖N」（N 為正文圖片序號）；既有 alt（含 Word 圖片描述）保留。"""
+    for index, img in enumerate(soup.find_all('img'), start=1):
+        if not (img.get('alt') or '').strip():
+            img['alt'] = '%s 圖%d' % (title, index)
+
+
 def docx_to_fields(docx_path, title='', author='史塔克實驗室', author_pic='',
                    cover='', abstract='', date='', link=''):
     """把 .docx 轉成文章欄位 dict。
 
     圖片存到 MEDIA_ROOT/blog/<時間戳>/imgN.ext，正文 img src 改寫成 /media/...。
-    未指定的欄位會自動推導（標題→第一個 h1/h2→檔名；摘要→第一段；封面→第一張圖；日期→今天）。
+    未指定的欄位會自動推導（標題→第一個 h1/h2→檔名；摘要→第一個有意義段落（截 150 字）；
+    封面→第一張圖；日期→今天）。
+    SEO 處理：正文標題降一級（不含 h1）、每張圖都有 alt（Word 圖片描述優先）。
 
     回傳 (fields: dict, image_count: int)。
     """
@@ -72,14 +118,11 @@ def docx_to_fields(docx_path, title='', author='史塔克實驗室', author_pic=
         if first_img and first_img.get('src'):
             cover = first_img['src']
 
-    # 摘要：傳入 > 第一段有字的文字（截 100 字）
-    abstract = (abstract or '').strip()
-    if not abstract:
-        for p in soup.find_all('p'):
-            txt = p.get_text(strip=True)
-            if txt:
-                abstract = txt[:100]
-                break
+    # 摘要：傳入 > 第一個有意義段落（截 150 字）
+    abstract = (abstract or '').strip() or extract_abstract(soup)
+
+    demote_headings(soup)
+    fill_missing_alts(soup, title)
 
     content_html = str(soup).strip()
     date = (date or '').strip() or datetime.date.today().strftime('%Y-%m-%d')

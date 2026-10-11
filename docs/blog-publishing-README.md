@@ -62,9 +62,9 @@ cd "C:/Users/Bandai/Desktop/ALL PROJECT/fintech_web/stark_lab"
 |---------|---------|
 | 標題 `title` | `config.yaml` 的 `subtitle` → `title` → `weekly-report*.md` 第一個 H1（vocus 版優先）→ `台股週報｜YYYY-Wnn` |
 | 日期 `date` | `config.yaml` 的 `publish_date` → 該 ISO 週的週五 |
-| 摘要 `abstract` | `config.yaml` 的 `subtitle` → Word 第一段文字（取前 100 字） |
+| 摘要 `abstract`（= meta description） | Word 正文第一個 ≥ 50 字的段落（去 HTML，超過 150 字截斷並加「…」；全部都太短就用第一段非空文字）。`config.yaml` 的 `subtitle` **不再**當摘要（太短） |
 | 封面 `title_picture` | Word 裡的第一張圖（沒有圖時，前端顯示品牌預設圖） |
-| 正文 `content` | mammoth 轉出來的 HTML；如果開頭標題跟文章標題相同會拿掉，避免重複 |
+| 正文 `content` | mammoth 轉出來的 HTML；如果開頭標題跟文章標題相同會拿掉，避免重複。標題整體降一級（Word「標題 1」→ `<h2>`…，`h6` 維持），頁面 `<h1>` 只留給模板大標題；每張圖都有 `alt`（Word 圖片「替代文字」優先，否則「{文章標題} 圖N」） |
 | 作者 | 固定為「史塔克實驗室」 |
 | `source_docx` | Word 檔名，**用來判斷是否匯入過（冪等 key）** |
 
@@ -82,12 +82,25 @@ python manage.py publish_docx "檔案.docx" --update 12   # 覆蓋 id=12 的舊�
 
 ## 5. 修改已經上站的週報
 
-`backfill_weekly` 用檔名判斷是否匯入過，所以 **Word 內容改了，再跑一次也不會更新**。修改方法：
+`backfill_weekly` 用檔名（`source_docx`）判斷是否匯入過，預設已匯入的會跳過。要更新已上站的文章：
 
-1. 用 `publish_docx "那份.docx" --update <文章id>` 覆蓋（推薦）；或
-2. 到 Django admin（`/admin/`）直接編輯該篇文章。
+| 指令 | 已存在的文章 | 不存在的文章 |
+|------|------------|------------|
+| `backfill_weekly`（預設） | 跳過 | 新增 |
+| `backfill_weekly --update`（`更新週報文章.bat` 用這個） | Word / `config.yaml` 修改時間晚於上次上站才就地更新 | 新增 |
+| `backfill_weekly --rebuild` | **一律就地重新轉檔更新**（不看修改時間，文章 id 不變） | 新增 |
+| `backfill_weekly --force` | ⚠️ **新增一篇重複文章**（不會更新原本那篇） | 新增 |
 
-> ⚠️ 不要用 `--force`，它會**新增一篇重複的文章**，不會更新原本那篇。
+- 轉檔規則改版（例如 SEO 調整：標題降級、圖片 alt、摘要長度）後，要把新格式套到所有舊週報，用 `--rebuild`：
+
+```bash
+"C:/Users/Bandai/anaconda3/python.exe" manage.py backfill_weekly --rebuild --dry-run   # 先預覽，列出「[dry] 更新 / 新增」
+"C:/Users/Bandai/anaconda3/python.exe" manage.py backfill_weekly --rebuild
+```
+
+- `--rebuild` 與 `--force` 不能同時使用；`--rebuild` 可與 `--dry-run` 並用。
+- 單篇也可以用 `publish_docx "那份.docx" --update <文章id>` 覆蓋，或到 Django admin（`/admin/`）直接編輯。
+- 每次重新轉檔都會把圖片存到新的 `media/blog/<時間戳>/`，舊資料夾不會自動刪除。
 
 ## 6. ⚠️ 本機 vs 正式站
 
@@ -110,7 +123,7 @@ python manage.py migrate                    # 需要 migration 0014（content/sl
 | 狀況 | 原因 / 處理 |
 |------|------------|
 | `找不到週報 Word` | 檔名必須是 `*台股週報_方格子專欄.docx`，並且放在 `articles/<週次>/` 底下 |
-| 某一週被 `[skip]` | 這週已經匯入過；要更新內容請看第 5 節 |
+| 某一週被 `[skip]` | 這週已經匯入過（或 `--update` 判斷來源沒改過）；要強制更新用 `--rebuild`，見第 5 節 |
 | 標題不理想 | 改 `config.yaml` 的 `subtitle`（最優先）後重新上稿，或到 admin 修改 |
 | `/blog/<id>/` 出現 404 | 檢查 Caddyfile 的 `@dirScan` 規則有沒有誤擋 `/blog`（commit `78e1ce9` 修過一次） |
 | Word 暫存檔 `~$xxx.docx` | 會自動略過 |
@@ -124,6 +137,7 @@ python manage.py migrate                    # 需要 migration 0014（content/sl
 | 網域 | sitemap 與文章頁 `og:image` 一律輸出 `settings.SITE_BASE_URL`（預設 `https://starklab.tw`，可用環境變數 `SITE_BASE_URL` 覆寫），本機測試也會顯示正式網址，屬正常。 |
 | robots.txt | 正式站實際由 **Caddyfile** 的 `starklab.tw` 區塊回應（含 `Sitemap: https://starklab.tw/sitemap.xml`）；Django 的 `/robots.txt` 只在沒經過 Caddy 時生效，兩邊內容請同步。 |
 | 文章頁 | `og:image`、JSON-LD `image` 為絕對網址；JSON-LD 有 `datePublished`／`dateModified`（ISO 8601，+08:00）。 |
+| 正文結構 | 全頁只有模板大標題 1 個 `<h1>`（正文標題上稿時自動降一級）；正文圖片都有 `alt`；meta description 取自摘要（正文第一個有意義段落，≤150 字＋「…」）。舊文章要套用請跑 `backfill_weekly --rebuild`。 |
 
 **上線步驟**
 
