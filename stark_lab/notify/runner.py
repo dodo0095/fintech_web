@@ -82,11 +82,12 @@ def run_market(market: str) -> str:
             logger.warning("%s 今日未開盤/資料過舊，僅列價格不判定訊號", t.symbol)
             continue
 
-        # 盤整過濾（A）：開關與閾值自 settings 讀取後傳入，indicators.py 保持無 Django 相依。
+        # 盤整過濾（A）：開關、閾值與模式自 settings 讀取後傳入，indicators.py 保持無 Django 相依。
         sigs = indicators.evaluate(
             df,
             ranging_filter=settings.RANGING_FILTER_ENABLED,
             adx_threshold=settings.ADX_RANGING_THRESHOLD,
+            ranging_mode=settings.RANGING_FILTER_MODE,
         )
         # L0 全域指標開關：只保留啟用清單內的指標
         sigs = [s for s in sigs if s.indicator in settings.ENABLED_INDICATORS]
@@ -111,7 +112,10 @@ def run_market(market: str) -> str:
             has_bull = any(s.direction == C.BULLISH for s in new_sigs)
             has_bear = any(s.direction == C.BEARISH for s in new_sigs)
             dir_key = "mixed" if has_bull and has_bear else ("bull" if has_bull else "bear")
-            signaled.append((t.display_name, C.SUMMARY_DIR[dir_key]))
+            direction = C.SUMMARY_DIR[dir_key]
+            if all(s.ranging for s in new_sigs):
+                direction += C.SUMMARY_RANGING_SUFFIX
+            signaled.append((t.display_name, direction))
 
     parts = [_build_title()]
     price_block = messaging.build_price_block(price_rows)

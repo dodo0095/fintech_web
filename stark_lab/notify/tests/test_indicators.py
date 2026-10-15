@@ -179,9 +179,9 @@ def test_adx_none_on_perfectly_flat_no_range():
     assert compute_adx(df) is None
 
 
-# --- A. 盤整過濾：盤整時壓制交叉型、保留均值回歸型 ---
+# --- A. 盤整過濾：suppress 模式壓制交叉型、保留均值回歸型 ---
 def test_ranging_filter_suppresses_trend_keeps_mean_reversion():
-    """盤整資料 + 人為交叉：交叉型（ema）被過濾、均值回歸型（bias）保留。"""
+    """suppress 模式＋盤整資料：交叉型（ema）被過濾、均值回歸型（bias）保留。"""
     df = _df_from_close(_ranging_series(63))
     # 確認此段確為盤整（ADX < 閾值）
     assert compute_adx(df) < C.ADX_RANGING_THRESHOLD
@@ -191,7 +191,10 @@ def test_ranging_filter_suppresses_trend_keeps_mean_reversion():
     assert any(i in TREND for i, _ in base)
     assert any(i in MEAN_REVERSION for i, _ in base)
 
-    filtered = {(s.indicator, s.direction) for s in evaluate(df, ranging_filter=True)}
+    filtered = {
+        (s.indicator, s.direction)
+        for s in evaluate(df, ranging_filter=True, ranging_mode="suppress")
+    }
     # 過濾後：交叉型全數消失、均值回歸型保留
     assert not any(i in TREND for i, _ in filtered)
     assert {(i, d) for i, d in base if i in MEAN_REVERSION} <= filtered
@@ -211,3 +214,38 @@ def test_ranging_filter_disabled_keeps_everything():
     df = _df_from_close(_ranging_series(63))
     sigs = {(s.indicator, s.direction) for s in evaluate(df, ranging_filter=False)}
     assert any(i in TREND for i, _ in sigs)
+
+
+# --- A. 盤整過濾：tag 模式（預設）保留交叉型但標記 ranging ---
+def test_ranging_tag_mode_keeps_trend_signals_marked():
+    """tag 模式＋盤整資料：交叉型訊號仍在且 ranging=True；均值回歸型 ranging=False。"""
+    df = _df_from_close(_ranging_series(63))
+    assert compute_adx(df) < C.ADX_RANGING_THRESHOLD
+
+    base = evaluate(df, ranging_filter=False)
+    tagged = evaluate(df, ranging_filter=True, ranging_mode="tag")
+    # 訊號數量與內容不變（detail 不改），只多了 ranging 標記
+    assert [(s.indicator, s.direction, s.detail) for s in tagged] == [
+        (s.indicator, s.direction, s.detail) for s in base
+    ]
+    trend = [s for s in tagged if s.indicator in TREND]
+    mean_rev = [s for s in tagged if s.indicator in MEAN_REVERSION]
+    assert trend and mean_rev
+    assert all(s.ranging for s in trend)
+    assert not any(s.ranging for s in mean_rev)
+
+
+def test_ranging_tag_is_default_mode():
+    """未指定 ranging_mode 時預設為 tag：盤整資料的交叉型訊號保留並標記。"""
+    df = _df_from_close(_ranging_series(63))
+    sigs = evaluate(df)
+    assert any(s.indicator in TREND and s.ranging for s in sigs)
+
+
+def test_trend_data_not_tagged_in_tag_mode():
+    """趨勢資料（ADX 高）：tag 模式下交叉型訊號不被標記。"""
+    df = _df_from_close([100] * 40 + [130])
+    assert compute_adx(df) >= C.ADX_RANGING_THRESHOLD
+    sigs = evaluate(df, ranging_filter=True, ranging_mode="tag")
+    assert any(s.indicator in TREND for s in sigs)
+    assert not any(s.ranging for s in sigs)

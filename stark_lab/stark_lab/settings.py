@@ -16,6 +16,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 # 指標全集（供 ENABLED_INDICATORS 預設用）；constants 為純資料模組、無 Django 相依，import 安全。
 from notify.constants import INDICATORS as _ALL_INDICATORS
+from notify.constants import RANGING_MODES as _RANGING_MODES
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -206,10 +207,16 @@ ENABLED_INDICATORS = (
     if _enabled_raw
     else list(_ALL_INDICATORS)
 )
-# 盤整過濾（A）：ADX < 閾值（盤整）時壓制交叉型指標（ma/ema/macd/kd/tower），
-# 保留均值回歸型（rsi/bias/bollinger）；ADX 無法計算時自動安全降級（不過濾）。
+# 盤整過濾（A）：ADX < 閾值（盤整）時處理交叉型指標（ma/ema/macd/kd/tower），
+# 均值回歸型（rsi/bias/bollinger）不受影響；ADX 無法計算時自動安全降級（不判盤整）。
+# ENABLED=false → 完全不判盤整（原始行為）。
 RANGING_FILTER_ENABLED = _env_bool("RANGING_FILTER_ENABLED", default=True)
 ADX_RANGING_THRESHOLD = float(os.environ.get("ADX_RANGING_THRESHOLD", "25"))
+# 盤整處理模式：tag=保留並標註「盤整中・僅供參考」（預設）；suppress=直接刪除交叉型訊號。
+# 非法值回落 tag。
+RANGING_FILTER_MODE = os.environ.get("RANGING_FILTER_MODE", "tag").strip().lower()
+if RANGING_FILTER_MODE not in _RANGING_MODES:
+    RANGING_FILTER_MODE = "tag"
 # true=只寫 log 不實送（驗證用）
 DRY_RUN = _env_bool("DRY_RUN", default=False)
 # Discord 推播（唯一通報線）：頻道開關＋Webhook 網址（機密，勿硬編碼）

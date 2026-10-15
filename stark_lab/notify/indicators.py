@@ -5,7 +5,7 @@
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import pandas as pd
@@ -18,6 +18,8 @@ class Signal:
     indicator: str
     direction: str
     detail: str
+    # 盤整（ADX < 閾值）時被降級標註的交叉/趨勢型訊號；訊息端據此加註「僅供參考」
+    ranging: bool = False
 
 
 def _ema(series: pd.Series, span: int) -> pd.Series:
@@ -86,15 +88,21 @@ def evaluate(
     df: pd.DataFrame,
     ranging_filter: bool = True,
     adx_threshold: float = C.ADX_RANGING_THRESHOLD,
+    ranging_mode: str = C.RANGING_MODE_TAG,
 ) -> list[Signal]:
     """回傳本次觸發的訊號列表。
 
     盤整過濾（A）：當 `ranging_filter=True` 且可算出 ADX 且 ADX < `adx_threshold`（盤整、
-    無趨勢）時，壓制交叉/趨勢型指標（C.TREND_INDICATORS：ma/ema/macd/kd/tower），
-    保留均值回歸型（rsi/bias/bollinger）。ADX 無法計算（資料不足）時不啟用過濾、回傳全部。
+    無趨勢）時，依 `ranging_mode` 處理交叉/趨勢型指標（C.TREND_INDICATORS：
+    ma/ema/macd/kd/tower）：
+    - `"tag"`（預設）：保留訊號，但標記 `ranging=True`（detail 不變），由訊息端加註僅供參考。
+    - `"suppress"`：直接刪除這些訊號。
+    均值回歸型（rsi/bias/bollinger）一律保留且不標記。ADX 無法計算（資料不足）時不判盤整。
 
-    本函式不依賴 Django settings，可獨立測試；開關/閾值由呼叫端（runner）自 settings 傳入。
+    本函式不依賴 Django settings，可獨立測試；開關/閾值/模式由呼叫端（runner）自 settings 傳入。
     """
+    if ranging_mode not in C.RANGING_MODES:
+        raise ValueError(f"ranging_mode 須為 {sorted(C.RANGING_MODES)}，收到 {ranging_mode!r}")
     close = df["close"]
     high = df["high"]
     low = df["low"]
@@ -198,11 +206,17 @@ def evaluate(
             elif states[-1] == "black":
                 signals.append(Signal("tower", C.BEARISH, f"翻黑 收盤 {closes[-1]:.2f}"))
 
-    # --- A. 盤整過濾（ADX trend filter）：盤整時壓制交叉型、保留均值回歸型 ---
+    # --- A. 盤整過濾（ADX trend filter）：盤整時標註（或壓制）交叉型、保留均值回歸型 ---
     if ranging_filter:
         adx = compute_adx(df, C.ADX_PERIOD)
         # ADX 可算出且低於閾值 → 盤整；ADX 為 None（資料不足）則安全降級、不過濾。
         if adx is not None and adx < adx_threshold:
-            signals = [s for s in signals if s.indicator not in C.TREND_INDICATORS]
+            if ranging_mode == C.RANGING_MODE_SUPPRESS:
+                signals = [s for s in signals if s.indicator not in C.TREND_INDICATORS]
+            else:
+                signals = [
+                    replace(s, ranging=True) if s.indicator in C.TREND_INDICATORS else s
+                    for s in signals
+                ]
 
     return signals

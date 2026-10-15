@@ -92,12 +92,13 @@ def build_message(display_name: str, trigger_date: dt.date, signals: list[Signal
             guide = C.SIGNAL_GUIDE.get((s.indicator, s.direction), {})
             # 白話當主標（長輩先看懂方向），專業名詞與數據退為附註。
             # 附註只留指標短名（label 冒號前段）＋實際數據，避免與白話描述重複。
+            tag = C.RANGING_TAG if s.ranging else ""
             if plain:
                 short = label.split("：", 1)[0]
-                lines.append(f"・{C.PLAIN_EMOJI.get(s.direction, '')} {plain}")
+                lines.append(f"・{C.PLAIN_EMOJI.get(s.direction, '')} {plain}{tag}")
                 lines.append(f"　指標：{short}｜{s.detail}")
             else:
-                lines.append(f"・{label}｜{s.detail}")
+                lines.append(f"・{label}{tag}｜{s.detail}")
             if guide.get("advice"):
                 lines.append(f"　建議：{guide['advice']}")
 
@@ -107,4 +108,8 @@ def build_message(display_name: str, trigger_date: dt.date, signals: list[Signal
     if has_bull and has_bear:
         lines.append("")
         lines.append(C.CONFLICT_NOTE)
+    # 盤整標註：該標的全部訊號皆為盤整中的交叉類訊號時，於區塊尾說明僅供參考。
+    if all(s.ranging for s in signals):
+        lines.append("")
+        lines.append(C.RANGING_NOTE)
     return "\n".join(lines)

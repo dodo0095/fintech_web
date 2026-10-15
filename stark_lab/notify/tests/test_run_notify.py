@@ -1,4 +1,5 @@
 import datetime as dt
+import math
 
 import pandas as pd
 import pytest
@@ -23,6 +24,18 @@ def _flat_df():
     flat = pd.Series([100.0] * 80, index=idx)
     return pd.DataFrame(
         {"open": flat, "high": flat, "low": flat, "close": flat, "volume": 0}, index=idx
+    )
+
+
+def _ranging_df():
+    """區間震盪（ADX 低），末根觸發 ema 交叉（交叉型）＋ bias（均值回歸型）。"""
+    idx = pd.date_range(end=dt.date.today(), periods=63)
+    close = pd.Series(
+        [100 + 6 * math.sin(i * 2 * math.pi / 10) for i in range(63)], index=idx, dtype=float
+    )
+    return pd.DataFrame(
+        {"open": close, "high": close + 1, "low": close - 1, "close": close, "volume": 0},
+        index=idx,
     )
 
 
@@ -212,3 +225,41 @@ def test_tw_message_contains_disclaimer(monkeypatch, settings):
     call_command("run_notify", "--market", "tw")
 
     assert C.DISCLAIMER in PushLog.objects.first().message
+
+
+@pytest.mark.django_db
+def test_summary_marks_reference_when_all_signals_ranging(monkeypatch, settings):
+    """tag 模式：某檔新訊號全為盤整標註時，摘要方向加「・參考」，區塊有盤整加註與說明。"""
+    settings.DRY_RUN = True
+    settings.RANGING_FILTER_ENABLED = True
+    settings.RANGING_FILTER_MODE = "tag"
+    settings.ENABLED_INDICATORS = ["ema"]  # 只留交叉型 → 該檔訊號全為盤整標註
+    monkeypatch.setattr(runner.data, "fetch_daily", lambda symbol, days: _ranging_df())
+    monkeypatch.setattr(runner.data, "is_fresh_today", lambda df, market: True)
+
+    call_command("run_notify", "--market", "tw")
+
+    pl = PushLog.objects.first()
+    assert pl.signal_count >= 1
+    assert C.SUMMARY_RANGING_SUFFIX in pl.message
+    assert C.RANGING_TAG in pl.message
+    assert C.RANGING_NOTE in pl.message
+
+
+@pytest.mark.django_db
+def test_summary_no_reference_suffix_when_not_all_ranging(monkeypatch, settings):
+    """tag 模式：同檔同時有均值回歸型（未標註）訊號時，摘要方向不加「・參考」。"""
+    settings.DRY_RUN = True
+    settings.RANGING_FILTER_ENABLED = True
+    settings.RANGING_FILTER_MODE = "tag"
+    settings.ENABLED_INDICATORS = ["ema", "bias"]
+    monkeypatch.setattr(runner.data, "fetch_daily", lambda symbol, days: _ranging_df())
+    monkeypatch.setattr(runner.data, "is_fresh_today", lambda df, market: True)
+
+    call_command("run_notify", "--market", "tw")
+
+    pl = PushLog.objects.first()
+    assert pl.signal_count >= 1
+    assert C.SUMMARY_RANGING_SUFFIX not in pl.message
+    assert C.RANGING_TAG in pl.message
+    assert C.RANGING_NOTE not in pl.message

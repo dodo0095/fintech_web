@@ -127,3 +127,34 @@ def test_message_no_conflict_note_when_single_direction():
     ]
     msg = build_message("0050", dt.date(2026, 7, 26), sigs)
     assert C.CONFLICT_NOTE not in msg
+
+
+# --- 盤整標註（tag 模式）：主標後加註、全為盤整時區塊尾加說明 ---
+def test_message_tags_ranging_signal():
+    sigs = [
+        Signal("ma", "bullish", "金叉", ranging=True),
+        Signal("rsi", "bullish", "RSI=28"),
+    ]
+    msg = build_message("0050", dt.date(2026, 7, 26), sigs)
+    assert f"{C.SIGNAL_PLAIN[('ma', 'bullish')]}{C.RANGING_TAG}" in msg
+    assert f"{C.SIGNAL_PLAIN[('rsi', 'bullish')]}{C.RANGING_TAG}" not in msg
+    assert msg.count(C.RANGING_TAG) == 1
+    # 尚有非盤整訊號 → 不加區塊尾說明
+    assert C.RANGING_NOTE not in msg
+
+
+def test_message_adds_ranging_note_when_all_ranging():
+    sigs = [
+        Signal("ma", "bearish", "死叉", ranging=True),
+        Signal("ema", "bearish", "死叉", ranging=True),
+    ]
+    msg = build_message("0050", dt.date(2026, 7, 26), sigs)
+    assert msg.count(C.RANGING_TAG) == 2
+    assert msg.rstrip().endswith(C.RANGING_NOTE)
+
+
+def test_message_no_ranging_marks_for_normal_signals():
+    sigs = [Signal("ma", "bullish", "金叉")]
+    msg = build_message("0050", dt.date(2026, 7, 26), sigs)
+    assert C.RANGING_TAG not in msg
+    assert C.RANGING_NOTE not in msg

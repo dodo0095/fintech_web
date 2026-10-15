@@ -33,9 +33,13 @@ TOWER_REF = 2
 # ADX(14) Wilder 標準算法；ADX < ADX_RANGING_THRESHOLD 視為盤整（無趨勢）。
 ADX_PERIOD = 14
 ADX_RANGING_THRESHOLD = 25
-# 交叉/趨勢型指標：盤整時易來回假訊號（前日買、隔日賣），盤整期間壓制之。
+# 交叉/趨勢型指標：盤整時易來回假訊號（前日買、隔日賣），盤整期間依模式標註或壓制之。
 TREND_INDICATORS = {"ma", "ema", "macd", "kd", "tower"}
-# 其餘為均值回歸型（rsi, bias, bollinger），盤整時仍具參考價值、不壓制。
+# 其餘為均值回歸型（rsi, bias, bollinger），盤整時仍具參考價值、不標註也不壓制。
+# 盤整處理模式：tag=保留並標註「僅供參考」（預設）；suppress=直接刪除交叉/趨勢型訊號
+RANGING_MODE_TAG = "tag"
+RANGING_MODE_SUPPRESS = "suppress"
+RANGING_MODES = {RANGING_MODE_TAG, RANGING_MODE_SUPPRESS}
 
 # 抓取後至少需要的資料筆數（暖機期，feature-spec §3.1）
 MIN_ROWS = 60
@@ -84,6 +88,11 @@ SUMMARY_NONE = "😴 無訊號"
 SUMMARY_DIR = {"bull": "偏多", "bear": "偏空", "mixed": "多空並存"}
 # 同一標的同時出現多、空新訊號時的加註提醒（D 衝突明示；不取代買/賣分組顯示）
 CONFLICT_NOTE = "⚠️ 盤整訊號分歧，建議觀望"
+# 盤整中被標註的訊號（tag 模式）：主標後加註；該檔全部訊號皆為盤整標註時於區塊尾加說明
+RANGING_TAG = "（盤整中・僅供參考）"
+RANGING_NOTE = "ℹ️ 目前趨勢不明顯（盤整），交叉類訊號容易反覆，僅供參考"
+# 摘要方向標註的後綴：該檔新訊號全部為盤整標註時附加（例：偏空・參考）
+SUMMARY_RANGING_SUFFIX = "・參考"
 
 # 每條訊號的「白話總結」——保留專業名詞，另加一句人話讓長輩看得懂方向
 PLAIN_EMOJI = {BULLISH: "📈", BEARISH: "📉"}
